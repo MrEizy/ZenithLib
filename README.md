@@ -1,25 +1,19 @@
+# ZenithLib
+A common library for my Minecraft mods to use, to make updating and creating new mods easier and reducing code duplication.
 
-Installation information
-=======
+## Downloads
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+- [CurseForge](https://www.curseforge.com/minecraft/mc-mods)
+- [Modrinth](https://modrinth.com/mod)
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+If you downloaded the mod from somewhere other than Curseforge or Modrinth (or as part of a modpack in some cases), I cannot make any guarantees about the file or its contents, as it may have been uploaded without my permission.
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+## Other Links
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+- [GitHub repository](https://github.com/MrEizy/ZenithLib) (source code)
+- [Issue Tracker on GitHub](https://github.com/MrEizy/ZenithLib/issues) (bug reports and feature requests)
+- [Discord Server](https://discord.gg/vev75fX2wq) (easiest way to get quick questions answered, do not use to report bugs)
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+## Developers
+
+To use ZenithLib in your project, add the following to your `build.gradle`
