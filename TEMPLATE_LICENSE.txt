@@ -1,24 +1,35 @@
-MIT License
+# ALL RIGHTS RESERVED
 
-Copyright (c) 2023 NeoForged project
+This project is limited on specific situations described below
 
-This license applies to the template files as supplied by github.com/NeoForged/MDK
+## WHAT YOU CAN DO
 
+- You can use it in modpacks/ any curseforge or third party launcher related project
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+- You can create Pull Requests based on forks to contribute the main project
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+### IF YOU ARE A DEVELOPER
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+- **ASK ME BEFORE START ANYTHING**
+
+- You can create Addons/Mod inspired or based
+
+- You can take inspiration or small parts to create something
+
+## WHAT YOU CAN'T DO
+
+- Claim it as yours
+
+- Reupload on differents websites
+
+- Clone the entire project without asking for consent to the OWNER of it
+
+- Clone "protected" / modified textures without the consent
+
+## NOTES
+
+- Some textures weren't originally made for this project and have a different license -> [credits](https://github.com/MrEizy/ZenithLib/blob/main/README.md)
+
+- Custom textures are under ARR so if you want use them , open a question issue or ASK TO ME !
+
+- Avoid download of any clones of this project outside CurseForge or third parties launchers!
