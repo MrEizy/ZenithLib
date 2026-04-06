@@ -23,25 +23,11 @@ public class TooltipKeybinds {
     public static final KeyMapping NEXT_PAGE = new KeyMapping("key.zenithlib.tooltip.next_page", GLFW.GLFW_KEY_RIGHT, TOOLTIP_CATEGORY);
     public static final KeyMapping PREVIOUS_PAGE = new KeyMapping("key.zenithlib.tooltip.previous_page", GLFW.GLFW_KEY_LEFT, TOOLTIP_CATEGORY);
 
-    /*NEXT_PAGE = new KeyMapping(
-
-                "key.zenithlib.tooltip.next_page",
-                KeyConflictContext.IN_GAME,
-                InputConstants.Type.KEYSYM,
-                InputConstants.KEY_RIGHT,
-                TOOLTIP_CATEGORY
-                );*/
-
-    /**
-     * Call this every client tick (e.g., from ClientTickEvent.Post) to handle page switching.
-     */
     public static void handleInput() {
         Minecraft mc = Minecraft.getInstance();
 
-        // Determine which item the player is currently hovering over
         ItemStack hoveredStack = getCurrentlyHoveredItem(mc);
         if (hoveredStack.isEmpty()) {
-            // Fallback: when no screen is open, use the last stack from tooltip render (e.g., hand hover)
             hoveredStack = PageState.getCurrentStack();
         }
 

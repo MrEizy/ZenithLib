@@ -3,16 +3,13 @@ package net.zic.zenithlib.tooltip.client.render;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.zic.zenithlib.tooltip.api.TooltipProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Custom tooltip provider for Diamond Sword with 3 pages of content.
- * Replaces vanilla attack damage/speed with custom formatted stats.
- */
 public class SwordTooltipProvider implements TooltipProvider {
 
     public static final SwordTooltipProvider INSTANCE = new SwordTooltipProvider();
@@ -33,8 +30,7 @@ public class SwordTooltipProvider implements TooltipProvider {
     public List<Section> getSections(ItemStack stack) {
         List<Section> sections = new ArrayList<>();
 
-        // SECTION 1: Custom Stats (replaces vanilla "When in Main Hand")
-        // These will appear on page 1 after the item name
+        // SECTION 1: Custom Stats (page 1, after item name)
         sections.add(new Section(
                 "§6⚔ Combat Statistics",
                 List.of(
@@ -49,22 +45,17 @@ public class SwordTooltipProvider implements TooltipProvider {
                 false
         ));
 
-        // SECTION 2: Active Ability (Page 2)
+        // SECTION 2: Enchantments (page 2) — read live from the stack
+        List<String> enchantLines = buildEnchantmentLines(stack);
         sections.add(new Section(
-                "§b✦ Galeforce",
-                List.of(
-                        "§7While sprinting, release to lunge",
-                        "§7forward and deal §c+3§7 bonus",
-                        "§7damage on impact.",
-                        "",
-                        "§6Cooldown: §e8 seconds",
-                        "§6Mana Cost: §915"
-                ),
-                20,
-                true // New page
+                "§b✧ Enchantments",
+                enchantLines,
+                11,
+                true // new page
         ));
 
-        // SECTION 3: Passive Ability (still Page 2)
+
+        // SECTION 4: Passive Ability (still page 2)
         sections.add(new Section(
                 "§d❖ Diamond Edge",
                 List.of(
@@ -73,10 +64,10 @@ public class SwordTooltipProvider implements TooltipProvider {
                         "§7bonus damage."
                 ),
                 15,
-                false
+                true
         ));
 
-        // SECTION 4: Lore (Page 3)
+        // SECTION 5: Lore (page 3)
         sections.add(new Section(
                 "§5✦ Ancient Legend",
                 List.of(
@@ -88,10 +79,10 @@ public class SwordTooltipProvider implements TooltipProvider {
                         "§8its unbreaking light."
                 ),
                 30,
-                true // New page
+                true // new page
         ));
 
-        // SECTION 5: Rarity footer (Page 3)
+        // SECTION 6: Rarity footer (page 3)
         sections.add(new Section(
                 "",
                 List.of(
@@ -106,65 +97,32 @@ public class SwordTooltipProvider implements TooltipProvider {
         return sections;
     }
 
-    @Override
-    public int getPriority() {
-        // High priority to override other providers for diamond swords
-        return 100;
+    /**
+     * Reads enchantments from the stack and formats them as display lines.
+     * Returns a "No enchantments" line if the stack has none.
+     */
+    private static List<String> buildEnchantmentLines(ItemStack stack) {
+        List<String> lines = new ArrayList<>();
+
+        var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(stack);
+        if (enchantments.isEmpty()) {
+            lines.add("§8No enchantments");
+            return lines;
+        }
+
+        enchantments.keySet().forEach(enchHolder -> {
+            int level = enchantments.getLevel(enchHolder);
+            // getFullname() returns the formatted "Sharpness V" style Component
+            Component name = enchHolder.value().getFullname(enchHolder, level);
+            // Prefix with the standard enchantment cyan color §b
+            lines.add("§b" + name.getString());
+        });
+
+        return lines;
     }
 
-    /**
-     * Filters vanilla tooltip lines to remove unwanted stats.
-     * Call this from your renderer to clean up the vanilla tooltip.
-     */
-    private static List<Component> filterVanillaLines(List<Component> lines, TooltipProvider provider, ItemStack stack) {
-        // Check if this provider is the sword provider by checking if it handles diamond swords
-        // This is more reliable than instanceof check
-        boolean isSwordProvider = provider.getClass().getSimpleName().equals("SwordTooltipProvider") ||
-                (provider.canProvideFor(new ItemStack(Items.DIAMOND_SWORD)) &&
-                        provider.getPriority() == 100);
-
-        if (!isSwordProvider) {
-            return new ArrayList<>(lines);
-        }
-
-        List<Component> filtered = new ArrayList<>();
-        boolean skipStatsSection = false;
-
-        for (Component line : lines) {
-            String text = line.getString();
-
-            // Always keep the title (first line)
-            if (filtered.isEmpty()) {
-                filtered.add(line);
-                continue;
-            }
-
-            // Detect start of "When in Main Hand:" section
-            if (text.contains("When in Main Hand:")) {
-                skipStatsSection = true;
-                continue;
-            }
-
-            // Skip lines while in stats section
-            if (skipStatsSection) {
-                // More aggressive filtering - skip anything that looks like a stat
-                boolean isStatLine = text.contains("Attack Damage") ||
-                        text.contains("Attack Speed") ||
-                        text.matches(".*\\d+\\.?\\d*\\s*(Attack|Damage|Speed).*") || // Matches "7 Attack Damage" etc
-                        text.trim().isEmpty() ||
-                        text.startsWith(" "); // Most vanilla stat lines are indented
-
-                if (isStatLine) {
-                    continue;
-                } else {
-                    skipStatsSection = false;
-                }
-            }
-
-            // Keep all other lines
-            filtered.add(line);
-        }
-
-        return filtered;
+    @Override
+    public int getPriority() {
+        return 100;
     }
 }

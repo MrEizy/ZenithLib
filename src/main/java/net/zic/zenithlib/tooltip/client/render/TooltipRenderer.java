@@ -58,11 +58,10 @@ public class TooltipRenderer {
     }
 
     /**
-     * Reorders lines so Combat Statistics section appears BEFORE vanilla stats.
-     * For diamond sword: Name -> Combat Statistics -> (rest of vanilla including When in Main Hand)
+     * Reorders lines so Combat Statistics section appears BEFORE vanilla stats,
+     * and strips vanilla enchantment lines (we re-render them in Section 2).
      */
     private static List<Component> reorderForSword(List<Component> lines, TooltipProvider provider, ItemStack stack) {
-        // Only for diamond sword with custom provider
         if (!stack.is(Items.DIAMOND_SWORD)) {
             return new ArrayList<>(lines);
         }
@@ -74,32 +73,107 @@ public class TooltipRenderer {
 
         List<Component> result = new ArrayList<>();
 
-        // 1. Add title first
+        // 1. Title
         if (!lines.isEmpty()) {
             result.add(lines.get(0));
         }
 
-        // 2. Add custom Combat Statistics header and lines (from sections)
-        // These will be the first custom section with newPage=false
+        // 2. Custom Combat Statistics section (injected before vanilla stats)
         List<TooltipProvider.Section> sections = provider.getSections(stack);
         for (TooltipProvider.Section section : sections) {
             if (!section.newPage() && section.header().contains("Combat Statistics")) {
-                // Add the custom stats FIRST (before vanilla stats)
                 result.add(Component.literal(section.header()));
                 for (String line : section.lines()) {
                     result.add(Component.literal(line));
                 }
-                break; // Only add the first non-newPage section (Combat Statistics)
+                break;
             }
         }
 
-        // 3. Add remaining vanilla lines (including When in Main Hand, enchantments, etc.)
-        // Skip the title since we already added it
+        // 3. Remaining vanilla lines — strip attack stats AND enchantments
+        // Enchantments are cyan (§9 or §b) short lines appearing before the blank
+        // line that precedes "When in Main Hand:", OR they appear as the first
+        // non-title lines. We detect them by checking the vanilla enchantment
+        // color codes that Minecraft uses (§9 for normal, §r§9 for curse highlight).
+        boolean skipStatsSection = false;
+
         for (int i = 1; i < lines.size(); i++) {
+            String text = lines.get(i).getString();
+
+            // Strip "When in Main Hand:" block (attack damage / speed)
+            if (text.contains("When in Main Hand:")) {
+                skipStatsSection = true;
+                continue;
+            }
+            if (skipStatsSection) {
+                boolean isStat = text.contains("Attack Damage")
+                        || text.contains("Attack Speed")
+                        || text.matches(".*\\d+\\.?\\d*\\s*(Attack|Damage|Speed).*")
+                        || text.trim().isEmpty()
+                        || text.startsWith(" ");
+                if (isStat) continue;
+                else skipStatsSection = false;
+            }
+
+            // Strip vanilla enchantment lines.
+            // Vanilla renders enchant names via getFullname() which produces a
+            // Component whose raw string starts with the enchantment translation.
+            // The *formatted* string from getString() won't have § codes, but the
+            // raw siblings use Style with color=AQUA (§b) or BLUE (§9).
+            // The most reliable cross-version check: ask the Component's style or
+            // siblings. We use the serialised plain string + sibling color check.
+            if (isVanillaEnchantmentLine(lines.get(i))) {
+                continue; // drop it — SwordTooltipProvider re-adds them in Section 2
+            }
+
             result.add(lines.get(i));
         }
 
         return result;
+    }
+
+    /**
+     * Returns true if this Component is a vanilla enchantment line.
+     *
+     * Vanilla produces enchantment Components via Enchantment#getFullname(level),
+     * which wraps the name in a TranslatableComponent with Style color AQUA (for
+     * normal enchants) or RED (for curses). The resulting Component has no plain
+     * text prefix — the entire content is that styled translation.
+     *
+     * We identify these by checking that the component has exactly one or two
+     * siblings (name + optional level suffix) and the first sibling's style color
+     * is AQUA or RED — the only two colors Minecraft uses for enchantment lines.
+     */
+    private static boolean isVanillaEnchantmentLine(Component component) {
+        // Vanilla enchantment lines use TranslatableContents with keys like
+        // "enchantment.minecraft.sharpness" — this is the most reliable check
+        // across all 1.21.x versions regardless of color/style wrapping.
+        if (component.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
+            if (tc.getKey().startsWith("enchantment.")) {
+                return true;
+            }
+        }
+
+        // Also check siblings — sometimes the enchantment name is wrapped in
+        // a plain parent component with the colored translation as a child.
+        for (Component sibling : component.getSiblings()) {
+            if (sibling.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc) {
+                if (tc.getKey().startsWith("enchantment.")) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isEnchantColor(net.minecraft.network.chat.Style style) {
+        if (style == null) return false;
+        var color = style.getColor();
+        if (color == null) return false;
+        int rgb = color.getValue();
+        // AQUA = 0x55FFFF, RED = 0xFF5555 (Minecraft's named text colors)
+        return rgb == 0x55FFFF || rgb == 0xFF5555;
     }
 
     /**
