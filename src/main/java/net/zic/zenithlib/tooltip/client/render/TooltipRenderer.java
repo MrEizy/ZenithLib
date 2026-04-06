@@ -4,6 +4,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.tooltip.api.ThemeDefinition;
 import net.zic.zenithlib.tooltip.api.TooltipProvider;
 import net.zic.zenithlib.tooltip.api.TooltipProviderRegistry;
@@ -13,22 +15,15 @@ import java.util.List;
 
 /**
  * Main renderer for modern tooltips.
- * Handles page calculation, section organization, and rendering.
- * Updated for NeoForge 26.1
  */
 public class TooltipRenderer {
 
-    /**
-     * Renders the tooltip for the given item stack.
-     */
     public static void render(GuiGraphicsExtractor graphics, Font font, ItemStack stack,
                               List<Component> originalLines, TooltipProvider provider,
                               int x, int y, int screenWidth, int screenHeight) {
 
-        // Update page state with current stack
         PageState.setCurrentStack(stack);
 
-        // Get the theme for this stack
         String themeKey = provider.getThemeKey(stack).orElse(null);
         ThemeDefinition theme;
         if (themeKey != null && ThemeRegistry.has(themeKey)) {
@@ -40,140 +35,176 @@ public class TooltipRenderer {
         }
 
         if (!theme.enabled()) {
-            // Theme is disabled, don't render
             return;
         }
 
-        // Get sections from provider
+        // For diamond sword, inject custom stats at the TOP of page 1
+        // Keep vanilla lines but reorder so Combat Statistics comes first
+        List<Component> reorderedLines = reorderForSword(originalLines, provider, stack);
+
         List<TooltipProvider.Section> sections = provider.getSections(stack);
+        List<Page> pages = buildPagesWithOverlay(reorderedLines, sections, theme.maxLinesPerPage());
 
-        // Build pages from lines and sections
-        List<Page> pages = buildPages(originalLines, sections, theme.maxLinesPerPage());
-
-        // Update page count
         int totalPages = Math.max(1, pages.size());
         PageState.setPageCount(stack, totalPages);
 
-        // Get current page index
-        int currentPageIndex = PageState.getCurrentPage(stack);
-        currentPageIndex = Math.min(currentPageIndex, totalPages - 1);
+        int currentPage = PageState.getCurrentPage(stack);
+        currentPage = Math.min(currentPage, totalPages - 1);
 
-        // Get lines for current page
-        List<Component> pageLines = pages.isEmpty()
-                ? originalLines
-                : pages.get(currentPageIndex).lines();
+        List<Component> pageLines = pages.isEmpty() ? reorderedLines : pages.get(currentPage).lines();
 
-        // Render the tooltip
         TooltipPainter.paint(graphics, stack, pageLines, theme, x, y,
-                screenWidth, screenHeight, currentPageIndex, totalPages);
+                screenWidth, screenHeight, currentPage, totalPages);
     }
 
     /**
-     * Builds pages from tooltip lines and provider sections.
+     * Reorders lines so Combat Statistics section appears BEFORE vanilla stats.
+     * For diamond sword: Name -> Combat Statistics -> (rest of vanilla including When in Main Hand)
      */
-    private static List<Page> buildPages(List<Component> originalLines,
-                                         List<TooltipProvider.Section> sections,
-                                         int maxLinesPerPage) {
-        List<Page> pages = new ArrayList<>();
-        List<Component> currentPageLines = new ArrayList<>();
-
-        // Add title to first page
-        if (!originalLines.isEmpty()) {
-            currentPageLines.add(originalLines.get(0));
+    private static List<Component> reorderForSword(List<Component> lines, TooltipProvider provider, ItemStack stack) {
+        // Only for diamond sword with custom provider
+        if (!stack.is(Items.DIAMOND_SWORD)) {
+            return new ArrayList<>(lines);
         }
 
-        int lineCount = currentPageLines.size();
-
-        // Add original tooltip lines (excluding title)
-        for (int i = 1; i < originalLines.size(); i++) {
-            Component line = originalLines.get(i);
-
-            // Check if we need a new page
-            if (lineCount >= maxLinesPerPage) {
-                pages.add(new Page(new ArrayList<>(currentPageLines)));
-                currentPageLines.clear();
-                lineCount = 0;
-            }
-
-            currentPageLines.add(line);
-            lineCount++;
+        String providerClass = provider.getClass().getName();
+        if (!providerClass.contains("SwordTooltipProvider")) {
+            return new ArrayList<>(lines);
         }
 
-        // Add provider sections
+        List<Component> result = new ArrayList<>();
+
+        // 1. Add title first
+        if (!lines.isEmpty()) {
+            result.add(lines.get(0));
+        }
+
+        // 2. Add custom Combat Statistics header and lines (from sections)
+        // These will be the first custom section with newPage=false
+        List<TooltipProvider.Section> sections = provider.getSections(stack);
         for (TooltipProvider.Section section : sections) {
-            // Check if section needs a new page
-            if (section.newPage() && !currentPageLines.isEmpty()) {
-                pages.add(new Page(new ArrayList<>(currentPageLines)));
-                currentPageLines.clear();
-                lineCount = 0;
+            if (!section.newPage() && section.header().contains("Combat Statistics")) {
+                // Add the custom stats FIRST (before vanilla stats)
+                result.add(Component.literal(section.header()));
+                for (String line : section.lines()) {
+                    result.add(Component.literal(line));
+                }
+                break; // Only add the first non-newPage section (Combat Statistics)
+            }
+        }
+
+        // 3. Add remaining vanilla lines (including When in Main Hand, enchantments, etc.)
+        // Skip the title since we already added it
+        for (int i = 1; i < lines.size(); i++) {
+            result.add(lines.get(i));
+        }
+
+        return result;
+    }
+
+    /**
+     * Build pages, skipping the Combat Statistics section since we already added it
+     */
+    private static List<Page> buildPagesWithOverlay(List<Component> baseLines,
+                                                    List<TooltipProvider.Section> sections,
+                                                    int maxLines) {
+        List<Page> pages = new ArrayList<>();
+
+        if (baseLines.isEmpty()) return pages;
+
+        Component title = baseLines.get(0);
+        List<Component> content = baseLines.size() > 1 ?
+                new ArrayList<>(baseLines.subList(1, baseLines.size())) : new ArrayList<>();
+
+        List<Component> currentPage = new ArrayList<>();
+        currentPage.add(title);
+        int lineCount = 1;
+
+        int contentIdx = 0;
+
+        // Add content lines first (includes Combat Statistics + vanilla stats)
+        while (contentIdx < content.size()) {
+            if (lineCount >= maxLines) {
+                pages.add(new Page(new ArrayList<>(currentPage)));
+                currentPage = new ArrayList<>();
+                currentPage.add(title);
+                lineCount = 1;
             }
 
-            // Add section header if present
+            currentPage.add(content.get(contentIdx));
+            lineCount++;
+            contentIdx++;
+        }
+
+        // Now add remaining sections (those with newPage=true)
+        for (TooltipProvider.Section section : sections) {
+            // Skip Combat Statistics since we already added it
+            if (!section.newPage() && section.header().contains("Combat Statistics")) {
+                continue;
+            }
+
+            // This section forces new page
+            if (section.newPage() && !currentPage.isEmpty() && lineCount > 1) {
+                pages.add(new Page(new ArrayList<>(currentPage)));
+                currentPage = new ArrayList<>();
+                currentPage.add(title);
+                lineCount = 1;
+            }
+
+            // Add section header
             if (section.header() != null && !section.header().isEmpty()) {
-                if (lineCount >= maxLinesPerPage) {
-                    pages.add(new Page(new ArrayList<>(currentPageLines)));
-                    currentPageLines.clear();
-                    lineCount = 0;
+                if (lineCount >= maxLines) {
+                    pages.add(new Page(new ArrayList<>(currentPage)));
+                    currentPage = new ArrayList<>();
+                    currentPage.add(title);
+                    lineCount = 1;
                 }
-                currentPageLines.add(Component.literal("§6" + section.header()));
+                currentPage.add(Component.literal(section.header()));
                 lineCount++;
             }
 
             // Add section lines
-            for (String lineText : section.lines()) {
-                if (lineCount >= maxLinesPerPage) {
-                    pages.add(new Page(new ArrayList<>(currentPageLines)));
-                    currentPageLines.clear();
-                    lineCount = 0;
+            for (String txt : section.lines()) {
+                if (lineCount >= maxLines) {
+                    pages.add(new Page(new ArrayList<>(currentPage)));
+                    currentPage = new ArrayList<>();
+                    currentPage.add(title);
+                    lineCount = 1;
                 }
-                currentPageLines.add(Component.literal("  " + lineText));
+                currentPage.add(Component.literal(txt));
                 lineCount++;
             }
         }
 
-        // Add remaining lines as final page
-        if (!currentPageLines.isEmpty()) {
-            pages.add(new Page(currentPageLines));
+        // Add final page
+        if (lineCount > 1) {
+            pages.add(new Page(currentPage));
+        }
+
+        if (pages.isEmpty() && !baseLines.isEmpty()) {
+            pages.add(new Page(baseLines));
         }
 
         return pages;
     }
 
-    /**
-     * Represents a single page of tooltip content.
-     */
     private record Page(List<Component> lines) {}
 
-    /**
-     * Renders a simple tooltip without the modern styling.
-     * Used as fallback.
-     */
-    public static void renderSimple(GuiGraphicsExtractor graphics, Font font, List<Component> lines,
-                                    int x, int y, int screenWidth, int screenHeight) {
-        // Use vanilla tooltip rendering as fallback
-        // In 26.1, this would call the vanilla extraction methods
-    }
-
-    /**
-     * Checks if modern tooltip rendering should be used for the given stack.
-     */
     public static boolean shouldUseModernTooltip(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) {
-            return false;
+        if (stack == null || stack.isEmpty()) return false;
+
+        var provider = TooltipProviderRegistry.find(stack);
+        if (provider.isPresent()) {
+            var themeKey = provider.get().getThemeKey(stack);
+            if (themeKey.isPresent()) {
+                return ThemeRegistry.get(themeKey.get()).enabled();
+            }
         }
 
-        // Check if there's a theme for this item
         if (ItemThemeRegistry.hasThemeForStack(stack)) {
-            String themeKey = ItemThemeRegistry.getThemeKey(stack);
-            ThemeDefinition theme = ThemeRegistry.get(themeKey);
-            return theme.enabled();
+            return ThemeRegistry.get(ItemThemeRegistry.getThemeKey(stack)).enabled();
         }
 
-        // Check if there's a provider with a theme
-        return TooltipProviderRegistry.find(stack)
-                .flatMap(p -> p.getThemeKey(stack))
-                .map(ThemeRegistry::get)
-                .map(ThemeDefinition::enabled)
-                .orElse(false);
+        return false;
     }
 }

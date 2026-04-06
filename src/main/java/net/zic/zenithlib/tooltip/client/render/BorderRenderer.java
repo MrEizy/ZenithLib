@@ -5,7 +5,6 @@ import net.zic.zenithlib.tooltip.api.TooltipTheme;
 
 /**
  * Renders borders, frames, and the diamond badge for tooltips.
- * Updated for NeoForge 26.1 with extraction-based rendering.
  */
 public class BorderRenderer {
 
@@ -122,9 +121,6 @@ public class BorderRenderer {
      * Draws a filled rectangle.
      */
     private static void drawRect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
-        if (width <= 0 || height <= 0) {
-            return;
-        }
         graphics.fill(x, y, x + width, y + height, color);
     }
 
@@ -132,9 +128,6 @@ public class BorderRenderer {
      * Draws a hollow rectangle (outline only).
      */
     private static void drawHollowRect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
-        if (width <= 0 || height <= 0) {
-            return;
-        }
         // Top line
         drawHorizontalLine(graphics, x, y, width, color);
         // Bottom line
@@ -150,9 +143,6 @@ public class BorderRenderer {
      */
     private static void drawGradientRect(GuiGraphicsExtractor graphics, int x, int y, int width, int height,
                                          int colorTop, int colorBottom) {
-        if (width <= 0 || height <= 0) {
-            return;
-        }
         graphics.fillGradient(x, y, x + width, y + height, colorTop, colorBottom);
     }
 
@@ -160,9 +150,6 @@ public class BorderRenderer {
      * Draws a horizontal line.
      */
     private static void drawHorizontalLine(GuiGraphicsExtractor graphics, int x, int y, int width, int color) {
-        if (width <= 0) {
-            return;
-        }
         graphics.fill(x, y, x + width, y + 1, color);
     }
 
@@ -170,9 +157,6 @@ public class BorderRenderer {
      * Draws a vertical line.
      */
     private static void drawVerticalLine(GuiGraphicsExtractor graphics, int x, int y, int height, int color) {
-        if (height <= 0) {
-            return;
-        }
         graphics.fill(x, y, x + 1, y + height, color);
     }
 
@@ -180,9 +164,6 @@ public class BorderRenderer {
      * Draws a circle (approximated with pixels).
      */
     private static void drawCircle(GuiGraphicsExtractor graphics, int centerX, int centerY, int radius, int color) {
-        if (radius <= 0) {
-            return;
-        }
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
                 if (x * x + y * y <= radius * radius) {

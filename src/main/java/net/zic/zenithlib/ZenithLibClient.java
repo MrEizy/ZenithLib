@@ -4,6 +4,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -24,6 +26,7 @@ import net.zic.zenithlib.tooltip.client.render.*;
 import net.zic.zenithlib.tooltip.api.TooltipProvider;
 import net.zic.zenithlib.tooltip.api.TooltipProviderRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,11 +46,9 @@ public class ZenithLibClient {
         // Register event listeners on the MOD event bus
         modEventBus.addListener(this::onClientSetup);
         modEventBus.addListener(this::registerReloadListeners);
-        modEventBus.addListener(this::registerKeyMappings);
 
         // Register to NeoForge event bus for game events (not mod lifecycle events)
         NeoForge.EVENT_BUS.register(this);
-        NeoForge.EVENT_BUS.addListener(TooltipKeybinds.ClientInputHandler::onClientTick);
     }
 
     /**
@@ -59,8 +60,10 @@ public class ZenithLibClient {
 
             // Register the generic tooltip provider
             TooltipProviderRegistry.register(GenericTooltipProvider.INSTANCE);
+            TooltipProviderRegistry.register(SwordTooltipProvider.INSTANCE);
         });
     }
+
 
     /**
      * Register reload listeners - runs on mod event bus
@@ -80,15 +83,6 @@ public class ZenithLibClient {
         }
 
         ZenithLib.LOGGER.info("Registered tooltip reload listeners (themes + item themes)");
-    }
-
-    /**
-     * Register key mappings - runs on mod event bus
-     * NOTE: This is NOT annotated with @SubscribeEvent because we're using addListener
-     */
-    private void registerKeyMappings(RegisterKeyMappingsEvent event) {
-        // Register tooltip navigation keybinds
-        TooltipKeybinds.registerKeyMappings(event);
     }
 
     /**
@@ -147,6 +141,9 @@ public class ZenithLibClient {
             return;
         }
 
+        // Filter out vanilla "When in Main Hand" stats for diamond sword
+        components = filterVanillaStats(stack, components);
+
         // Build pages
         var sections = provider.get().getSections(stack);
         var pages = buildPages(components, sections, theme.maxLinesPerPage());
@@ -172,6 +169,60 @@ public class ZenithLibClient {
                 currentPageIndex,
                 totalPages
         );
+    }
+
+    /**
+     * Removes the vanilla "When in Main Hand" block (Attack Damage / Attack Speed)
+     * for diamond swords that use the SwordTooltipProvider.
+     */
+    private List<Component> filterVanillaStats(ItemStack stack, List<Component> originalLines) {
+        // Only filter for diamond sword with SwordTooltipProvider
+        if (!stack.is(Items.DIAMOND_SWORD)) {
+            return originalLines;
+        }
+        Optional<TooltipProvider> provider = TooltipProviderRegistry.find(stack);
+        if (provider.isEmpty() || !(provider.get() instanceof SwordTooltipProvider)) {
+            return originalLines;
+        }
+
+        List<Component> filtered = new ArrayList<>();
+        boolean skip = false;
+
+        for (int i = 0; i < originalLines.size(); i++) {
+            Component line = originalLines.get(i);
+            String text = line.getString();
+
+            // Always keep the title (first line)
+            if (i == 0) {
+                filtered.add(line);
+                continue;
+            }
+
+            // Detect start of vanilla stat block
+            if (text.contains("When in Main Hand:")) {
+                skip = true;
+                continue;
+            }
+
+            // Skip lines while inside the stat block
+            if (skip) {
+                // Stop skipping when we encounter a line that is not a stat
+                // (empty line, enchantment, or next section)
+                boolean isStat = text.contains("Attack Damage") ||
+                        text.contains("Attack Speed") ||
+                        (text.trim().isEmpty() && text.length() < 10) ||
+                        text.matches(".*\\d+\\.?\\d*\\s+(Attack|Damage|Speed).*");
+                if (!isStat) {
+                    skip = false;
+                    filtered.add(line); // add the non-stat line (e.g. enchantment)
+                }
+                continue;
+            }
+
+            filtered.add(line);
+        }
+
+        return filtered;
     }
 
     /**

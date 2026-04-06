@@ -20,9 +20,9 @@
   },
   "itemAnimStyle": "breathe_spin_bob",
   "titleAnimStyle": "static",
-  "itemBorderShape": "diamond",
+  "itemBorderShape": "square",
   "showPageIndicator": true,
-  "showDiamondBadge": true,
+  "showSquareBadge": true,
   "maxLinesPerPage": 8,
   "enabled": true,
   "customTextKeys": []

@@ -1,5 +1,8 @@
 package net.zic.zenithlib;
 
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.zic.zenithlib.tooltip.client.render.TooltipKeybinds;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -27,11 +30,23 @@ public class ZenithLib {
         NeoForge.EVENT_BUS.register(this);
 
 
+        modEventBus.addListener(this::registerKeyBindings);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
 
+    }
+
+    private void registerKeyBindings(RegisterKeyMappingsEvent event) {
+        event.registerCategory(TooltipKeybinds.TOOLTIP_CATEGORY);
+        event.register(TooltipKeybinds.NEXT_PAGE);
+        event.register(TooltipKeybinds.PREVIOUS_PAGE);
+    }
+
+    @SubscribeEvent
+    public void onClientTick(ClientTickEvent.Post event) {
+        TooltipKeybinds.handleInput();
     }
 
 

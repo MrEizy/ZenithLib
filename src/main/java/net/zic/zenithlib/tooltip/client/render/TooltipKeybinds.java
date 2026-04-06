@@ -3,124 +3,89 @@ package net.zic.zenithlib.tooltip.client.render;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.zic.zenithlib.ZenithLib;
+import net.zic.zenithlib.tooltip.api.TooltipProvider;
+import net.zic.zenithlib.tooltip.api.TooltipProviderRegistry;
+import org.lwjgl.glfw.GLFW;
 
-/**
- * Handles keybind registration and input for tooltip page navigation.
- * Note: This class is NOT annotated with @EventBusSubscriber because
- * key registration is handled manually via ZenithLibClient.
- */
+import java.util.Optional;
+
 public class TooltipKeybinds {
 
-    /** Custom category name (used in controls menu) */
-    public static final String CATEGORY = "key.categories.zenithlib.tooltip";
-
-    /** The actual Category object (required for 26.1) */
     public static final KeyMapping.Category TOOLTIP_CATEGORY =
-            new KeyMapping.Category(Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "tooltip"));
+            new KeyMapping.Category(Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "key.zenithlib.category.tooltip")) ;
 
-    // Keybind for next page
-    public static KeyMapping NEXT_PAGE;
+    public static final KeyMapping NEXT_PAGE = new KeyMapping("key.zenithlib.tooltip.next_page", GLFW.GLFW_KEY_RIGHT, TOOLTIP_CATEGORY);
+    public static final KeyMapping PREVIOUS_PAGE = new KeyMapping("key.zenithlib.tooltip.previous_page", GLFW.GLFW_KEY_LEFT, TOOLTIP_CATEGORY);
 
-    // Keybind for previous page
-    public static KeyMapping PREVIOUS_PAGE;
+    /*NEXT_PAGE = new KeyMapping(
 
-    /**
-     * Registers the custom category + key mappings.
-     * Called manually from ZenithLibClient.registerKeyMappings()
-     */
-    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-        // Create the category object
-        KeyMapping.Category tooltipCategory = new KeyMapping.Category(
-                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "tooltip")
-        );
-
-        // Now create the key mappings using the Category object
-        NEXT_PAGE = new KeyMapping(
                 "key.zenithlib.tooltip.next_page",
-                KeyConflictContext.GUI,
+                KeyConflictContext.IN_GAME,
                 InputConstants.Type.KEYSYM,
                 InputConstants.KEY_RIGHT,
-                tooltipCategory
-        );
-
-        PREVIOUS_PAGE = new KeyMapping(
-                "key.zenithlib.tooltip.previous_page",
-                KeyConflictContext.GUI,
-                InputConstants.Type.KEYSYM,
-                InputConstants.KEY_LEFT,
-                tooltipCategory
-        );
-
-        event.register(NEXT_PAGE);
-        event.register(PREVIOUS_PAGE);
-
-        ZenithLib.LOGGER.info("Registered ZenithLib tooltip keybinds");
-    }
+                TOOLTIP_CATEGORY
+                );*/
 
     /**
-     * Client tick event handler for checking key presses.
-     * This is registered separately in ZenithLibClient.
+     * Call this every client tick (e.g., from ClientTickEvent.Post) to handle page switching.
      */
-    public static class ClientInputHandler {
+    public static void handleInput() {
+        Minecraft mc = Minecraft.getInstance();
 
-        private static boolean wasNextPagePressed = false;
-        private static boolean wasPrevPagePressed = false;
+        // Determine which item the player is currently hovering over
+        ItemStack hoveredStack = getCurrentlyHoveredItem(mc);
+        if (hoveredStack.isEmpty()) {
+            // Fallback: when no screen is open, use the last stack from tooltip render (e.g., hand hover)
+            hoveredStack = PageState.getCurrentStack();
+        }
 
-        public static void onClientTick(ClientTickEvent.Post event) {
-            Minecraft minecraft = Minecraft.getInstance();
+        if (hoveredStack.isEmpty()) return;
 
-            // Only process when a screen is open (tooltip is visible)
-            if (minecraft.screen == null) {
-                return;
-            }
+        // Only handle paging if this item actually has a paginated tooltip
+        Optional<TooltipProvider> provider = TooltipProviderRegistry.find(hoveredStack);
+        if (provider.isEmpty()) return;
 
-            // Check if we have a valid stack with multiple pages
-            if (PageState.getCurrentStack().isEmpty()) {
-                return;
-            }
+        int totalPages = PageState.getPageCount(hoveredStack);
+        if (totalPages <= 1) return;
 
-            if (!PageState.hasMultiplePages(PageState.getCurrentStack())) {
-                return;
-            }
-
-            // Handle next page key
-            boolean isNextPagePressed = NEXT_PAGE.isDown();
-            if (isNextPagePressed && !wasNextPagePressed) {
-                PageState.nextPage();
-            }
-            wasNextPagePressed = isNextPagePressed;
-
-            // Handle previous page key
-            boolean isPrevPagePressed = PREVIOUS_PAGE.isDown();
-            if (isPrevPagePressed && !wasPrevPagePressed) {
-                PageState.previousPage();
-            }
-            wasPrevPagePressed = isPrevPagePressed;
+        // Consume key presses and update page
+        while (PREVIOUS_PAGE.consumeClick()) {
+            // Ensure PageState knows which stack we're paging
+            PageState.setCurrentStack(hoveredStack);
+            PageState.previousPage();
+        }
+        while (NEXT_PAGE.consumeClick()) {
+            PageState.setCurrentStack(hoveredStack);
+            PageState.nextPage();
         }
     }
 
     /**
-     * Returns the display name of the next page key.
+     * Returns the item currently under the mouse cursor in any open container screen,
+     * or ItemStack.EMPTY if none.
      */
-    public static String getNextPageKeyName() {
-        if (NEXT_PAGE == null) {
-            return "->";
+    private static ItemStack getCurrentlyHoveredItem(Minecraft mc) {
+        Screen screen = mc.screen;
+        if (screen instanceof AbstractContainerScreen<?> containerScreen) {
+            var slot = containerScreen.getSlotUnderMouse();
+            if (slot != null && slot.hasItem()) {
+                return slot.getItem();
+            }
         }
-        return NEXT_PAGE.getTranslatedKeyMessage().getString();
+        return ItemStack.EMPTY;
     }
 
-    /**
-     * Returns the display name of the previous page key.
-     */
     public static String getPreviousPageKeyName() {
-        if (PREVIOUS_PAGE == null) {
-            return "<-";
-        }
         return PREVIOUS_PAGE.getTranslatedKeyMessage().getString();
+    }
+
+    public static String getNextPageKeyName() {
+        return NEXT_PAGE.getTranslatedKeyMessage().getString();
     }
 }
