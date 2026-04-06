@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.zic.zenithlib.tooltip.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "client.DrawContextMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "zenithlib.refmap.json"
+}

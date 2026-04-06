@@ -1,0 +1,29 @@
+{
+  "colors": {
+    "border": "0xFFFFD700",
+    "borderInner": "0xFFB8860B",
+    "bgTop": "0xF0202000",
+    "bgBottom": "0xF0101000",
+    "name": "0xFFFFD700",
+    "sectionHeader": "0xFFFFEC8B",
+    "body": "0xFFFFFACD",
+    "hint": "0xFFDAA520",
+    "badgeBg": "0xFFEEEEEE",
+    "badgeCutout": "0xFF101000",
+    "diamondFrame": "0xFFFFD700",
+    "diamondFrameInner": "0xFF404000",
+    "separator": "0xFFB8860B",
+    "pageDotFilled": "0xFFFFD700",
+    "pageDotEmpty": "0xFF404000",
+    "accentPrimary": "0xFFFFA500",
+    "accentSecondary": "0xFFFF8C00"
+  },
+  "itemAnimStyle": "breathe_spin_bob",
+  "titleAnimStyle": "static",
+  "itemBorderShape": "diamond",
+  "showPageIndicator": true,
+  "showDiamondBadge": true,
+  "maxLinesPerPage": 8,
+  "enabled": true,
+  "customTextKeys": []
+}

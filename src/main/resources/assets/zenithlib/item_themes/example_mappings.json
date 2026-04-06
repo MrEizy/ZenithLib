@@ -1,0 +1,18 @@
+{
+  "comment": "Example item-to-theme mappings. Remove the underscore prefix to enable.",
+  "comment2": "Use #prefix for tags, e.g., #minecraft:swords",
+
+  "minecraft:diamond": "rare",
+  "minecraft:emerald": "rare",
+  "minecraft:netherite_ingot": "legendary",
+  "minecraft:netherite_sword": "legendary_weapon",
+  "minecraft:netherite_pickaxe": "legendary_tool",
+  "minecraft:enchanted_golden_apple": "mythic",
+
+  "#minecraft:swords": "weapon",
+  "#minecraft:pickaxes": "tool",
+  "#minecraft:axes": "tool",
+  "#minecraft:shovels": "tool",
+  "#minecraft:hoes": "tool",
+  "#minecraft:armor": "armor"
+}
