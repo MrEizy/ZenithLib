@@ -15,8 +15,6 @@ public class ToolTipManager {
 
         // Tooltip with custom formatting
 
-        ToolTipHandler.registerTooltip(Items.DIAMOND_SWORD, Component.literal("Test ToolTip").withStyle(ChatFormatting.DARK_RED));
-        ToolTipHandler.registerAnimatedTooltip(Items.DIAMOND_SWORD, Component.literal("Test RGB"), 0.001f);
         ToolTipHandler.registerTooltip(Items.DIAMOND, Component.literal("Test ToolTip").withStyle(ChatFormatting.DARK_RED));
         ToolTipHandler.registerAnimatedTooltip(Items.DIAMOND, Component.literal("Test RGB"), 0.001f);
 
