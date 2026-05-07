@@ -34,11 +34,6 @@ public class ToolTipsGradient
                 }
 
             }
-            else
-            {
-                tooltipComponents.add(Component.translatable("tooltip.laicaps.generic.shift_up"));
-            }
-
         }
     }
 
