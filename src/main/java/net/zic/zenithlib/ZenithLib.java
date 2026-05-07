@@ -20,7 +20,7 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(ZenithLib.MOD_ID)
 public class ZenithLib {
-    public static float hue;
+    public static float hue; //test
     public static final String MOD_ID = "zenithlib";
     public static final Logger LOGGER = LogUtils.getLogger();
 
