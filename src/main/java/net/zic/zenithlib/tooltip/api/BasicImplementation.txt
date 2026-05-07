@@ -1,0 +1,18 @@
+API
+- interface ZenithTooltipProvider - Allows an item, mod, or system to provide a custom ZenithTooltipDocument instead of relying on the vanilla tooltip conversion.
+- final class ZenithTooltipRegistry - Stores global tooltip providers, theme resolvers, and fallback settings so other mods can register their tooltip behavior through ZenithLib.
+- record ZenithTooltipData(ZenithTooltipDocument docu) implements TooltipComponent- Wraps a ZenithTooltipDocument as a Minecraft TooltipComponent so NeoForge can pass it to the client renderer.
+- record ZenithTooltipDocument - Represents the full custom tooltip, including its theme and all of its pages.
+- record ZenithTooltipPage - Represents one page of tooltip content, usually containing a title and a list of text lines or future tooltip elements.
+- record ZenithTooltipTheme - Defines the visual style of the tooltip, such as colors, padding, border colors, max width, and later texture data.
+- final class ZenithTooltipBuilder - Converts vanilla tooltip data or provider output into a finished ZenithTooltipDocument that the renderer can display.
+- sealed interface ZenithTooltipElement - Base interface for anything that can appear inside a Zenith tooltip page. This would have nested records Text, Divider, Header and Stat (eventually move these to separate files when they get bigger)
+
+Client
+- final class ZenithTooltipPageController - Decides which tooltip page is currently shown, usually based on Shift, Ctrl, Alt, or later scroll/keybind state.
+- final class event subscriber ZenithTooltipClientRegistration - Registers ZenithTooltipData to use ClientZenithTooltip as its client-side renderer.
+- final class event subscriber ZenithTooltipClientEvents - Hooks into NeoForge tooltip events, replaces vanilla tooltip elements with ZenithLib’s custom tooltip data, and optionally changes the vanilla background colors.
+- class ClientZenithTooltip implements ClientTooltipComponent - Renders the actual custom tooltip panel, including the background, border, title, body lines, page indicator, icons, and future custom elements.
+
+
+Flow?: ClientEvents → Builder → Registry/Provider → Document/Page/Elements/Theme → Data → ClientTooltip
