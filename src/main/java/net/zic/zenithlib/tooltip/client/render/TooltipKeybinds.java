@@ -67,6 +67,58 @@ public class TooltipKeybinds {
         return ItemStack.EMPTY;
     }
 
+    public static boolean handleScreenKeyPressed(int keyCode, int scanCode) {
+        Minecraft mc = Minecraft.getInstance();
+
+        ItemStack hoveredStack = getCurrentlyHoveredItem(mc);
+        if (hoveredStack.isEmpty()) {
+            hoveredStack = PageState.getCurrentStack();
+        }
+
+        if (hoveredStack.isEmpty()) {
+            return false;
+        }
+
+        Optional<TooltipProvider> provider = TooltipProviderRegistry.find(hoveredStack);
+        if (provider.isEmpty()) {
+            return false;
+        }
+
+        int totalPages = PageState.getPageCount(hoveredStack);
+        if (totalPages <= 1) {
+            return false;
+        }
+
+        if (matchesKey(PREVIOUS_PAGE, keyCode, scanCode)) {
+            PageState.setCurrentStack(hoveredStack);
+            PageState.previousPage();
+            return true;
+        }
+
+        if (matchesKey(NEXT_PAGE, keyCode, scanCode)) {
+            PageState.setCurrentStack(hoveredStack);
+            PageState.nextPage();
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean matchesKey(KeyMapping keyMapping, int keyCode, int scanCode) {
+        InputConstants.Key boundKey = keyMapping.getKey();
+
+        if (boundKey.getType() == InputConstants.Type.KEYSYM) {
+            return boundKey.getValue() == keyCode;
+        }
+
+        if (boundKey.getType() == InputConstants.Type.SCANCODE) {
+            return boundKey.getValue() == scanCode;
+        }
+
+        return false;
+    }
+
+
     public static String getPreviousPageKeyName() {
         return PREVIOUS_PAGE.getTranslatedKeyMessage().getString();
     }
