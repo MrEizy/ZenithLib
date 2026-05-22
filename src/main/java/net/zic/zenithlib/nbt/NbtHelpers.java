@@ -1,13 +1,12 @@
 package net.zic.zenithlib.nbt;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.IntFunction;
 
 public class NbtHelpers {
@@ -52,6 +51,31 @@ public class NbtHelpers {
         }
         return output;
     }
+    //─────ARRAYS───────────────────────────────────────────────
 
+    //creates a list of compound tags with key/val fields
+    public static <T,V> ListTag writeMap(Map<T,V> map,Writer<T> keyWriter,Writer<V> valWriter){
+        Set<Map.Entry<T,V>> entries = map.entrySet();
+        Writer<Map.Entry<T,V>> entryWriter = value -> {
+            CompoundTag tag = new CompoundTag();
+            tag.put("key",keyWriter.write(value.getKey()));
+            tag.put("value",valWriter.write(value.getValue()));
+            return tag;
+        };
 
+        return writeCollection(entries,entryWriter);
+    }
+
+    public static <T,V> Map<T,V> readMap(ListTag tag,Reader<T> keyReader,Reader<V> valueReader){
+        HashMap<T,V> newMap = new HashMap<>();
+        readMap(tag,newMap,keyReader,valueReader);
+        return Map.copyOf(newMap);
+    }
+
+    public static <T,V> void readMap(ListTag tag,HashMap<T,V> existingMap, Reader<T> keyReader,Reader<V> valueReader){
+        for(Tag subTag : tag){
+            if(!(subTag instanceof CompoundTag compoundTag)) continue;
+            existingMap.put(keyReader.read(compoundTag.get("key")),valueReader.read(compoundTag.get("value")));
+        }
+    }
 }
