@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.nbt.Reader;
 import net.zic.zenithlib.network.ByteBufHelpers;
@@ -23,6 +24,10 @@ public class ValueContainer {
     private final HashMap<Identifier, HashSet<ValueContainerModifier>> multiFinalByGroup = new HashMap<>();
 
     private double cachedVal;
+
+    private static final StreamCodec<ByteBuf,ValueContainer> STREAM_CODEC = StreamCodec.of(ValueContainer::encode,ValueContainer::decode);
+
+
     public ValueContainer(Identifier valueIdentifier,double base){
         this.valueIdentifier = valueIdentifier;
         this.base = base;
@@ -125,7 +130,7 @@ public class ValueContainer {
     public double getBaseValue(){return base;}
 
 
-    public static void encode(ValueContainer container, ByteBuf buf){
+    public static void encode(ByteBuf buf,ValueContainer container){
         ByteBufHelpers.encodeIdentifier(container.getIdentifier(),buf);
         buf.writeDouble(container.base);
         ByteBufHelpers.encodeCollection(container.getAllModifiers(),buf,ValueContainerModifier::encode);
