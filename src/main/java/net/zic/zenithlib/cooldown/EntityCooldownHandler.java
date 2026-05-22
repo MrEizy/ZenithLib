@@ -4,16 +4,17 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.common.NeoForge;
 import net.zic.zenithlib.network.ByteBufHelpers;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-
+//TODO currently listeners are not persistent if the player leaves
 public class EntityCooldownHandler {
     //used when user does not define one
-    private static final CooldownListener EMPTY = (entity, cooldown) -> {};
+
     private final Entity entity;
     private final HashMap<Identifier,Cooldown> cooldowns = new HashMap<>();
 
@@ -32,23 +33,16 @@ public class EntityCooldownHandler {
 
     public void setCooldown(Identifier identifier,int ticksRemaining){if(cooldowns.containsKey(identifier)) cooldowns.get(identifier).setTicksRemaining(ticksRemaining);}
 
-    public void addCooldown(Identifier identifier,int initialTicks,CooldownListener listener){
-        cooldowns.put(identifier,new Cooldown(identifier,listener,initialTicks));
+    public void addCooldown(Identifier identifier,int initialTicks){
+        CooldownEvent.Start cooldownStartEvent= new CooldownEvent.Start(entity,identifier,initialTicks);
+        NeoForge.EVENT_BUS.post(cooldownStartEvent);
+        cooldowns.put(identifier,new Cooldown(cooldownStartEvent.getUpdatedCooldown()));
     }
 
-    //if you start a cooldown with no Listener it will silently finish
-    public void addCooldown(Identifier identifier,int initialTicks){
-        cooldowns.put(identifier,new Cooldown(identifier,EMPTY,initialTicks));
-    }
 
     public void removeCooldown(Identifier identifier){
-        removeCooldown(identifier,false);
-    }
-
-    public void removeCooldown(Identifier identifier,boolean suppressListener){
-        Cooldown cooldown = cooldowns.remove(identifier);
-
-        if(!suppressListener && cooldown != null) cooldown.getListener().finished(entity,identifier);
+        if(!cooldowns.containsKey(identifier)) return;
+        NeoForge.EVENT_BUS.post(new CooldownEvent.Finished(entity,identifier));
     }
 
 
@@ -56,6 +50,7 @@ public class EntityCooldownHandler {
     public void tick(){
         HashSet<Identifier> finished = new HashSet<>();
         for(Identifier identifier : cooldowns.keySet()){
+
             if(cooldowns.get(identifier).tick()) finished.add(identifier);
         }
 
@@ -75,7 +70,6 @@ public class EntityCooldownHandler {
                 cooldowns,
                 ByteBufHelpers::encodeIdentifier,
                 (cooldown,byteBuf)->{
-                    ByteBufHelpers.encodeIdentifier(cooldown.getIdentifier(),byteBuf);
                     byteBuf.writeInt(cooldown.getTicksRemaining());
                 },
                 buf
@@ -86,7 +80,7 @@ public class EntityCooldownHandler {
         cooldowns.clear();
         ByteBufHelpers.decodeMap(
                 cooldowns,ByteBufHelpers::decodeIdentifier,
-                (byteBuf)->new Cooldown(ByteBufHelpers.decodeIdentifier(byteBuf),EMPTY,buf.readInt()),
+                (byteBuf)->new Cooldown(byteBuf.readInt()),
                 buf
         );
     }

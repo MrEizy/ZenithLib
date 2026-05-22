@@ -1,28 +1,22 @@
 package net.zic.zenithlib.cooldown;
 
-import net.minecraft.resources.Identifier;
+import org.apache.commons.lang3.mutable.MutableInt;
 
-//holds an instance of a cooldown
+/**
+ * we are using a wrapper class to prevent constant Integer object creation
+ */
 public class Cooldown {
-    private final Identifier identifier;
-    private final CooldownListener listener;
     private int ticksRemaining;
-
-    public Cooldown(Identifier identifier, CooldownListener listener,int initialTicks) {
-        this.identifier = identifier;
-        this.listener = listener;
-        ticksRemaining = initialTicks;
+    public Cooldown(int initialTicks){
+        this.ticksRemaining = initialTicks;;
     }
-    public Identifier getIdentifier(){return identifier;}
-    public CooldownListener getListener(){return listener;}
-    public int getTicksRemaining() {return ticksRemaining;}
 
-    /**
-     * @return true if it has finished cooldown, false otherwise
-     */
     public boolean tick(){
-        this.ticksRemaining--;
-        return ticksRemaining <= 0;
+        return --ticksRemaining <= 0;
     }
-    public void setTicksRemaining(int value){ticksRemaining = value;}
+    public void setTicksRemaining(int newValue){
+        ticksRemaining = newValue;
+    }
+    public int getTicksRemaining(){return ticksRemaining;}
+
 }
