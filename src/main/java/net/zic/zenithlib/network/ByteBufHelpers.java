@@ -5,10 +5,7 @@ import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.resources.Identifier;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.IntFunction;
 
 public class ByteBufHelpers {
@@ -122,6 +119,13 @@ public class ByteBufHelpers {
         int size = buf.readInt();
         for(int i = 0;i <size;i++){
             existingMap.put(keyDecoder.decode(buf),valDecoder.decode(buf));
+        }
+    }
+    //─────COLLECTION───────────────────────────────────────────────
+    public static <T> void encodeCollection(Collection<T> input, ByteBuf buf, Encoder<T> encoder){
+        buf.writeInt(input.size());
+        for(T value : input){
+            encoder.encode(value,buf);
         }
     }
 }

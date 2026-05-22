@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 
-//TODO currently listeners are not persistent if the player leaves
+
 public class EntityCooldownHandler {
     //used when user does not define one
 
