@@ -1,7 +1,10 @@
 package net.zic.zenithlib.cooldown;
 
+import io.netty.buffer.ByteBuf;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
+import net.zic.zenithlib.network.ByteBufHelpers;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +52,7 @@ public class EntityCooldownHandler {
     }
 
 
-
+    //─────TICK HANDLING───────────────────────────────────────────────
     public void tick(){
         HashSet<Identifier> finished = new HashSet<>();
         for(Identifier identifier : cooldowns.keySet()){
@@ -57,5 +60,41 @@ public class EntityCooldownHandler {
         }
 
         for(Identifier identifier : finished) removeCooldown(identifier);
+    }
+
+    //─────NETWORK───────────────────────────────────────────────
+    /*
+        we do not necessary have to sync it ever tick if we decide to give it ticker on the client.
+        in that scenario whatever is hadnling this ticker can keep track and every X ticks sync (configurable?)
+     */
+
+
+    //we do not send the listener with the cooldown
+    public void encode(ByteBuf buf){
+        ByteBufHelpers.encodeMap(
+                cooldowns,
+                ByteBufHelpers::encodeIdentifier,
+                (cooldown,byteBuf)->{
+                    ByteBufHelpers.encodeIdentifier(cooldown.getIdentifier(),byteBuf);
+                    byteBuf.writeInt(cooldown.getTicksRemaining());
+                },
+                buf
+        );
+    }
+
+    public void decode(ByteBuf buf){
+        cooldowns.clear();
+        ByteBufHelpers.decodeMap(
+                cooldowns,ByteBufHelpers::decodeIdentifier,
+                (byteBuf)->new Cooldown(ByteBufHelpers.decodeIdentifier(byteBuf),EMPTY,buf.readInt()),
+                buf
+        );
+    }
+
+    public void save(CompoundTag tag){
+
+    }
+    public void load(CompoundTag tag){
+
     }
 }
