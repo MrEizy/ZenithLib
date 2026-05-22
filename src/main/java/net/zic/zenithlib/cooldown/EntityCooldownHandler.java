@@ -1,16 +1,30 @@
 package net.zic.zenithlib.cooldown;
 
+import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.attachment.AttachmentSyncHandler;
+import net.neoforged.neoforge.attachment.IAttachmentHolder;
+import net.neoforged.neoforge.attachment.IAttachmentSerializer;
 import net.neoforged.neoforge.common.NeoForge;
+import net.zic.zenithlib.nbt.NbtHelpers;
 import net.zic.zenithlib.network.ByteBufHelpers;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+
 //TODO currently listeners are not persistent if the player leaves
 public class EntityCooldownHandler {
     //used when user does not define one
@@ -37,6 +51,7 @@ public class EntityCooldownHandler {
         CooldownEvent.Start cooldownStartEvent= new CooldownEvent.Start(entity,identifier,initialTicks);
         NeoForge.EVENT_BUS.post(cooldownStartEvent);
         cooldowns.put(identifier,new Cooldown(cooldownStartEvent.getUpdatedCooldown()));
+
     }
 
 
@@ -85,10 +100,61 @@ public class EntityCooldownHandler {
         );
     }
 
-    public void save(CompoundTag tag){
+    public void save(ValueOutput output){
+        NbtHelpers.writeMap(
+                output,
+                "cooldowns",
+                cooldowns,
+                NbtHelpers::writeIdentifier,
+                (out,id,cooldown)->out.putInt(id,cooldown.getTicksRemaining()));
+    }
+    public void load(ValueInput input){
+        NbtHelpers.readMap(
+                input,
+                "cooldowns",
+                cooldowns,
+                NbtHelpers::readIdentifier,
+                (in,id)->new Cooldown(in.getIntOr(id,0))
+        );
 
     }
-    public void load(CompoundTag tag){
 
+    private static class SyncHandle implements AttachmentSyncHandler<EntityCooldownHandler>{
+
+        @Override
+        public void write(@NonNull RegistryFriendlyByteBuf buf, EntityCooldownHandler attachment, boolean initialSync) {
+            attachment.encode(buf);
+        }
+
+        @Override
+        public @Nullable EntityCooldownHandler read(@NonNull IAttachmentHolder holder, @NonNull RegistryFriendlyByteBuf buf, @Nullable EntityCooldownHandler previousValue) {
+            if(!(holder instanceof Entity entity)) return null;
+            if(previousValue == null) previousValue = new EntityCooldownHandler(entity);
+            previousValue.decode(buf);
+            return previousValue;
+        }
+
+        @Override
+        public boolean sendToPlayer(@NonNull IAttachmentHolder holder, @NonNull ServerPlayer to) {
+            return holder == to;
+        }
+    }
+    private static class Provider implements IAttachmentSerializer<EntityCooldownHandler>{
+
+        @Override
+        public EntityCooldownHandler read(@NonNull IAttachmentHolder holder, ValueInput input) {
+            if(holder instanceof Entity entity){
+                EntityCooldownHandler cooldownHandler = new EntityCooldownHandler(entity);
+                cooldownHandler.load(input);
+                return cooldownHandler;
+            }
+            return null;
+        }
+
+        @Override
+        public boolean write(EntityCooldownHandler attachment, ValueOutput output) {
+            attachment.save(output);
+            return true;
+        }
     }
 }

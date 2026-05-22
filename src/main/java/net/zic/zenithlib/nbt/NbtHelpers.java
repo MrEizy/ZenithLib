@@ -5,77 +5,76 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.*;
 import java.util.function.IntFunction;
 
 public class NbtHelpers {
     //─────IDENTIFIERS───────────────────────────────────────────────
-    public static Tag writeIdentifier(Identifier input){
-        return StringTag.valueOf(input.toString());
+    public static void writeIdentifier(ValueOutput output, String id, Identifier value){
+        output.putString(id,value.toString());
     }
-    //IDEA consider throwing an error here
-    public static Identifier readIdentifier(Tag input){
-        if(input instanceof StringTag stringTag) return Identifier.parse(stringTag.toString());
-        return null;
+    public static Identifier readIdentifier(ValueInput input,String id){
+        return Identifier.parse(input.getStringOr(id,""));
     }
 
     //─────ARRAYS───────────────────────────────────────────────
-    public static <T> ListTag writeArray(T[] input,Writer<T> writer){
-        ListTag listTag = new ListTag();
+    public static <T> void writeArray(ValueOutput output,String id,T[] input,Writer<T> writer){
+        ValueOutput.ValueOutputList list = output.childrenList(id);
         for(T value : input){
-            listTag.add(writer.write(value));
+            writer.write(list.addChild(),"value",value);
         }
-        return listTag;
     }
-    public static <T> ListTag writeCollection(Collection<T> input,Writer<T> writer){
-        ListTag listTag = new ListTag();
+    public static <T> void writeCollection(ValueOutput output,String id,Collection<T> input,Writer<T> writer){
+        ValueOutput.ValueOutputList list = output.childrenList(id);
         for(T value : input){
-            listTag.add(writer.write(value));
+            writer.write(list.addChild(),"value",value);
         }
-        return listTag;
     }
 
-    public static <T> List<T> readList(ListTag tag,Reader<T> reader){
+    public static <T> List<T> readList(ValueInput input,String id, Reader<T> reader){
         ArrayList<T> list = new ArrayList<>();
-        for (Tag value : tag) {
-            list.add(reader.read(value));
+        ValueInput.ValueInputList values =  input.childrenListOrEmpty(id);
+
+        for(ValueInput field : values){
+            list.add(reader.read(field,"value"));
         }
+
         return List.copyOf(list);
     }
 
-    public static <T> T[] readArray(ListTag tag, Reader<T> reader, IntFunction<T[]> builder){
-        T[] output = builder.apply(tag.size());
-        for(int i = 0; i<tag.size();i++){
-            output[i] = reader.read(tag.get(i));
-        }
-        return output;
-    }
-    //─────ARRAYS───────────────────────────────────────────────
+    //─────MAPS───────────────────────────────────────────────
 
-    //creates a list of compound tags with key/val fields
-    public static <T,V> ListTag writeMap(Map<T,V> map,Writer<T> keyWriter,Writer<V> valWriter){
+
+    public static <T,V> void writeMap(ValueOutput output,String id,Map<T,V> map, Writer<T> keyWriter,Writer<V> valueWriter){
+
         Set<Map.Entry<T,V>> entries = map.entrySet();
-        Writer<Map.Entry<T,V>> entryWriter = value -> {
-            CompoundTag tag = new CompoundTag();
-            tag.put("key",keyWriter.write(value.getKey()));
-            tag.put("value",valWriter.write(value.getValue()));
-            return tag;
+        Writer<Map.Entry<T,V>> entryWriter = (out,entryId,val) -> {
+            keyWriter.write(out,"key",val.getKey());
+            valueWriter.write(out,"value",val.getValue());
         };
+        writeCollection(output,id,entries,entryWriter);
 
-        return writeCollection(entries,entryWriter);
     }
 
-    public static <T,V> Map<T,V> readMap(ListTag tag,Reader<T> keyReader,Reader<V> valueReader){
-        HashMap<T,V> newMap = new HashMap<>();
-        readMap(tag,newMap,keyReader,valueReader);
-        return Map.copyOf(newMap);
-    }
+    public static <T,V> void readMap(ValueInput input,String id, HashMap<T,V> existingMap,Reader<T> keyReader,Reader<V> valueReader){
 
-    public static <T,V> void readMap(ListTag tag,HashMap<T,V> existingMap, Reader<T> keyReader,Reader<V> valueReader){
-        for(Tag subTag : tag){
-            if(!(subTag instanceof CompoundTag compoundTag)) continue;
-            existingMap.put(keyReader.read(compoundTag.get("key")),valueReader.read(compoundTag.get("value")));
+        ValueInput.ValueInputList values =  input.childrenListOrEmpty(id);
+
+        for(ValueInput field : values){
+            existingMap.put(keyReader.read(field,"key"),valueReader.read(field,"value"));
         }
     }
+    public static <T,V> Map<T,V> readMap(ValueInput input,String id,Reader<T> keyReader,Reader<V> valueReader){
+        HashMap<T,V> newMap = new HashMap<>();
+        readMap(input,id,newMap,keyReader,valueReader);
+        return newMap;
+    }
+
+
+
 }
