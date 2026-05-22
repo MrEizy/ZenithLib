@@ -2,6 +2,7 @@ package net.zic.zenithlib.network;
 
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.Hash;
+import net.minecraft.resources.Identifier;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -20,7 +21,13 @@ public class ByteBufHelpers {
         return (String) buf.readCharSequence(buf.readInt(),Charset.defaultCharset());
     }
 
-
+    //─────IDENTIFIER───────────────────────────────────────────────
+    public static void encodeIdentifier(Identifier input, ByteBuf buf){
+        encodeString(input.toString(),buf);
+    }
+    public static Identifier decodeIdentifier(ByteBuf buf){
+        return Identifier.parse(decodeString(buf));
+    }
     //─────ARRAYS───────────────────────────────────────────────
     public static <T> void encodeArray(T[] input, ByteBuf buf, Encoder<T> encoder){
         buf.writeInt(input.length);
@@ -28,6 +35,16 @@ public class ByteBufHelpers {
             encoder.encode(value,buf);
         }
     }
+    //encodes an array that can have null fields
+    public static <T> void encodeNullableArray(T[] input,ByteBuf buf,Encoder<T> encoder){
+        buf.writeInt(input.length);
+        for(T value : input){
+            buf.writeBoolean(value != null);
+            if(value != null) encoder.encode(value,buf);
+        }
+    }
+
+
     public static <T> List<T> decodeArray(ByteBuf buf,Decoder<T> decoder){
         int size = buf.readInt();
         ArrayList<T> output = new ArrayList<>();
@@ -37,11 +54,41 @@ public class ByteBufHelpers {
         }
         return output;
     }
+
+    //decodes an array as a List that can have null fields
+    public static <T> List<T> decodeNullableArray(ByteBuf buf,Decoder<T> decoder){
+        int size = buf.readInt();
+        ArrayList<T> output = new ArrayList<>();
+
+        for(int i = 0;i<size;i++){
+            if(!buf.readBoolean()){
+                output.add(null);
+                continue;
+            }
+            output.add(decoder.decode(buf));
+        }
+        return output;
+    }
+
+
     //we cannot create generic arrays so we need a factory for it
     public static <T> T[] decodeArray(ByteBuf buf, Decoder<T> decoder, IntFunction<T[]> factory){
         int size = buf.readInt();
         T[] output = factory.apply(size);
         for(int i = 0;i<size;i++){
+            output[i] = decoder.decode(buf);
+        }
+        return output;
+    }
+    //decodes an array that can have null fields
+    public static <T> T[] decodeNullableArray(ByteBuf buf, Decoder<T> decoder, IntFunction<T[]> factory){
+        int size = buf.readInt();
+        T[] output = factory.apply(size);
+        for(int i = 0;i<size;i++){
+            if(!buf.readBoolean()){
+                output[i] = null;
+                continue;
+            }
             output[i] = decoder.decode(buf);
         }
         return output;
@@ -54,8 +101,8 @@ public class ByteBufHelpers {
             output[i] = decodeString(buf);
         }
         return output;
-
     }
+
     //─────MAPS───────────────────────────────────────────────
     public static <T,V> void encodeMap(Map<T,V> map,Encoder<T> keyEncoder,Encoder<V> valEncoder,ByteBuf buf){
         buf.writeInt(map.size());
