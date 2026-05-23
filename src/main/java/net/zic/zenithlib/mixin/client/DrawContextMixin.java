@@ -1,4 +1,4 @@
-//package net.zic.zenithlib.tooltip.mixin.client;
+//package net.zic.zenithlib.mixin.client;
 //
 //import net.minecraft.client.Minecraft;
 //import net.minecraft.client.gui.Font;
