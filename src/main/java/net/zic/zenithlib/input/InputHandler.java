@@ -67,8 +67,7 @@ public class InputHandler {
         return handler;
     }
     @SubscribeEvent // on the mod event bus only on the physical client
-    public static void registerBindings(RegisterKeyMappingsEvent event) {
-        ExampleMappings.init();//temp
+    protected static void registerBindings(RegisterKeyMappingsEvent event) {
         for(MappingHandler handler : handlers){
             event.register(handler.getMapping());
         }
