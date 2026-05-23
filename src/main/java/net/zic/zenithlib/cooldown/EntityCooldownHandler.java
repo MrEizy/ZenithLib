@@ -119,7 +119,7 @@ public class EntityCooldownHandler {
 
     }
 
-    private static class SyncHandle implements AttachmentSyncHandler<EntityCooldownHandler>{
+    public static class SyncHandler implements AttachmentSyncHandler<EntityCooldownHandler>{
 
         @Override
         public void write(@NonNull RegistryFriendlyByteBuf buf, EntityCooldownHandler attachment, boolean initialSync) {
@@ -139,7 +139,7 @@ public class EntityCooldownHandler {
             return holder == to;
         }
     }
-    private static class Provider implements IAttachmentSerializer<EntityCooldownHandler>{
+    public static class Provider implements IAttachmentSerializer<EntityCooldownHandler>{
 
         @Override
         public EntityCooldownHandler read(@NonNull IAttachmentHolder holder, ValueInput input) {

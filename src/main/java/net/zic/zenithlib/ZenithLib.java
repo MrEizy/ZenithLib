@@ -2,6 +2,10 @@ package net.zic.zenithlib;
 
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.zic.zenithlib.common.ZenithAttachments;
+import net.zic.zenithlib.input.action.ActionChangedPacket;
 import net.zic.zenithlib.tooltip.manager.ToolTipManager;
 import org.slf4j.Logger;
 
@@ -31,6 +35,7 @@ public class ZenithLib {
 
         NeoForge.EVENT_BUS.register(this);
 
+        ZenithAttachments.register(modEventBus);
 
         modEventBus.addListener(this::registerKeyBindings);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -56,4 +61,5 @@ public class ZenithLib {
 
         LOGGER.info("(!) Zenith Lib Connected (!)");
     }
+
 }

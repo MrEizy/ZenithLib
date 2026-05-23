@@ -10,8 +10,9 @@ import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.common.NeoForge;
-
+import net.zic.zenithlib.input.action.ActionChangedPacket;
 
 
 /**
@@ -63,6 +64,7 @@ public class ZenithLibClient {
     public void onRenderTooltip(RenderTooltipEvent.Pre event) {
 
     }
+
 
 
 }
