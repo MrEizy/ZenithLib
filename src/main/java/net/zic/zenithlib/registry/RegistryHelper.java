@@ -2,6 +2,7 @@ package net.zic.zenithlib.registry;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
@@ -15,13 +16,13 @@ public class RegistryHelper {
 
     public record DataPackRegistry<T>(ResourceKey<Registry<T>> key, Supplier<Codec<T>> codec){
 
-        public Registry<T> get(Level level){
-            Optional<Registry<T>> registry = level.registryAccess().lookup(key);
+        public Registry<T> get(RegistryAccess access){
+            Optional<Registry<T>> registry = access.lookup(key);
             if(registry.isEmpty()){
                 ZenithLib.LOGGER.error("error when trying to access registry with key {}", key.identifier());
                 return null;
             }
-            return level.registryAccess().lookup(key).orElse(null);
+            return registry.orElse(null);
         }
     }
 
