@@ -1,0 +1,113 @@
+{
+  "pages": [
+    {
+      "title": {
+        "translate": "tooltip.zenithlib.diamond.title"
+      },
+      "elements": [
+        {
+          "type": "title_icon",
+          "title": {
+            "translate": "tooltip.zenithlib.diamond.title"
+          },
+          "subtitle": {
+            "translate": "tooltip.zenithlib.diamond.header"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.line_1"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "translate": "tooltip.zenithlib.diamond.row.rarity"
+          },
+          "right": {
+            "translate": "tooltip.zenithlib.diamond.row.rarity_value"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "translate": "tooltip.zenithlib.diamond.row.origin"
+          },
+          "right": {
+            "translate": "tooltip.zenithlib.diamond.row.origin_value"
+          },
+          "right_color": "accent"
+        }
+      ]
+    },
+    {
+      "title": {
+        "translate": "tooltip.zenithlib.diamond.page_2.title"
+      },
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.header"
+          },
+          "color": "accent"
+        },
+        {
+          "type": "text",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.line_1"
+          }
+        },
+        {
+          "type": "spacer",
+          "height": 4
+        },
+        {
+          "type": "text",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.line_2"
+          },
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": {
+        "translate": "tooltip.zenithlib.diamond.page_3.title"
+      },
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_3.header"
+          },
+          "color": "warning"
+        },
+        {
+          "type": "text",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_3.line_1"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "translate": "tooltip.zenithlib.diamond.page_3.row.note"
+          },
+          "right": {
+            "translate": "tooltip.zenithlib.diamond.page_3.row.note_value"
+          },
+          "right_color": "warning"
+        }
+      ]
+    }
+  ]
+}

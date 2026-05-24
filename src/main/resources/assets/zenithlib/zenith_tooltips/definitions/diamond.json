@@ -1,0 +1,10 @@
+{
+  "priority": 100,
+  "selector": {
+    "items": [
+      "minecraft:diamond"
+    ]
+  },
+  "document": "zenithlib:showcase",
+  "theme": "zenithlib:mana_blue"
+}

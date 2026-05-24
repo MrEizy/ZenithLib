@@ -1,5 +1,6 @@
 package net.zic.zenithlib;
 
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -10,9 +11,8 @@ import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.zic.zenithlib.input.action.ActionChangedPacket;
+import net.zic.zenithlib.tooltip.manager.ZenithTooltipRepository;
 
 
 /**
@@ -30,9 +30,6 @@ public class ZenithLibClient {
         // Register event listeners on the MOD event bus
         modEventBus.addListener(this::onClientSetup);
         modEventBus.addListener(this::registerReloadListeners);
-
-        // Register to NeoForge event bus for game events (not mod lifecycle events)
-        NeoForge.EVENT_BUS.register(this);
     }
 
     /**
@@ -51,20 +48,18 @@ public class ZenithLibClient {
      * Register reload listeners - runs on mod event bus
      */
     private void registerReloadListeners(AddClientReloadListenersEvent event) {
+        event.addListener(
+                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "zenith_tooltip_themes"),
+                new ZenithTooltipRepository.ThemesReloadListener()
+        );
 
+        event.addListener(
+                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "zenith_tooltips"),
+                new ZenithTooltipRepository.RulesReloadListener()
+        );
 
-        ZenithLib.LOGGER.info("Registered tooltip reload listeners (themes + item themes)");
+        ZenithLib.LOGGER.info("Registered tooltip reload listeners (themes + rules)");
     }
-
-    /**
-     * Event-based tooltip rendering - runs on NeoForge event bus
-     * This catches tooltips that might not be intercepted by the mixin.
-     */
-    @SubscribeEvent
-    public void onRenderTooltip(RenderTooltipEvent.Pre event) {
-
-    }
-
 
 
 }
