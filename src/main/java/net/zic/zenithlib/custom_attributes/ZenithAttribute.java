@@ -95,13 +95,14 @@ public class ZenithAttribute extends ValueContainer {
     }
 
 
-    //make sure to call this whenever you update the stat sheet
-    public void update(StatSheet statSheet){
+    //make sure to call this whenever you update a stat
+    public void update(Map<Stat,StatInstance> stats){
         //used to retrieve the stat sheet for calculations
 
         double baseVal = 0;
         for (Stat stat : scaling.keySet()){
-            StatInstance instance = statSheet.getStatInstance(stat);
+            StatInstance instance = stats.get(stat);
+            if(instance == null) continue;
             baseVal += instance.getValue()*scaling.get(stat).getValue();
         }
         cachedBaseStatBonus = baseVal;

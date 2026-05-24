@@ -14,12 +14,15 @@ import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.zic.zenithlib.cooldown.Cooldown;
 import net.zic.zenithlib.cooldown.EntityCooldownHandler;
 import net.zic.zenithlib.network.ByteBufHelpers;
+import net.zic.zenithlib.stats.Stat;
+import net.zic.zenithlib.stats.StatInstance;
 import net.zic.zenithlib.stats.StatSheet;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -59,9 +62,10 @@ public class ZenithAttributeHolder {
         return attributes.containsKey(attributeHolder);
     }
 
-    public void update(StatSheet sheet){
-        attributes.forEach((attributeHolder, zenithAttribute) -> zenithAttribute.update(sheet));
+    public void update(Map<Stat,StatInstance> stats){
+        attributes.forEach((attributeHolder, zenithAttribute) -> zenithAttribute.update(stats));
     }
+
 
     public void attachEntity(){
         attributes.forEach(((attributeHolder, zenithAttribute) -> zenithAttribute.setAttachedEntity(attachedEntity)));
