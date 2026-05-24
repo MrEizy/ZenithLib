@@ -1,0 +1,10 @@
+{
+  "priority": 100,
+  "selector": {
+    "items": [
+      "minecraft:echo_shard"
+    ]
+  },
+  "document": "zenithlib:showcase",
+  "theme": "zenithlib:ember_orange"
+}

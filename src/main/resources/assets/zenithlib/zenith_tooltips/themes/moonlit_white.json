@@ -1,0 +1,17 @@
+{
+  "colors": {
+    "background": "#F8F4E8DD",
+    "border_top": "#FFFFFFFF",
+    "border_bottom": "#B8B1A3FF",
+    "text": "#2A2530FF",
+    "accent": "#356F9DFF",
+    "muted": "#716979FF",
+    "positive": "#237544FF",
+    "warning": "#946315FF",
+    "negative": "#A53845FF"
+  },
+  "layout": {
+    "padding": 6,
+    "max_width": 240
+  }
+}

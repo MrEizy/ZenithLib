@@ -1,0 +1,10 @@
+{
+  "priority": 100,
+  "selector": {
+    "items": [
+      "minecraft:nether_star"
+    ]
+  },
+  "document": "zenithlib:showcase",
+  "theme": "zenithlib:glass_clear"
+}
