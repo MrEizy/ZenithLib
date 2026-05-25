@@ -1,10 +1,10 @@
 {
+  "document": "zenithlib:showcase",
   "priority": 100,
   "selector": {
     "items": [
       "minecraft:amethyst_shard"
     ]
   },
-  "document": "zenithlib:showcase",
   "theme": "zenithlib:moonlit_white"
 }

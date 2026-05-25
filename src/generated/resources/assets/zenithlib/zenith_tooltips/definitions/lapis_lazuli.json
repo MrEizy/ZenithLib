@@ -1,10 +1,10 @@
 {
+  "document": "zenithlib:showcase",
   "priority": 100,
   "selector": {
     "items": [
       "minecraft:lapis_lazuli"
     ]
   },
-  "document": "zenithlib:showcase",
   "theme": "zenithlib:cobalt_blue"
 }

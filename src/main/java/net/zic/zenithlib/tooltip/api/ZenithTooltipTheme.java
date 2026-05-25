@@ -21,14 +21,16 @@ import java.util.Locale;
  * built-in fallback is the ZIC mana-blue theme used whenever a requested theme is not
  * available.</p>
  */
-
 public record ZenithTooltipTheme(
         Palette colors,
         Metrics layout,
         IconHolder iconHolder,
         BarStyle barStyle,
         BadgeStyle badgeStyle,
-        DividerStyle dividerStyle
+        DividerStyle dividerStyle,
+        FrameStyle frameStyle,
+        HeaderStyle headerStyle,
+        BackgroundStyle backgroundStyle
 ) {
     public static final int MIN_INNER_WIDTH = 80;
 
@@ -48,7 +50,10 @@ public record ZenithTooltipTheme(
             IconHolder.DEFAULT,
             BarStyle.DEFAULT,
             BadgeStyle.DEFAULT,
-            DividerStyle.DEFAULT
+            DividerStyle.DEFAULT,
+            FrameStyle.DEFAULT,
+            HeaderStyle.DEFAULT,
+            BackgroundStyle.DEFAULT
     );
 
     public static final Codec<ZenithTooltipTheme> CODEC = RecordCodecBuilder.create(instance ->
@@ -58,7 +63,10 @@ public record ZenithTooltipTheme(
                     IconHolder.CODEC.optionalFieldOf("icon_holder", DEFAULT.iconHolder()).forGetter(ZenithTooltipTheme::iconHolder),
                     BarStyle.CODEC.optionalFieldOf("bar_style", DEFAULT.barStyle()).forGetter(ZenithTooltipTheme::barStyle),
                     BadgeStyle.CODEC.optionalFieldOf("badge_style", DEFAULT.badgeStyle()).forGetter(ZenithTooltipTheme::badgeStyle),
-                    DividerStyle.CODEC.optionalFieldOf("divider_style", DEFAULT.dividerStyle()).forGetter(ZenithTooltipTheme::dividerStyle)
+                    DividerStyle.CODEC.optionalFieldOf("divider_style", DEFAULT.dividerStyle()).forGetter(ZenithTooltipTheme::dividerStyle),
+                    FrameStyle.CODEC.optionalFieldOf("frame_style", DEFAULT.frameStyle()).forGetter(ZenithTooltipTheme::frameStyle),
+                    HeaderStyle.CODEC.optionalFieldOf("header_style", DEFAULT.headerStyle()).forGetter(ZenithTooltipTheme::headerStyle),
+                    BackgroundStyle.CODEC.optionalFieldOf("background_style", DEFAULT.backgroundStyle()).forGetter(ZenithTooltipTheme::backgroundStyle)
             ).apply(instance, ZenithTooltipTheme::new)
     );
 
@@ -161,6 +169,10 @@ public record ZenithTooltipTheme(
         return String.format("#%02X%02X%02X%02X", r, g, b, a);
     }
 
+    private static int withAlpha(int color, int alpha) {
+        return (alpha << 24) | (color & 0x00FFFFFF);
+    }
+
     public record Palette(
             int background,
             int borderTop,
@@ -214,7 +226,6 @@ public record ZenithTooltipTheme(
         }
     }
 
-
     /** Theme-controlled presentation of labelled progress bars. */
     public record BarStyle(
             int height,
@@ -260,10 +271,6 @@ public record ZenithTooltipTheme(
         public int fillColor(int color) {
             return withAlpha(color, fillAlpha);
         }
-
-        private static int withAlpha(int color, int alpha) {
-            return (alpha << 24) | (color & 0x00FFFFFF);
-        }
     }
 
     /** Theme-controlled sizing and opacity for compact badge labels. */
@@ -292,7 +299,7 @@ public record ZenithTooltipTheme(
         }
 
         public int fillColor(int color) {
-            return (fillAlpha << 24) | (color & 0x00FFFFFF);
+            return withAlpha(color, fillAlpha);
         }
     }
 
@@ -329,7 +336,10 @@ public record ZenithTooltipTheme(
         }
 
         public int ornamentSize() {
-            return decoration == Decoration.DIAMOND ? 5 : thickness;
+            return switch (decoration) {
+                case DIAMOND, DOUBLE_DIAMOND, CENTER_RUNE -> 5;
+                case DOTTED, NONE -> thickness;
+            };
         }
 
         public int height() {
@@ -339,12 +349,12 @@ public record ZenithTooltipTheme(
 
     public enum Decoration {
         NONE("none"),
-        DIAMOND("diamond");
+        DIAMOND("diamond"),
+        DOUBLE_DIAMOND("double_diamond"),
+        CENTER_RUNE("center_rune"),
+        DOTTED("dotted");
 
-        private static final Codec<Decoration> CODEC = Codec.STRING.comapFlatMap(
-                Decoration::decode,
-                Decoration::serializedName
-        );
+        private static final Codec<Decoration> CODEC = codec(Decoration::decode, Decoration::serializedName);
 
         private final String serializedName;
 
@@ -358,14 +368,209 @@ public record ZenithTooltipTheme(
 
         private static DataResult<Decoration> decode(String raw) {
             String normalized = raw.toLowerCase(Locale.ROOT);
-
             for (Decoration decoration : values()) {
                 if (decoration.serializedName.equals(normalized)) {
                     return DataResult.success(decoration);
                 }
             }
-
             return DataResult.error(() -> "Unsupported tooltip divider_style decoration: " + raw);
+        }
+    }
+
+    /** Theme-controlled styling for decorative frame accents. */
+    public record FrameStyle(
+            CornerDecoration cornerDecoration,
+            int cornerSize,
+            int cornerInset,
+            String cornerColor,
+            boolean innerBorder,
+            int innerBorderInset,
+            String innerBorderColor,
+            int innerBorderAlpha
+    ) {
+        public static final FrameStyle DEFAULT = new FrameStyle(
+                CornerDecoration.NONE,
+                6,
+                2,
+                "accent",
+                false,
+                2,
+                "border_top",
+                110
+        );
+
+        public static final Codec<FrameStyle> CODEC = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        CornerDecoration.CODEC.optionalFieldOf("corner_decoration", DEFAULT.cornerDecoration()).forGetter(FrameStyle::cornerDecoration),
+                        Codec.INT.optionalFieldOf("corner_size", DEFAULT.cornerSize()).forGetter(FrameStyle::cornerSize),
+                        Codec.INT.optionalFieldOf("corner_inset", DEFAULT.cornerInset()).forGetter(FrameStyle::cornerInset),
+                        Codec.STRING.optionalFieldOf("corner_color", DEFAULT.cornerColor()).forGetter(FrameStyle::cornerColor),
+                        Codec.BOOL.optionalFieldOf("inner_border", DEFAULT.innerBorder()).forGetter(FrameStyle::innerBorder),
+                        Codec.INT.optionalFieldOf("inner_border_inset", DEFAULT.innerBorderInset()).forGetter(FrameStyle::innerBorderInset),
+                        Codec.STRING.optionalFieldOf("inner_border_color", DEFAULT.innerBorderColor()).forGetter(FrameStyle::innerBorderColor),
+                        Codec.INT.optionalFieldOf("inner_border_alpha", DEFAULT.innerBorderAlpha()).forGetter(FrameStyle::innerBorderAlpha)
+                ).apply(instance, FrameStyle::new)
+        );
+
+        public FrameStyle {
+            cornerDecoration = cornerDecoration == null ? CornerDecoration.NONE : cornerDecoration;
+            cornerSize = Math.max(3, cornerSize);
+            cornerInset = Math.max(0, cornerInset);
+            cornerColor = cornerColor == null || cornerColor.isBlank() ? "accent" : cornerColor;
+            innerBorderInset = Math.max(1, innerBorderInset);
+            innerBorderColor = innerBorderColor == null || innerBorderColor.isBlank() ? "border_top" : innerBorderColor;
+            innerBorderAlpha = Math.max(0, Math.min(255, innerBorderAlpha));
+        }
+
+        public int cornerColorValue(ZenithTooltipTheme theme) {
+            return theme.resolveColor(cornerColor);
+        }
+
+        public int innerBorderColorValue(ZenithTooltipTheme theme) {
+            return withAlpha(theme.resolveColor(innerBorderColor), innerBorderAlpha);
+        }
+    }
+
+    public enum CornerDecoration {
+        NONE("none"),
+        DIAMOND("diamond"),
+        BRACKET("bracket"),
+        NOTCHED("notched"),
+        RUNE("rune");
+
+        private static final Codec<CornerDecoration> CODEC = codec(CornerDecoration::decode, CornerDecoration::serializedName);
+
+        private final String serializedName;
+
+        CornerDecoration(String serializedName) {
+            this.serializedName = serializedName;
+        }
+
+        public String serializedName() {
+            return serializedName;
+        }
+
+        private static DataResult<CornerDecoration> decode(String raw) {
+            String normalized = raw.toLowerCase(Locale.ROOT);
+            for (CornerDecoration decoration : values()) {
+                if (decoration.serializedName.equals(normalized)) {
+                    return DataResult.success(decoration);
+                }
+            }
+            return DataResult.error(() -> "Unsupported tooltip frame_style corner_decoration: " + raw);
+        }
+    }
+
+    /** Theme-controlled styling for ornamental title and header flourishes. */
+    public record HeaderStyle(
+            Ornament ornament,
+            String color
+    ) {
+        public static final HeaderStyle DEFAULT = new HeaderStyle(Ornament.NONE, "accent");
+
+        public static final Codec<HeaderStyle> CODEC = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        Ornament.CODEC.optionalFieldOf("ornament", DEFAULT.ornament()).forGetter(HeaderStyle::ornament),
+                        Codec.STRING.optionalFieldOf("color", DEFAULT.color()).forGetter(HeaderStyle::color)
+                ).apply(instance, HeaderStyle::new)
+        );
+
+        public HeaderStyle {
+            ornament = ornament == null ? Ornament.NONE : ornament;
+            color = color == null || color.isBlank() ? "accent" : color;
+        }
+
+        public int colorValue(ZenithTooltipTheme theme) {
+            return theme.resolveColor(color);
+        }
+    }
+
+    public enum Ornament {
+        NONE("none"),
+        SIDE_LINES("side_lines"),
+        CORNER_TICKS("corner_ticks"),
+        SMALL_DIAMONDS("small_diamonds");
+
+        private static final Codec<Ornament> CODEC = codec(Ornament::decode, Ornament::serializedName);
+
+        private final String serializedName;
+
+        Ornament(String serializedName) {
+            this.serializedName = serializedName;
+        }
+
+        public String serializedName() {
+            return serializedName;
+        }
+
+        private static DataResult<Ornament> decode(String raw) {
+            String normalized = raw.toLowerCase(Locale.ROOT);
+            for (Ornament ornament : values()) {
+                if (ornament.serializedName.equals(normalized)) {
+                    return DataResult.success(ornament);
+                }
+            }
+            return DataResult.error(() -> "Unsupported tooltip header_style ornament: " + raw);
+        }
+    }
+
+    /** Theme-controlled low-alpha surface decoration beneath tooltip content. */
+    public record BackgroundStyle(
+            Pattern pattern,
+            String color,
+            int alpha,
+            int spacing
+    ) {
+        public static final BackgroundStyle DEFAULT = new BackgroundStyle(Pattern.NONE, "accent", 18, 8);
+
+        public static final Codec<BackgroundStyle> CODEC = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        Pattern.CODEC.optionalFieldOf("pattern", DEFAULT.pattern()).forGetter(BackgroundStyle::pattern),
+                        Codec.STRING.optionalFieldOf("color", DEFAULT.color()).forGetter(BackgroundStyle::color),
+                        Codec.INT.optionalFieldOf("alpha", DEFAULT.alpha()).forGetter(BackgroundStyle::alpha),
+                        Codec.INT.optionalFieldOf("spacing", DEFAULT.spacing()).forGetter(BackgroundStyle::spacing)
+                ).apply(instance, BackgroundStyle::new)
+        );
+
+        public BackgroundStyle {
+            pattern = pattern == null ? Pattern.NONE : pattern;
+            color = color == null || color.isBlank() ? "accent" : color;
+            alpha = Math.max(0, Math.min(255, alpha));
+            spacing = Math.max(4, spacing);
+        }
+
+        public int colorValue(ZenithTooltipTheme theme) {
+            return withAlpha(theme.resolveColor(color), alpha);
+        }
+    }
+
+    public enum Pattern {
+        NONE("none"),
+        DIAGONAL_LINES("diagonal_lines"),
+        GRID("grid"),
+        STARS("stars"),
+        RUNES("runes");
+
+        private static final Codec<Pattern> CODEC = codec(Pattern::decode, Pattern::serializedName);
+
+        private final String serializedName;
+
+        Pattern(String serializedName) {
+            this.serializedName = serializedName;
+        }
+
+        public String serializedName() {
+            return serializedName;
+        }
+
+        private static DataResult<Pattern> decode(String raw) {
+            String normalized = raw.toLowerCase(Locale.ROOT);
+            for (Pattern pattern : values()) {
+                if (pattern.serializedName.equals(normalized)) {
+                    return DataResult.success(pattern);
+                }
+            }
+            return DataResult.error(() -> "Unsupported tooltip background_style pattern: " + raw);
         }
     }
 
@@ -414,8 +619,8 @@ public record ZenithTooltipTheme(
             shape = shape == null ? Shape.DIAMOND : shape;
             boxSize = Math.max(16, boxSize);
 
-            // Pixel diamonds need an odd diameter so both points land symmetrically.
-            if (shape == Shape.DIAMOND && boxSize % 2 == 0) {
+            // Pixel diamonds and circles are cleaner when they can centre symmetrically.
+            if ((shape == Shape.DIAMOND || shape == Shape.CIRCLE || shape == Shape.GEM) && boxSize % 2 == 0) {
                 boxSize++;
             }
 
@@ -433,21 +638,18 @@ public record ZenithTooltipTheme(
         public int fillColor(ZenithTooltipTheme theme) {
             return withAlpha(theme.resolveColor(fill), fillAlpha);
         }
-
-        private static int withAlpha(int color, int alpha) {
-            return (alpha << 24) | (color & 0x00FFFFFF);
-        }
     }
 
     public enum Shape {
         DIAMOND("diamond"),
         SQUARE("square"),
-        NONE("none");
+        NONE("none"),
+        OCTAGON("octagon"),
+        CIRCLE("circle"),
+        GEM("gem"),
+        BRACKET("bracket");
 
-        private static final Codec<Shape> CODEC = Codec.STRING.comapFlatMap(
-                Shape::decode,
-                Shape::serializedName
-        );
+        private static final Codec<Shape> CODEC = codec(Shape::decode, Shape::serializedName);
 
         private final String serializedName;
 
@@ -461,14 +663,17 @@ public record ZenithTooltipTheme(
 
         private static DataResult<Shape> decode(String raw) {
             String normalized = raw.toLowerCase(Locale.ROOT);
-
             for (Shape shape : values()) {
                 if (shape.serializedName.equals(normalized)) {
                     return DataResult.success(shape);
                 }
             }
-
             return DataResult.error(() -> "Unsupported tooltip icon_holder shape: " + raw);
         }
     }
+
+    private static <E> Codec<E> codec(java.util.function.Function<String, DataResult<E>> decoder, java.util.function.Function<E, String> encoder) {
+        return Codec.STRING.comapFlatMap(decoder, encoder);
+    }
 }
+

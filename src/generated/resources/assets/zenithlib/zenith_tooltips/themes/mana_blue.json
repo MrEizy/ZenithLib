@@ -1,0 +1,27 @@
+{
+  "background_style": {
+    "alpha": 12,
+    "pattern": "diagonal_lines",
+    "spacing": 9
+  },
+  "badge_style": {
+    "fill_alpha": 235
+  },
+  "bar_style": {
+    "border_width": 1,
+    "track_alpha": 70
+  },
+  "colors": {},
+  "divider_style": {
+    "decoration": "double_diamond"
+  },
+  "frame_style": {
+    "corner_decoration": "bracket",
+    "corner_size": 5,
+    "inner_border": true,
+    "inner_border_alpha": 92
+  },
+  "header_style": {
+    "ornament": "small_diamonds"
+  }
+}

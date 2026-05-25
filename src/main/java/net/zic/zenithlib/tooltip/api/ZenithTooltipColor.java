@@ -27,6 +27,9 @@ public record ZenithTooltipColor(String value) {
     public static final ZenithTooltipColor POSITIVE = new ZenithTooltipColor("positive");
     public static final ZenithTooltipColor WARNING = new ZenithTooltipColor("warning");
     public static final ZenithTooltipColor NEGATIVE = new ZenithTooltipColor("negative");
+    public static final ZenithTooltipColor BACKGROUND = new ZenithTooltipColor("background");
+    public static final ZenithTooltipColor BORDER_TOP = new ZenithTooltipColor("border_top");
+    public static final ZenithTooltipColor BORDER_BOTTOM = new ZenithTooltipColor("border_bottom");
 
     public static final Codec<ZenithTooltipColor> CODEC = Codec.STRING.xmap(ZenithTooltipColor::new, ZenithTooltipColor::value);
 

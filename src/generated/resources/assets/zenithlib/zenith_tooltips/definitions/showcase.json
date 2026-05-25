@@ -1,27 +1,23 @@
 {
   "pages": [
     {
-      "title": {
-        "translate": "tooltip.zenithlib.diamond.title"
-      },
       "elements": [
         {
           "type": "title_icon",
-          "title": {
-            "translate": "tooltip.zenithlib.diamond.title"
-          },
           "subtitle": {
             "translate": "tooltip.zenithlib.diamond.header"
+          },
+          "title": {
+            "translate": "tooltip.zenithlib.diamond.title"
           }
         },
         {
           "type": "badge",
+          "background_color": "accent",
           "text": {
             "literal": "RARE MATERIAL"
           },
-          "text_color": "background",
-          "background_color": "accent",
-          "border_color": "accent"
+          "text_color": "background"
         },
         {
           "type": "text",
@@ -49,22 +45,20 @@
           },
           "right": {
             "translate": "tooltip.zenithlib.diamond.row.origin_value"
-          },
-          "right_color": "accent"
+          }
         }
-      ]
+      ],
+      "title": {
+        "translate": "tooltip.zenithlib.diamond.title"
+      }
     },
     {
-      "title": {
-        "translate": "tooltip.zenithlib.diamond.page_2.title"
-      },
       "elements": [
         {
           "type": "header",
           "text": {
             "translate": "tooltip.zenithlib.diamond.page_2.header"
-          },
-          "color": "accent"
+          }
         },
         {
           "type": "text",
@@ -73,34 +67,33 @@
           }
         },
         {
-          "type": "spacer",
-          "height": 4
+          "type": "spacer"
         },
         {
           "type": "text",
+          "color": "accent",
           "text": {
             "translate": "tooltip.zenithlib.diamond.page_2.line_2"
-          },
-          "color": "accent"
+          }
         }
-      ]
+      ],
+      "title": {
+        "translate": "tooltip.zenithlib.diamond.page_2.title"
+      }
     },
     {
-      "title": {
-        "literal": "Gauge Preview"
-      },
       "elements": [
         {
           "type": "header",
+          "color": "warning",
           "text": {
-            "literal": "Resource Bars"
-          },
-          "color": "warning"
+            "literal": "Bars"
+          }
         },
         {
           "type": "text",
           "text": {
-            "literal": "Bars support bounded values with optional custom display text."
+            "literal": "Bars support bounded values with optional custom display text. These are Placeholders"
           }
         },
         {
@@ -108,61 +101,59 @@
         },
         {
           "type": "bar",
+          "color": "positive",
           "label": {
-            "literal": "Craft Integrity"
+            "literal": "Integrity"
           },
-          "value": 78,
           "max": 100,
+          "value": 78,
           "value_text": {
             "literal": "78%"
-          },
-          "color": "positive"
+          }
         },
         {
           "type": "bar",
           "label": {
-            "literal": "Arcane Charge"
+            "literal": "Stored Qi"
           },
-          "value": 42,
           "max": 100,
-          "color": "accent"
+          "value": 42
         },
         {
           "type": "bar",
+          "color": "negative",
           "label": {
-            "literal": "Instability"
+            "literal": "Impurities"
           },
-          "value": 16,
           "max": 100,
-          "color": "negative"
+          "value": 16
         }
-      ]
+      ],
+      "title": {
+        "literal": "Gauge Preview"
+      }
     },
     {
-      "title": {
-        "literal": "Scrollable Detail Sheet"
-      },
       "elements": [
         {
           "type": "header",
           "text": {
             "literal": "Long Tooltip Preview"
-          },
-          "color": "accent"
+          }
         },
         {
           "type": "badge",
-          "text": {
-            "literal": "EXPERIMENTAL \u2022 ATTUNED"
-          },
-          "text_color": "background",
           "background_color": "warning",
-          "border_color": "warning"
+          "border_color": "warning",
+          "text": {
+            "literal": "EXPERIMENTAL • PLACEHOLDER"
+          },
+          "text_color": "background"
         },
         {
           "type": "text",
           "text": {
-            "literal": "This page deliberately exceeds the theme height. Use the mouse wheel while hovering to browse the body without losing its heading or page controls."
+            "literal": "This page exceeds the theme height. Use the mouse wheel while hovering to browse the body without losing its heading or page controls."
           }
         },
         {
@@ -170,55 +161,54 @@
         },
         {
           "type": "header",
+          "color": "text",
           "text": {
             "literal": "Attunement"
+          }
+        },
+        {
+          "type": "bar",
+          "color": "positive",
+          "label": {
+            "literal": "Alignment"
           },
-          "color": "text"
+          "max": 100,
+          "value": 91
         },
         {
           "type": "bar",
           "label": {
-            "literal": "Resonance"
+            "literal": "Stored Qi"
           },
-          "value": 91,
           "max": 100,
-          "color": "positive"
+          "value": 63
         },
         {
           "type": "bar",
+          "color": "negative",
           "label": {
-            "literal": "Stored Mana"
+            "literal": "Karma"
           },
-          "value": 63,
           "max": 100,
-          "color": "accent"
-        },
-        {
-          "type": "bar",
-          "label": {
-            "literal": "Corruption"
-          },
-          "value": 12,
-          "max": 100,
-          "color": "negative"
+          "value": 12
         },
         {
           "type": "divider"
         },
         {
           "type": "header",
+          "color": "warning",
           "text": {
             "literal": "Requirements"
-          },
-          "color": "warning"
+          }
         },
         {
           "type": "row",
           "left": {
-            "literal": "Combat Level"
+            "literal": "Cultivation Realm"
           },
           "right": {
-            "literal": "26"
+            "literal": "Golden Core"
           },
           "right_color": "positive"
         },
@@ -243,16 +233,29 @@
           "right_color": "positive"
         },
         {
+          "type": "row",
+          "left": {
+            "literal": "Intelligence"
+          },
+          "right": {
+            "literal": "92"
+          },
+          "right_color": "negative"
+        },
+        {
           "type": "divider"
         },
         {
           "type": "text",
+          "color": "muted",
           "text": {
             "literal": "Damageable converted items can display live durability bars, while authored documents can use bars for any lore or resource value."
-          },
-          "color": "muted"
+          }
         }
-      ]
+      ],
+      "title": {
+        "literal": "Scrollable Detail Sheet"
+      }
     }
   ]
 }
