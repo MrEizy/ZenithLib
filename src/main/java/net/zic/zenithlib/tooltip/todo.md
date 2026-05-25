@@ -6,18 +6,12 @@
   including selectors, element types, semantic colour tokens,
   rule priorities, reusable document references, and custom theme examples.
 
-- [ ] Add example tooltip definitions demonstrating:
+- [x] Add example tooltip definitions demonstrating:
   exact item selectors, tag selectors, namespace selectors,
   translated text, literal text, multiple pages, and custom themes.
 
 - [ ] Investigate a small data-generation helper or builder API so dependent
   mods can generate tooltip definitions and themes without hand-writing JSON.
 
-- [ ] Polish the default tooltip appearance and spacing
-
-- [ ] Expand icon-holder customization, such as configurable size,
-  alignment, border/background palette tokens, decorative shapes,
-  and optional item-count or enchantment-glint behaviour.
-
-- [ ] Test wrapping and layout behaviour with narrow themes, long
+- [x] Test wrapping and layout behaviour with narrow themes, long
   translations, many enchantments, long stat values, and multipage tooltips.

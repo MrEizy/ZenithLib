@@ -15,6 +15,15 @@
           }
         },
         {
+          "type": "badge",
+          "text": {
+            "literal": "RARE MATERIAL"
+          },
+          "text_color": "background",
+          "background_color": "accent",
+          "border_color": "accent"
+        },
+        {
           "type": "text",
           "text": {
             "translate": "tooltip.zenithlib.diamond.line_1"
@@ -78,34 +87,170 @@
     },
     {
       "title": {
-        "translate": "tooltip.zenithlib.diamond.page_3.title"
+        "literal": "Gauge Preview"
       },
       "elements": [
         {
           "type": "header",
           "text": {
-            "translate": "tooltip.zenithlib.diamond.page_3.header"
+            "literal": "Resource Bars"
           },
           "color": "warning"
         },
         {
           "type": "text",
           "text": {
-            "translate": "tooltip.zenithlib.diamond.page_3.line_1"
+            "literal": "Bars support bounded values with optional custom display text."
           }
         },
         {
           "type": "divider"
         },
         {
+          "type": "bar",
+          "label": {
+            "literal": "Craft Integrity"
+          },
+          "value": 78,
+          "max": 100,
+          "value_text": {
+            "literal": "78%"
+          },
+          "color": "positive"
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Arcane Charge"
+          },
+          "value": 42,
+          "max": 100,
+          "color": "accent"
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Instability"
+          },
+          "value": 16,
+          "max": 100,
+          "color": "negative"
+        }
+      ]
+    },
+    {
+      "title": {
+        "literal": "Scrollable Detail Sheet"
+      },
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Long Tooltip Preview"
+          },
+          "color": "accent"
+        },
+        {
+          "type": "badge",
+          "text": {
+            "literal": "EXPERIMENTAL \u2022 ATTUNED"
+          },
+          "text_color": "background",
+          "background_color": "warning",
+          "border_color": "warning"
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "This page deliberately exceeds the theme height. Use the mouse wheel while hovering to browse the body without losing its heading or page controls."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "header",
+          "text": {
+            "literal": "Attunement"
+          },
+          "color": "text"
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Resonance"
+          },
+          "value": 91,
+          "max": 100,
+          "color": "positive"
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Stored Mana"
+          },
+          "value": 63,
+          "max": 100,
+          "color": "accent"
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Corruption"
+          },
+          "value": 12,
+          "max": 100,
+          "color": "negative"
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "header",
+          "text": {
+            "literal": "Requirements"
+          },
+          "color": "warning"
+        },
+        {
           "type": "row",
           "left": {
-            "translate": "tooltip.zenithlib.diamond.page_3.row.note"
+            "literal": "Combat Level"
           },
           "right": {
-            "translate": "tooltip.zenithlib.diamond.page_3.row.note_value"
+            "literal": "26"
           },
-          "right_color": "warning"
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Strength"
+          },
+          "right": {
+            "literal": "12"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Agility"
+          },
+          "right": {
+            "literal": "8"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "Damageable converted items can display live durability bars, while authored documents can use bars for any lore or resource value."
+          },
+          "color": "muted"
         }
       ]
     }

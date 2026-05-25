@@ -31,5 +31,9 @@
   "tooltip.zenithlib.vanilla.enchantments": "Enchantments",
   "tooltip.zenithlib.vanilla.stats": "Stats",
   "tooltip.zenithlib.vanilla.details": "Details",
-  "tooltip.zenithlib.page_hint": "Page %1$s/%2$s  Press Alt for next"
+  "key.zenithlib.tooltip.previous_page": "ZenithLib: Previous Tooltip Page",
+  "key.zenithlib.tooltip.next_page": "ZenithLib: Next Tooltip Page",
+  "tooltip.zenithlib.page_hint_navigation": "Page %1$s/%2$s  %3$s / %4$s",
+  "tooltip.zenithlib.page_hint_navigation_scroll": "Page %1$s/%2$s  %3$s / %4$s  Scroll",
+  "tooltip.zenithlib.scroll_hint": "Scroll to view more"
 }

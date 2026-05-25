@@ -9,16 +9,13 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
 /**
  * Draws a prepared Zenith tooltip layout through Minecraft's client graphics extractor.
  *
- * <p>The renderer is intentionally free of rule lookup and text measurement. It draws
- * the themed background and bevelled border, wrapped titles and elements, page hints,
- * and the decorative diamond item-icon box using the already prepared layout values.
- * Keeping drawing separate from layout makes render behaviour consistent with reported
- * tooltip dimensions and reduces repeated work while hovering an item.</p>
+ * <p>The renderer is intentionally free of resource lookup and text wrapping. Long
+ * tooltip pages are drawn inside a scissored body viewport while their header and hint
+ * remain stationary; ordinary pages follow the same draw path without clipping.</p>
  */
-
 public final class ZenithTooltipRenderer {
     private static final int INNER_HIGHLIGHT = 0x33FFFFFF;
-    private static final int ICON_BOX_ALPHA = 0x55;
+    private static final int ITEM_ICON_SIZE = 16;
 
     private ZenithTooltipRenderer() {}
 
@@ -36,22 +33,46 @@ public final class ZenithTooltipRenderer {
         int textX = x + theme.padding();
         int textY = y + theme.padding();
 
-        renderLines(font, graphics, textX, textY, layout.titleLines(), theme.text(), ZenithTooltipLayout.LINE_GAP);
         if (!layout.titleLines().isEmpty()) {
-            textY += layout.titleLines().size() * (font.lineHeight + ZenithTooltipLayout.LINE_GAP)
+            renderLines(font, graphics, textX, textY, layout.titleLines(), theme.text(), ZenithTooltipLayout.LINE_GAP);
+            textY += ZenithTooltipLayout.lineBlockHeight(font, layout.titleLines().size(), ZenithTooltipLayout.LINE_GAP)
                     + ZenithTooltipLayout.TITLE_BODY_GAP;
+        } else if (layout.titleIconHeader() != null) {
+            ZenithTooltipLayout.PreparedTitleIcon titleIconHeader = layout.titleIconHeader();
+            renderTitleIcon(font, graphics, textX, textY, stack, theme, titleIconHeader);
+            textY += titleIconHeader.height();
+            if (!layout.elements().isEmpty()) {
+                textY += ZenithTooltipLayout.gapAfter(theme, titleIconHeader, layout.elements().get(0));
+            }
         }
 
-        for (ZenithTooltipLayout.PreparedElement element : layout.elements()) {
+        int bodyY = textY;
+        if (layout.scrollable()) {
+            graphics.enableScissor(
+                    textX,
+                    bodyY,
+                    textX + layout.innerWidth(),
+                    bodyY + layout.bodyViewportHeight()
+            );
+            textY -= layout.scrollOffset();
+        }
+
+        for (int i = 0; i < layout.elements().size(); i++) {
+            ZenithTooltipLayout.PreparedElement element = layout.elements().get(i);
             renderElement(font, graphics, textX, textY, stack, theme, layout.innerWidth(), element);
-            textY += element.height() + ZenithTooltipLayout.ELEMENT_GAP;
+            textY += element.height();
+
+            if (i + 1 < layout.elements().size()) {
+                textY += ZenithTooltipLayout.gapAfter(theme, element, layout.elements().get(i + 1));
+            }
         }
 
-        if (!layout.elements().isEmpty()) {
-            textY -= ZenithTooltipLayout.ELEMENT_GAP;
+        if (layout.scrollable()) {
+            graphics.disableScissor();
         }
 
-        renderPageHint(font, graphics, textX, textY, layout.pageHintLines(), theme.muted());
+        int hintY = bodyY + layout.bodyViewportHeight();
+        renderPageHint(font, graphics, textX, hintY, layout.pageHintLines(), theme.muted());
     }
 
     private static void renderBackground(
@@ -97,18 +118,23 @@ public final class ZenithTooltipRenderer {
         }
 
         if (element instanceof ZenithTooltipLayout.PreparedDivider) {
-            int dividerY = textY + ZenithTooltipLayout.SECTION_GAP / 2;
-            graphics.fill(textX, dividerY, textX + innerWidth, dividerY + 1, theme.accent());
+            renderDivider(graphics, textX, textY, innerWidth, theme);
             return;
         }
 
         if (element instanceof ZenithTooltipLayout.PreparedRow row) {
             renderLines(font, graphics, textX, textY, row.leftLines(), row.leftColor(), ZenithTooltipLayout.LINE_GAP);
-            int rightY = textY;
-            for (FormattedCharSequence line : row.rightLines()) {
-                graphics.text(font, line, textX + innerWidth - font.width(line), rightY, row.rightColor(), false);
-                rightY += font.lineHeight + ZenithTooltipLayout.LINE_GAP;
-            }
+            renderRightAlignedLines(font, graphics, textX, textY, innerWidth, row.rightLines(), row.rightColor());
+            return;
+        }
+
+        if (element instanceof ZenithTooltipLayout.PreparedBadge badge) {
+            renderBadge(font, graphics, textX, textY, theme, badge);
+            return;
+        }
+
+        if (element instanceof ZenithTooltipLayout.PreparedBar bar) {
+            renderBar(font, graphics, textX, textY, innerWidth, theme, bar);
             return;
         }
 
@@ -137,6 +163,131 @@ public final class ZenithTooltipRenderer {
         }
     }
 
+    private static void renderRightAlignedLines(
+            Font font,
+            GuiGraphicsExtractor graphics,
+            int x,
+            int y,
+            int width,
+            Iterable<FormattedCharSequence> lines,
+            int color
+    ) {
+        for (FormattedCharSequence line : lines) {
+            graphics.text(font, line, x + width - font.width(line), y, color, false);
+            y += font.lineHeight + ZenithTooltipLayout.LINE_GAP;
+        }
+    }
+
+    private static void renderDivider(
+            GuiGraphicsExtractor graphics,
+            int textX,
+            int textY,
+            int innerWidth,
+            ZenithTooltipTheme theme
+    ) {
+        ZenithTooltipTheme.DividerStyle style = theme.dividerStyle();
+        int color = style.colorValue(theme);
+        int ornamentSize = style.ornamentSize();
+        int lineY = textY + style.gapAbove() + (ornamentSize - style.thickness()) / 2;
+
+        if (style.decoration() == ZenithTooltipTheme.Decoration.NONE) {
+            graphics.fill(textX, lineY, textX + innerWidth, lineY + style.thickness(), color);
+            return;
+        }
+
+        int centerX = textX + innerWidth / 2;
+        int radius = ornamentSize / 2;
+        int leftEnd = centerX - radius - 2;
+        int rightStart = centerX + radius + 2;
+        graphics.fill(textX, lineY, leftEnd, lineY + style.thickness(), color);
+        graphics.fill(rightStart, lineY, textX + innerWidth, lineY + style.thickness(), color);
+        renderSolidDiamond(graphics, centerX, textY + style.gapAbove() + radius, radius, color);
+    }
+
+    private static void renderSolidDiamond(
+            GuiGraphicsExtractor graphics,
+            int centerX,
+            int centerY,
+            int radius,
+            int color
+    ) {
+        for (int dy = -radius; dy <= radius; dy++) {
+            int halfWidth = radius - Math.abs(dy);
+            graphics.fill(centerX - halfWidth, centerY + dy, centerX + halfWidth + 1, centerY + dy + 1, color);
+        }
+    }
+
+    private static void renderBadge(
+            Font font,
+            GuiGraphicsExtractor graphics,
+            int textX,
+            int textY,
+            ZenithTooltipTheme theme,
+            ZenithTooltipLayout.PreparedBadge badge
+    ) {
+        ZenithTooltipTheme.BadgeStyle style = theme.badgeStyle();
+        int width = 0;
+        for (FormattedCharSequence line : badge.lines()) {
+            width = Math.max(width, font.width(line));
+        }
+        width += style.horizontalPadding() * 2;
+
+        graphics.fill(textX, textY, textX + width, textY + badge.height(), style.fillColor(badge.backgroundColor()));
+        for (int inset = 0; inset < style.borderWidth() && width - inset * 2 > 0 && badge.height() - inset * 2 > 0; inset++) {
+            graphics.outline(textX + inset, textY + inset, width - inset * 2, badge.height() - inset * 2, badge.borderColor());
+        }
+        renderLines(
+                font,
+                graphics,
+                textX + style.horizontalPadding(),
+                textY + style.verticalPadding(),
+                badge.lines(),
+                badge.textColor(),
+                0
+        );
+    }
+
+    private static void renderBar(
+            Font font,
+            GuiGraphicsExtractor graphics,
+            int textX,
+            int textY,
+            int innerWidth,
+            ZenithTooltipTheme theme,
+            ZenithTooltipLayout.PreparedBar bar
+    ) {
+        ZenithTooltipTheme.BarStyle style = theme.barStyle();
+        renderLines(font, graphics, textX, textY, bar.labelLines(), theme.text(), ZenithTooltipLayout.LINE_GAP);
+        renderRightAlignedLines(font, graphics, textX, textY, innerWidth, bar.valueLines(), bar.color());
+
+        int barY = textY + bar.labelHeight() + style.labelGap();
+        graphics.fill(textX, barY, textX + innerWidth, barY + style.height(), style.trackColor(theme));
+
+        int inset = style.borderWidth();
+        int fillAreaWidth = Math.max(0, innerWidth - inset * 2);
+        int fillHeight = Math.max(0, style.height() - inset * 2);
+        int fillWidth = Math.round(fillAreaWidth * bar.progress());
+        if (fillWidth > 0 && fillHeight > 0) {
+            graphics.fill(
+                    textX + inset,
+                    barY + inset,
+                    textX + inset + fillWidth,
+                    barY + inset + fillHeight,
+                    style.fillColor(bar.color())
+            );
+        }
+
+        for (int borderInset = 0; borderInset < style.borderWidth(); borderInset++) {
+            graphics.outline(
+                    textX + borderInset,
+                    barY + borderInset,
+                    innerWidth - borderInset * 2,
+                    style.height() - borderInset * 2,
+                    style.borderColor(theme)
+            );
+        }
+    }
+
     private static void renderCenteredIcon(
             GuiGraphicsExtractor graphics,
             int textX,
@@ -145,8 +296,9 @@ public final class ZenithTooltipRenderer {
             ZenithTooltipTheme theme,
             int innerWidth
     ) {
-        int boxX = textX + innerWidth / 2 - ZenithTooltipLayout.ICON_BOX_SIZE / 2;
-        renderItemBox(graphics, boxX, textY, stack, theme);
+        ZenithTooltipTheme.IconHolder holder = theme.iconHolder();
+        int boxX = textX + innerWidth / 2 - holder.boxSize() / 2;
+        renderItemHolder(graphics, boxX, textY, stack, theme);
     }
 
     private static void renderTitleIcon(
@@ -158,40 +310,60 @@ public final class ZenithTooltipRenderer {
             ZenithTooltipTheme theme,
             ZenithTooltipLayout.PreparedTitleIcon titleIcon
     ) {
-        renderItemBox(graphics, textX, textY + 2, stack, theme);
+        ZenithTooltipTheme.IconHolder holder = theme.iconHolder();
+        renderItemHolder(graphics, textX, textY, stack, theme);
 
-        int labelX = textX + ZenithTooltipLayout.ICON_BOX_SIZE + ZenithTooltipLayout.ICON_TEXT_GAP;
-        int labelY = textY + 2;
+        int labelX = textX + holder.boxSize() + holder.gap();
+        int labelLineCount = titleIcon.titleLines().size() + titleIcon.subtitleLines().size();
+        int labelHeight = ZenithTooltipLayout.lineBlockHeight(font, labelLineCount, ZenithTooltipLayout.ICON_LINE_GAP);
+        int labelY = textY + Math.max(0, (holder.boxSize() - labelHeight) / 2);
 
         renderLines(font, graphics, labelX, labelY, titleIcon.titleLines(), theme.text(), ZenithTooltipLayout.ICON_LINE_GAP);
-        labelY += titleIcon.titleLines().size() * (font.lineHeight + ZenithTooltipLayout.ICON_LINE_GAP);
+        if (!titleIcon.titleLines().isEmpty() && !titleIcon.subtitleLines().isEmpty()) {
+            labelY += ZenithTooltipLayout.lineBlockHeight(font, titleIcon.titleLines().size(), ZenithTooltipLayout.ICON_LINE_GAP)
+                    + ZenithTooltipLayout.ICON_LINE_GAP;
+        } else {
+            labelY += ZenithTooltipLayout.lineBlockHeight(font, titleIcon.titleLines().size(), ZenithTooltipLayout.ICON_LINE_GAP);
+        }
         renderLines(font, graphics, labelX, labelY, titleIcon.subtitleLines(), theme.accent(), ZenithTooltipLayout.ICON_LINE_GAP);
     }
 
-    private static void renderItemBox(
+    private static void renderItemHolder(
             GuiGraphicsExtractor graphics,
             int boxX,
             int boxY,
             ItemStack stack,
             ZenithTooltipTheme theme
     ) {
-        renderDiamondBox(
-                graphics,
-                boxX,
-                boxY,
-                ZenithTooltipLayout.ICON_BOX_SIZE,
-                theme.accent(),
-                withAlpha(theme.background(), ICON_BOX_ALPHA)
-        );
+        ZenithTooltipTheme.IconHolder holder = theme.iconHolder();
 
-        int centerX = boxX + ZenithTooltipLayout.ICON_BOX_SIZE / 2;
-        int centerY = boxY + ZenithTooltipLayout.ICON_BOX_SIZE / 2;
+        switch (holder.shape()) {
+            case DIAMOND -> renderDiamondBox(
+                    graphics,
+                    boxX,
+                    boxY,
+                    holder.boxSize(),
+                    holder.borderWidth(),
+                    holder.borderColor(theme),
+                    holder.fillColor(theme)
+            );
+            case SQUARE -> renderSquareBox(
+                    graphics,
+                    boxX,
+                    boxY,
+                    holder.boxSize(),
+                    holder.borderWidth(),
+                    holder.borderColor(theme),
+                    holder.fillColor(theme)
+            );
+            case NONE -> {
+                // Intentionally render only the item itself for minimal themes.
+            }
+        }
 
-        graphics.item(
-                stack,
-                centerX - ZenithTooltipLayout.ICON_SIZE / 2,
-                centerY - ZenithTooltipLayout.ICON_SIZE / 2
-        );
+        int centerX = boxX + holder.boxSize() / 2;
+        int centerY = boxY + holder.boxSize() / 2;
+        graphics.item(stack, centerX - ITEM_ICON_SIZE / 2, centerY - ITEM_ICON_SIZE / 2);
     }
 
     private static void renderPageHint(
@@ -206,8 +378,19 @@ public final class ZenithTooltipRenderer {
         renderLines(font, graphics, textX, textY, lines, color, ZenithTooltipLayout.LINE_GAP);
     }
 
-    private static int withAlpha(int color, int alpha) {
-        return (alpha << 24) | (color & 0x00FFFFFF);
+    private static void renderSquareBox(
+            GuiGraphicsExtractor graphics,
+            int boxX,
+            int boxY,
+            int boxSize,
+            int borderWidth,
+            int border,
+            int fill
+    ) {
+        graphics.fill(boxX, boxY, boxX + boxSize, boxY + boxSize, fill);
+        for (int inset = 0; inset < borderWidth && boxSize - inset * 2 > 0; inset++) {
+            graphics.outline(boxX + inset, boxY + inset, boxSize - inset * 2, boxSize - inset * 2, border);
+        }
     }
 
     private static void renderDiamondBox(
@@ -215,19 +398,25 @@ public final class ZenithTooltipRenderer {
             int boxX,
             int boxY,
             int boxSize,
+            int borderWidth,
             int border,
             int fill
     ) {
-        int centerX = boxX + boxSize / 2;
+        int radius = boxSize / 2;
+        int centerX = boxX + radius;
+        int centerY = boxY + radius;
+        int innerRadius = Math.max(0, radius - borderWidth);
 
-        for (int dy = 0; dy < boxSize; dy++) {
-            int distanceFromCenter = Math.abs(dy - boxSize / 2);
-            int halfWidth = boxSize / 2 - distanceFromCenter;
-            int yLine = boxY + dy;
+        for (int dy = -radius; dy <= radius; dy++) {
+            int halfWidth = radius - Math.abs(dy);
+            int yLine = centerY + dy;
+            graphics.fill(centerX - halfWidth, yLine, centerX + halfWidth + 1, yLine + 1, border);
 
-            graphics.fill(centerX - halfWidth, yLine, centerX + halfWidth + 1, yLine + 1, fill);
-            graphics.fill(centerX - halfWidth, yLine, centerX - halfWidth + 1, yLine + 1, border);
-            graphics.fill(centerX + halfWidth, yLine, centerX + halfWidth + 1, yLine + 1, border);
+            if (Math.abs(dy) <= innerRadius) {
+                int innerHalfWidth = innerRadius - Math.abs(dy);
+                graphics.fill(centerX - innerHalfWidth, yLine, centerX + innerHalfWidth + 1, yLine + 1, fill);
+            }
         }
     }
+
 }

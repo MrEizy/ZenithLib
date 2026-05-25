@@ -54,6 +54,23 @@ public class InputHandler {
     private static final HashSet<KeyMapping> activeMapping = new HashSet<>();
     private static int ticksElapsed = 0;
 
+    /* GUI-only mappings used by multipage Zenith tooltips. */
+    public static final KeyMapping TOOLTIP_PREVIOUS_PAGE = new KeyMapping(
+            "key.zenithlib.tooltip.previous_page",
+            KeyConflictContext.GUI,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_LEFT_BRACKET,
+            KeyMapping.Category.MISC
+    );
+
+    public static final KeyMapping TOOLTIP_NEXT_PAGE = new KeyMapping(
+            "key.zenithlib.tooltip.next_page",
+            KeyConflictContext.GUI,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_RIGHT_BRACKET,
+            KeyMapping.Category.MISC
+    );
+
 
 
     public static MappingHandler registerMapping(KeyMapping mapping){
@@ -71,6 +88,9 @@ public class InputHandler {
         for(MappingHandler handler : handlers){
             event.register(handler.getMapping());
         }
+
+        event.register(TOOLTIP_PREVIOUS_PAGE);
+        event.register(TOOLTIP_NEXT_PAGE);
     }
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event){

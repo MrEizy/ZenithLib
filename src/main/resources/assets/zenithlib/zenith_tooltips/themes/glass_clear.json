@@ -12,6 +12,40 @@
   },
   "layout": {
     "padding": 6,
-    "max_width": 240
+    "max_width": 240,
+    "element_gap": 3,
+    "row_gap": 1,
+    "max_height": 220
+  },
+  "icon_holder": {
+    "shape": "none",
+    "box_size": 18,
+    "border_width": 0,
+    "gap": 7,
+    "border": "accent",
+    "fill": "background",
+    "fill_alpha": 0
+  },
+  "bar_style": {
+    "height": 3,
+    "label_gap": 2,
+    "track": "muted",
+    "track_alpha": 45,
+    "border": "border_bottom",
+    "border_width": 0,
+    "fill_alpha": 190
+  },
+  "badge_style": {
+    "horizontal_padding": 5,
+    "vertical_padding": 1,
+    "border_width": 1,
+    "fill_alpha": 70
+  },
+  "divider_style": {
+    "thickness": 1,
+    "gap_above": 2,
+    "gap_below": 3,
+    "color": "muted",
+    "decoration": "none"
   }
 }

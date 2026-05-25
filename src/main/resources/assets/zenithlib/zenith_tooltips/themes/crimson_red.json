@@ -1,14 +1,14 @@
 {
   "colors": {
-    "background": "#170820DD",
-    "border_top": "#B967FFFF",
-    "border_bottom": "#4A1B77FF",
-    "text": "#EADFFFFF",
-    "accent": "#D49AFFFF",
-    "muted": "#B49AC8FF",
-    "positive": "#85FF9AFF",
+    "background": "#21090CDD",
+    "border_top": "#FF6976FF",
+    "border_bottom": "#7F1D2AFF",
+    "text": "#FFECEEFF",
+    "accent": "#FF6976FF",
+    "muted": "#C18C94FF",
+    "positive": "#86EFA0FF",
     "warning": "#FFD166FF",
-    "negative": "#FF6B7AFF"
+    "negative": "#FF4760FF"
   },
   "layout": {
     "padding": 6,
@@ -24,22 +24,22 @@
     "gap": 8,
     "border": "accent",
     "fill": "background",
-    "fill_alpha": 96
+    "fill_alpha": 92
   },
   "bar_style": {
-    "height": 4,
+    "height": 6,
     "label_gap": 2,
     "track": "muted",
-    "track_alpha": 58,
+    "track_alpha": 74,
     "border": "border_bottom",
-    "border_width": 0,
-    "fill_alpha": 240
+    "border_width": 1,
+    "fill_alpha": 255
   },
   "badge_style": {
     "horizontal_padding": 6,
     "vertical_padding": 2,
-    "border_width": 1,
-    "fill_alpha": 205
+    "border_width": 2,
+    "fill_alpha": 235
   },
   "divider_style": {
     "thickness": 1,

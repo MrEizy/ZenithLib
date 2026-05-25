@@ -1,14 +1,14 @@
 {
   "colors": {
-    "background": "#170820DD",
-    "border_top": "#B967FFFF",
-    "border_bottom": "#4A1B77FF",
-    "text": "#EADFFFFF",
-    "accent": "#D49AFFFF",
-    "muted": "#B49AC8FF",
-    "positive": "#85FF9AFF",
-    "warning": "#FFD166FF",
-    "negative": "#FF6B7AFF"
+    "background": "#071A12DD",
+    "border_top": "#67E89AFF",
+    "border_bottom": "#16613BFF",
+    "text": "#E8FFF0FF",
+    "accent": "#67E89AFF",
+    "muted": "#83BFA0FF",
+    "positive": "#B1FF7AFF",
+    "warning": "#FFE083FF",
+    "negative": "#FF7474FF"
   },
   "layout": {
     "padding": 6,
@@ -24,28 +24,28 @@
     "gap": 8,
     "border": "accent",
     "fill": "background",
-    "fill_alpha": 96
+    "fill_alpha": 88
   },
   "bar_style": {
-    "height": 4,
+    "height": 5,
     "label_gap": 2,
     "track": "muted",
-    "track_alpha": 58,
+    "track_alpha": 60,
     "border": "border_bottom",
-    "border_width": 0,
-    "fill_alpha": 240
+    "border_width": 1,
+    "fill_alpha": 250
   },
   "badge_style": {
-    "horizontal_padding": 6,
+    "horizontal_padding": 5,
     "vertical_padding": 2,
     "border_width": 1,
-    "fill_alpha": 205
+    "fill_alpha": 215
   },
   "divider_style": {
     "thickness": 1,
     "gap_above": 2,
     "gap_below": 3,
-    "color": "accent",
-    "decoration": "diamond"
+    "color": "positive",
+    "decoration": "none"
   }
 }
