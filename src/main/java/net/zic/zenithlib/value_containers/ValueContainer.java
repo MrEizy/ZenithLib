@@ -30,7 +30,7 @@ public class ValueContainer {
     private static final StreamCodec<ByteBuf,ValueContainer> STREAM_CODEC = StreamCodec.of(ValueContainer::encode,ValueContainer::decode);
 
 
-    private static final Codec<BaseModifier> BASE_MODIFIER_CODEC = RecordCodecBuilder.create(instance->
+    public static final Codec<BaseModifier> BASE_MODIFIER_CODEC = RecordCodecBuilder.create(instance->
             instance.group(
                     Identifier.CODEC.fieldOf("id").forGetter(BaseModifier::container),
                     Codec.DOUBLE.fieldOf("value").forGetter(BaseModifier::val)
