@@ -1,0 +1,47 @@
+{
+  "background_style": {
+    "alpha": 10,
+    "color": "positive",
+    "pattern": "grid",
+    "spacing": 10
+  },
+  "badge_style": {
+    "fill_alpha": 215
+  },
+  "bar_style": {
+    "border_width": 1,
+    "fill_alpha": 250,
+    "track_alpha": 60
+  },
+  "colors": {
+    "accent": "#67E89AFF",
+    "background": "#071A12DD",
+    "border_bottom": "#16613BFF",
+    "border_top": "#67E89AFF",
+    "muted": "#83BFA0FF",
+    "negative": "#FF7474FF",
+    "positive": "#B1FF7AFF",
+    "text": "#E8FFF0FF",
+    "warning": "#FFE083FF"
+  },
+  "divider_style": {
+    "color": "positive",
+    "decoration": "dotted"
+  },
+  "frame_style": {
+    "corner_color": "positive",
+    "corner_decoration": "bracket",
+    "corner_size": 7,
+    "inner_border": true,
+    "inner_border_alpha": 92
+  },
+  "header_style": {
+    "color": "positive",
+    "ornament": "corner_ticks"
+  },
+  "icon_holder": {
+    "box_size": 29,
+    "fill_alpha": 88,
+    "shape": "circle"
+  }
+}

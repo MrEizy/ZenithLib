@@ -3,6 +3,7 @@ package net.zic.zenithlib;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.zic.zenithlib.common.ZenithAttachments;
+import net.zic.zenithlib.datagen.ZenithLibDataGenerators;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -27,6 +28,7 @@ public class ZenithLib {
 
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(ZenithLibDataGenerators::gatherData);
 
 
         NeoForge.EVENT_BUS.register(this);
@@ -35,6 +37,7 @@ public class ZenithLib {
 
         modEventBus.addListener(this::registerKeyBindings);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

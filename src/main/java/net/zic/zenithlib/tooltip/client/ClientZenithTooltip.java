@@ -13,10 +13,9 @@ import org.jspecify.annotations.Nullable;
  * tooltip payload.
  *
  * <p>This class bridges {@link ZenithTooltipData} to the client tooltip component API.
- * It reports themed dimensions, prepares a {@link ZenithTooltipLayout.Layout} during
- * height measurement, and reuses that same draw-ready layout when the image pass is
- * extracted. The short-lived cache prevents text wrapping and element measurement from
- * being repeated during a single tooltip render cycle.</p>
+ * Width and height both reuse the same prepared {@link ZenithTooltipLayout.Layout}, so
+ * content-aware sizing always matches the final render pass while avoiding repeated
+ * wrapping work during a single tooltip render cycle.</p>
  */
 
 public final class ClientZenithTooltip implements net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent {
@@ -35,25 +34,29 @@ public final class ClientZenithTooltip implements net.minecraft.client.gui.scree
 
     @Override
     public int getHeight(Font font) {
-        preparedFont = font;
-        preparedLayout = ZenithTooltipLayout.prepare(font, itemId, document);
-        return preparedLayout.height();
+        return layout(font).height();
     }
 
     @Override
     public int getWidth(Font font) {
-        return document.theme().maxWidth();
+        return layout(font).width();
     }
 
     @Override
     public void extractImage(Font font, int x, int y, int w, int h, GuiGraphicsExtractor graphics) {
-        ZenithTooltipLayout.Layout layout = preparedLayout != null && preparedFont == font
-                ? preparedLayout
-                : ZenithTooltipLayout.prepare(font, itemId, document);
-
+        ZenithTooltipLayout.Layout layout = layout(font);
         ZenithTooltipRenderer.render(font, graphics, x, y, stack, layout);
 
         preparedFont = null;
         preparedLayout = null;
+    }
+
+    private ZenithTooltipLayout.Layout layout(Font font) {
+        if (preparedLayout == null || preparedFont != font) {
+            preparedFont = font;
+            preparedLayout = ZenithTooltipLayout.prepare(font, itemId, stack, document);
+        }
+
+        return preparedLayout;
     }
 }

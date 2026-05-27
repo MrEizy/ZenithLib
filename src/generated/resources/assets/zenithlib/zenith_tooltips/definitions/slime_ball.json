@@ -1,0 +1,10 @@
+{
+  "document": "zenithlib:showcase",
+  "priority": 100,
+  "selector": {
+    "items": [
+      "minecraft:slime_ball"
+    ]
+  },
+  "theme": "zenithlib:verdant_green"
+}

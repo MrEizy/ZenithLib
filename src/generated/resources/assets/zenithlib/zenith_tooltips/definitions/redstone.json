@@ -1,0 +1,10 @@
+{
+  "document": "zenithlib:showcase",
+  "priority": 100,
+  "selector": {
+    "items": [
+      "minecraft:redstone"
+    ]
+  },
+  "theme": "zenithlib:crimson_red"
+}

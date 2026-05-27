@@ -1,14 +1,19 @@
 package net.zic.zenithlib.tooltip.client;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.Font;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.FormattedCharSequence;
+import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
+import net.zic.zenithlib.tooltip.api.element.BadgeElement;
+import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.IconElement;
@@ -25,81 +30,156 @@ import java.util.List;
 /**
  * Prepares complete, draw-ready layouts for resolved Zenith tooltip documents.
  *
- * <p>The layout pass selects the currently displayed page, handles Alt-key page
- * cycling per hovered item, wraps titles and element text, resolves semantic colours,
- * and calculates stable dimensions. It converts public document elements into internal
- * prepared element records so {@link ZenithTooltipRenderer} can draw the tooltip
- * without repeating measurement or text-splitting work.</p>
+ * <p>The layout pass selects the current page, wraps its content, prepares compact
+ * elements such as bars and badges, and constrains oversized bodies to a themed
+ * scrolling viewport. Page headers and the footer hint remain fixed while scrolling,
+ * so long tooltip pages behave like readable information cards instead of wandering
+ * off screen.</p>
  *
- * <p>Layout constants centralise spacing and icon geometry, making the visual system
- * predictable for themes while protecting narrow custom widths from unreadable output.</p>
+ * <p>A theme's maximum width is a wrapping ceiling rather than a forced box width.
+ * Its maximum height is likewise a ceiling for ordinary body content; pages exceeding
+ * it become scrollable through the screen mouse-wheel handler.</p>
  */
-
 public final class ZenithTooltipLayout {
     public static final int MIN_WRAP_WIDTH = ZenithTooltipTheme.MIN_INNER_WIDTH;
     public static final int LINE_GAP = 2;
     public static final int TITLE_BODY_GAP = 5;
     public static final int PAGE_HINT_TOP_GAP = 4;
-    public static final int ELEMENT_GAP = 3;
-    public static final int SECTION_GAP = 5;
     public static final int ROW_COLUMN_GAP = 8;
+    public static final int ROW_MIN_COLUMN_WIDTH = 34;
     public static final int ICON_LINE_GAP = 1;
+    public static final int ICON_ELEMENT_BOTTOM_GAP = 4;
+    public static final int TITLE_ICON_BOTTOM_GAP = 3;
 
-    public static final int ICON_BOX_SIZE = 28;
-    public static final int ICON_SIZE = 16;
-    public static final int ICON_TEXT_GAP = 8;
-    public static final int ICON_ELEMENT_HEIGHT = 32;
-    public static final int TITLE_ICON_BOTTOM_GAP = 8;
+    private static final int SCROLL_STEP = 12;
+    private static final long NAVIGATION_ACTIVE_WINDOW_MS = 500L;
 
-    private static boolean wasAltDown;
     private static int selectedPage;
+    private static int lastPageCount;
+    private static int scrollOffset;
+    private static int lastMaxScrollOffset;
+    private static long lastPreparedAtMs;
     private static @Nullable Identifier lastHoveredItem;
 
     private ZenithTooltipLayout() {}
 
-    public static Layout prepare(Font font, Identifier itemId, ZenithTooltipDocument document) {
+    public static Layout prepare(Font font, Identifier itemId, ItemStack stack, ZenithTooltipDocument document) {
         ZenithTooltipTheme theme = document.theme();
-        int innerWidth = safeInnerWidth(theme);
+        int maxInnerWidth = safeInnerWidth(theme);
         int pageIndex = pageIndex(itemId, document.pages().size());
         ZenithTooltipPage page = document.page(pageIndex);
-        List<FormattedCharSequence> titleLines = split(
+
+        boolean titleProvidedByHeader = hasLeadingTitleIcon(page);
+        List<FormattedCharSequence> titleLines = titleProvidedByHeader
+                ? List.of()
+                : split(
+                        font,
+                        page.title().component().copy().withStyle(ChatFormatting.BOLD),
+                        maxInnerWidth
+                );
+
+        List<PreparedElement> prepared = new ArrayList<>(page.elements().size());
+        for (ZenithTooltipElement element : page.elements()) {
+            prepared.add(prepareElement(font, theme, stack, maxInnerWidth, element));
+        }
+
+        PreparedTitleIcon titleIconHeader = null;
+        List<PreparedElement> elements = List.copyOf(prepared);
+        if (!prepared.isEmpty() && prepared.get(0) instanceof PreparedTitleIcon header) {
+            titleIconHeader = header;
+            elements = List.copyOf(prepared.subList(1, prepared.size()));
+        }
+
+        int headerHeight = measuredHeaderHeight(font, theme, titleLines, titleIconHeader, elements);
+        int bodyContentHeight = measuredBodyHeight(theme, elements);
+        boolean hasMultiplePages = document.pages().size() > 1;
+
+        List<FormattedCharSequence> pageHint = footerLines(
                 font,
-                page.title().component().copy().withStyle(ChatFormatting.BOLD),
-                innerWidth
+                maxInnerWidth,
+                hasMultiplePages,
+                pageIndex,
+                document.pages().size(),
+                false,
+                0,
+                0
+        );
+        int hintHeight = hintHeight(font, pageHint);
+        int naturalHeight = theme.padding() * 2 + headerHeight + bodyContentHeight + hintHeight;
+        boolean scrollable = naturalHeight > theme.maxHeight();
+
+        if (scrollable) {
+            pageHint = footerLines(
+                    font,
+                    maxInnerWidth,
+                    hasMultiplePages,
+                    pageIndex,
+                    document.pages().size(),
+                    true,
+                    0,
+                    1
+            );
+            hintHeight = hintHeight(font, pageHint);
+        }
+
+        int innerWidth = measuredInnerWidth(
+                font,
+                theme,
+                titleLines,
+                titleIconHeader,
+                elements,
+                pageHint,
+                maxInnerWidth
         );
 
-        List<PreparedElement> elements = new ArrayList<>(page.elements().size());
-        int bodyHeight = 0;
-
-        for (ZenithTooltipElement element : page.elements()) {
-            PreparedElement prepared = prepareElement(font, theme, innerWidth, element);
-            elements.add(prepared);
-            bodyHeight += prepared.height() + ELEMENT_GAP;
+        if (!scrollable) {
+            scrollOffset = 0;
+            lastMaxScrollOffset = 0;
+            return new Layout(
+                    theme,
+                    titleLines,
+                    titleIconHeader,
+                    elements,
+                    pageHint,
+                    innerWidth + theme.padding() * 2,
+                    naturalHeight,
+                    innerWidth,
+                    bodyContentHeight,
+                    bodyContentHeight,
+                    0,
+                    false
+            );
         }
 
-        if (!elements.isEmpty()) {
-            bodyHeight -= ELEMENT_GAP;
-        }
-
-        List<FormattedCharSequence> pageHint = document.pages().size() <= 1
-                ? List.of()
-                : split(font, pageHintComponent(pageIndex, document.pages().size()), innerWidth);
-
-        int hintHeight = pageHint.isEmpty()
-                ? 0
-                : PAGE_HINT_TOP_GAP + lineBlockHeight(font, pageHint.size(), LINE_GAP);
-
-        int titleHeight = titleLines.isEmpty() ? 0 : lineBlockHeight(font, titleLines.size(), LINE_GAP) + TITLE_BODY_GAP;
-        int height = theme.padding() * 2 + titleHeight + bodyHeight + hintHeight;
+        int minimumVisibleHeight = theme.padding() * 2 + headerHeight + hintHeight + font.lineHeight;
+        int height = Math.max(theme.maxHeight(), minimumVisibleHeight);
+        int bodyViewportHeight = Math.max(1, height - theme.padding() * 2 - headerHeight - hintHeight);
+        lastMaxScrollOffset = Math.max(0, bodyContentHeight - bodyViewportHeight);
+        scrollOffset = Math.max(0, Math.min(scrollOffset, lastMaxScrollOffset));
+        pageHint = footerLines(
+                font,
+                maxInnerWidth,
+                hasMultiplePages,
+                pageIndex,
+                document.pages().size(),
+                true,
+                scrollOffset,
+                lastMaxScrollOffset
+        );
 
         return new Layout(
                 theme,
                 titleLines,
-                List.copyOf(elements),
+                titleIconHeader,
+                elements,
                 pageHint,
-                theme.maxWidth(),
+                innerWidth + theme.padding() * 2,
                 height,
-                innerWidth
+                innerWidth,
+                bodyViewportHeight,
+                bodyContentHeight,
+                scrollOffset,
+                lastMaxScrollOffset > 0
         );
     }
 
@@ -107,9 +187,69 @@ public final class ZenithTooltipLayout {
         return Math.max(MIN_WRAP_WIDTH, theme.maxWidth() - theme.padding() * 2);
     }
 
+    static int gapAfter(ZenithTooltipTheme theme, PreparedElement current, PreparedElement next) {
+        if (current instanceof PreparedRow && next instanceof PreparedRow) {
+            return theme.rowGap();
+        }
+
+        if (current instanceof PreparedBar && next instanceof PreparedBar) {
+            return theme.rowGap() + 1;
+        }
+
+        return theme.elementGap();
+    }
+
+    private static int measuredHeaderHeight(
+            Font font,
+            ZenithTooltipTheme theme,
+            List<FormattedCharSequence> titleLines,
+            @Nullable PreparedTitleIcon titleIconHeader,
+            List<PreparedElement> bodyElements
+    ) {
+        if (!titleLines.isEmpty()) {
+            return lineBlockHeight(font, titleLines.size(), LINE_GAP) + TITLE_BODY_GAP;
+        }
+
+        if (titleIconHeader == null) {
+            return 0;
+        }
+
+        int height = titleIconHeader.height();
+        if (!bodyElements.isEmpty()) {
+            height += gapAfter(theme, titleIconHeader, bodyElements.get(0));
+        }
+        return height;
+    }
+
+    private static int measuredBodyHeight(ZenithTooltipTheme theme, List<PreparedElement> elements) {
+        int height = 0;
+
+        for (int i = 0; i < elements.size(); i++) {
+            PreparedElement element = elements.get(i);
+            height += element.height();
+
+            if (i + 1 < elements.size()) {
+                height += gapAfter(theme, element, elements.get(i + 1));
+            }
+        }
+
+        return height;
+    }
+
+    private static int hintHeight(Font font, List<FormattedCharSequence> pageHint) {
+        return pageHint.isEmpty()
+                ? 0
+                : PAGE_HINT_TOP_GAP + lineBlockHeight(font, pageHint.size(), LINE_GAP);
+    }
+
+    private static boolean hasLeadingTitleIcon(ZenithTooltipPage page) {
+        return !page.elements().isEmpty() && page.elements().get(0) instanceof TitleIconElement;
+    }
+
     private static PreparedElement prepareElement(
             Font font,
             ZenithTooltipTheme theme,
+            ItemStack stack,
             int innerWidth,
             ZenithTooltipElement element
     ) {
@@ -128,7 +268,7 @@ public final class ZenithTooltipLayout {
         }
 
         if (element instanceof DividerElement) {
-            return new PreparedDivider(SECTION_GAP + 1);
+            return new PreparedDivider(theme.dividerStyle().height());
         }
 
         if (element instanceof SpacerElement spacer) {
@@ -136,30 +276,34 @@ public final class ZenithTooltipLayout {
         }
 
         if (element instanceof RowElement row) {
-            int rightMaxWidth = Math.max(1, (innerWidth - ROW_COLUMN_GAP) / 2);
-            List<FormattedCharSequence> rightLines = split(font, row.right().component(), rightMaxWidth);
-            int rightWidth = maxLineWidth(font, rightLines);
-            int leftWidth = Math.max(1, innerWidth - rightWidth - ROW_COLUMN_GAP);
-            List<FormattedCharSequence> leftLines = split(font, row.left().component(), leftWidth);
-            int height = Math.max(
-                    lineBlockHeight(font, leftLines.size(), LINE_GAP),
-                    lineBlockHeight(font, rightLines.size(), LINE_GAP)
-            );
-            return new PreparedRow(
-                    leftLines,
-                    rightLines,
-                    row.leftColor().resolve(theme),
-                    row.rightColor().resolve(theme),
+            return prepareRow(font, theme, innerWidth, row);
+        }
+
+        if (element instanceof BadgeElement badge) {
+            ZenithTooltipTheme.BadgeStyle style = theme.badgeStyle();
+            int textWidth = Math.max(1, innerWidth - style.horizontalPadding() * 2);
+            List<FormattedCharSequence> lines = split(font, badge.text().component(), textWidth);
+            int height = lineBlockHeight(font, lines.size(), 0) + style.verticalPadding() * 2;
+            return new PreparedBadge(
+                    lines,
+                    badge.textColor().resolve(theme),
+                    badge.backgroundColor().resolve(theme),
+                    badge.borderColor().resolve(theme),
                     height
             );
         }
 
+        if (element instanceof BarElement bar) {
+            return prepareBar(font, theme, stack, innerWidth, bar);
+        }
+
         if (element instanceof IconElement) {
-            return new PreparedIcon(ICON_ELEMENT_HEIGHT);
+            return new PreparedIcon(theme.iconHolder().boxSize() + ICON_ELEMENT_BOTTOM_GAP);
         }
 
         if (element instanceof TitleIconElement titleIcon) {
-            int labelWidth = Math.max(1, innerWidth - ICON_BOX_SIZE - ICON_TEXT_GAP);
+            ZenithTooltipTheme.IconHolder holder = theme.iconHolder();
+            int labelWidth = Math.max(1, innerWidth - holder.boxSize() - holder.gap());
             List<FormattedCharSequence> titleLines = split(
                     font,
                     titleIcon.title().component().copy().withStyle(ChatFormatting.BOLD),
@@ -168,12 +312,148 @@ public final class ZenithTooltipLayout {
             List<FormattedCharSequence> subtitleLines = titleIcon.subtitle().isBlank()
                     ? List.of()
                     : split(font, titleIcon.subtitle().component(), labelWidth);
-            int labelHeight = lineBlockHeight(font, titleLines.size() + subtitleLines.size(), ICON_LINE_GAP);
-            int height = Math.max(ICON_BOX_SIZE, labelHeight) + TITLE_ICON_BOTTOM_GAP;
+            int labelLineCount = titleLines.size() + subtitleLines.size();
+            int labelHeight = lineBlockHeight(font, labelLineCount, ICON_LINE_GAP);
+            int height = Math.max(holder.boxSize(), labelHeight) + TITLE_ICON_BOTTOM_GAP;
             return new PreparedTitleIcon(titleLines, subtitleLines, height);
         }
 
         return new PreparedSpacer(0);
+    }
+
+    private static PreparedRow prepareRow(Font font, ZenithTooltipTheme theme, int innerWidth, RowElement row) {
+        int availableWidth = Math.max(2, innerWidth - ROW_COLUMN_GAP);
+        int minimumColumnWidth = Math.max(1, Math.min(ROW_MIN_COLUMN_WIDTH, availableWidth / 2));
+        int leftNaturalWidth = font.width(row.left().component());
+        int rightNaturalWidth = font.width(row.right().component());
+
+        int leftWidth;
+        int rightWidth;
+
+        if (leftNaturalWidth + rightNaturalWidth <= availableWidth) {
+            leftWidth = Math.max(1, leftNaturalWidth);
+            rightWidth = Math.max(1, rightNaturalWidth);
+        } else if (leftNaturalWidth <= availableWidth - minimumColumnWidth) {
+            leftWidth = Math.max(1, leftNaturalWidth);
+            rightWidth = Math.max(1, availableWidth - leftWidth);
+        } else if (rightNaturalWidth <= availableWidth - minimumColumnWidth) {
+            rightWidth = Math.max(1, rightNaturalWidth);
+            leftWidth = Math.max(1, availableWidth - rightWidth);
+        } else {
+            leftWidth = Math.max(minimumColumnWidth, availableWidth * 11 / 20);
+            rightWidth = Math.max(1, availableWidth - leftWidth);
+        }
+
+        List<FormattedCharSequence> leftLines = split(font, row.left().component(), leftWidth);
+        List<FormattedCharSequence> rightLines = split(font, row.right().component(), rightWidth);
+        int height = Math.max(
+                lineBlockHeight(font, leftLines.size(), LINE_GAP),
+                lineBlockHeight(font, rightLines.size(), LINE_GAP)
+        );
+
+        return new PreparedRow(
+                leftLines,
+                rightLines,
+                row.leftColor().resolve(theme),
+                row.rightColor().resolve(theme),
+                height
+        );
+    }
+
+    private static PreparedBar prepareBar(
+            Font font,
+            ZenithTooltipTheme theme,
+            ItemStack stack,
+            int innerWidth,
+            BarElement bar
+    ) {
+        ResolvedBarValue resolved = resolveBarValue(stack, bar);
+        Component value = bar.valueText().isBlank()
+                ? Component.literal(resolved.value() + " / " + resolved.max())
+                : bar.valueText().component();
+        int valueNaturalWidth = font.width(value);
+        int labelWidth = Math.max(1, innerWidth - ROW_COLUMN_GAP - valueNaturalWidth);
+        int valueWidth = Math.max(1, Math.min(innerWidth / 2, valueNaturalWidth));
+        List<FormattedCharSequence> labelLines = split(font, bar.label().component(), labelWidth);
+        List<FormattedCharSequence> valueLines = split(font, value, valueWidth);
+        int labelHeight = Math.max(
+                lineBlockHeight(font, labelLines.size(), LINE_GAP),
+                lineBlockHeight(font, valueLines.size(), LINE_GAP)
+        );
+        int height = labelHeight + theme.barStyle().labelGap() + theme.barStyle().height();
+
+        return new PreparedBar(labelLines, valueLines, bar.color().resolve(theme), resolved.progress(), labelHeight, height);
+    }
+
+    private static ResolvedBarValue resolveBarValue(ItemStack stack, BarElement bar) {
+        if (bar.source().equals("durability") || bar.source().equals("zenithlib:durability")) {
+            Integer maxDamage = stack.get(DataComponents.MAX_DAMAGE);
+            Integer damage = stack.get(DataComponents.DAMAGE);
+
+            if (maxDamage != null && damage != null && maxDamage > 0) {
+                return new ResolvedBarValue(Math.max(0, maxDamage - damage), maxDamage);
+            }
+        }
+
+        return new ResolvedBarValue(bar.value(), bar.max());
+    }
+
+    private static int measuredInnerWidth(
+            Font font,
+            ZenithTooltipTheme theme,
+            List<FormattedCharSequence> titleLines,
+            @Nullable PreparedTitleIcon titleIconHeader,
+            List<PreparedElement> elements,
+            List<FormattedCharSequence> pageHint,
+            int maxInnerWidth
+    ) {
+        int contentWidth = Math.max(maxLineWidth(font, titleLines), maxLineWidth(font, pageHint));
+
+        if (titleIconHeader != null) {
+            contentWidth = Math.max(contentWidth, preparedElementWidth(font, theme, titleIconHeader));
+        }
+
+        for (PreparedElement element : elements) {
+            contentWidth = Math.max(contentWidth, preparedElementWidth(font, theme, element));
+        }
+
+        return Math.max(MIN_WRAP_WIDTH, Math.min(maxInnerWidth, contentWidth));
+    }
+
+    private static int preparedElementWidth(Font font, ZenithTooltipTheme theme, PreparedElement element) {
+        if (element instanceof PreparedText text) {
+            return maxLineWidth(font, text.lines());
+        }
+
+        if (element instanceof PreparedHeader header) {
+            return maxLineWidth(font, header.lines());
+        }
+
+        if (element instanceof PreparedRow row) {
+            return maxLineWidth(font, row.leftLines()) + ROW_COLUMN_GAP + maxLineWidth(font, row.rightLines());
+        }
+
+        if (element instanceof PreparedBadge badge) {
+            return maxLineWidth(font, badge.lines()) + theme.badgeStyle().horizontalPadding() * 2;
+        }
+
+        if (element instanceof PreparedBar bar) {
+            return maxLineWidth(font, bar.labelLines()) + ROW_COLUMN_GAP + maxLineWidth(font, bar.valueLines());
+        }
+
+        if (element instanceof PreparedIcon) {
+            return theme.iconHolder().boxSize();
+        }
+
+        if (element instanceof PreparedTitleIcon titleIcon) {
+            int labelWidth = Math.max(
+                    maxLineWidth(font, titleIcon.titleLines()),
+                    maxLineWidth(font, titleIcon.subtitleLines())
+            );
+            return theme.iconHolder().boxSize() + theme.iconHolder().gap() + labelWidth;
+        }
+
+        return 0;
     }
 
     private static List<FormattedCharSequence> split(Font font, Component component, int width) {
@@ -182,16 +462,21 @@ public final class ZenithTooltipLayout {
 
     private static int maxLineWidth(Font font, List<FormattedCharSequence> lines) {
         int width = 0;
-
         for (FormattedCharSequence line : lines) {
             width = Math.max(width, font.width(line));
         }
-
         return width;
     }
 
-    private static int lineBlockHeight(Font font, int lineCount, int gap) {
-        return lineCount * (font.lineHeight + gap);
+    static int lineBlockHeight(Font font, int lineCount, int gap) {
+        return lineBlockHeightFromCount(lineCount, font.lineHeight, gap);
+    }
+
+    private static int lineBlockHeightFromCount(int lineCount, int lineHeight, int gap) {
+        if (lineCount <= 0) {
+            return 0;
+        }
+        return lineCount * lineHeight + (lineCount - 1) * gap;
     }
 
     private static int pageIndex(Identifier itemId, int pageCount) {
@@ -202,43 +487,131 @@ public final class ZenithTooltipLayout {
 
         if (!itemId.equals(lastHoveredItem)) {
             selectedPage = 0;
-            wasAltDown = false;
+            scrollOffset = 0;
+            lastMaxScrollOffset = 0;
             lastHoveredItem = itemId;
         }
 
-        boolean altDown = Minecraft.getInstance().hasAltDown();
+        lastPageCount = pageCount;
+        lastPreparedAtMs = Util.getMillis();
+        selectedPage = Math.min(selectedPage, pageCount - 1);
+        return selectedPage;
+    }
 
-        if (altDown && !wasAltDown) {
-            selectedPage = (selectedPage + 1) % pageCount;
+    public static boolean previousPage() {
+        return movePage(-1);
+    }
+
+    public static boolean nextPage() {
+        return movePage(1);
+    }
+
+    private static boolean movePage(int delta) {
+        if (!hasRecentlyRenderedTooltip() || lastPageCount <= 1) {
+            return false;
         }
 
-        wasAltDown = altDown;
-        return Math.min(selectedPage, pageCount - 1);
+        selectedPage = Math.floorMod(selectedPage + delta, lastPageCount);
+        scrollOffset = 0;
+        lastMaxScrollOffset = 0;
+        return true;
+    }
+
+    /**
+     * Scrolls the body of the recently rendered tooltip. The input is consumed whenever
+     * the active page has overflowing content, including at either limit, so scrolling
+     * over a tooltip does not also operate the underlying inventory screen.
+     */
+    public static boolean scrollBody(double deltaY) {
+        if (!hasRecentlyRenderedTooltip() || lastMaxScrollOffset <= 0 || deltaY == 0.0D) {
+            return false;
+        }
+
+        int wheelSteps = Math.max(1, (int) Math.ceil(Math.abs(deltaY)));
+        int delta = (deltaY > 0.0D ? -1 : 1) * SCROLL_STEP * wheelSteps;
+        scrollOffset = Math.max(0, Math.min(lastMaxScrollOffset, scrollOffset + delta));
+        return true;
+    }
+
+    private static boolean hasRecentlyRenderedTooltip() {
+        return lastHoveredItem != null && Util.getMillis() - lastPreparedAtMs <= NAVIGATION_ACTIVE_WINDOW_MS;
     }
 
     private static void resetPageState() {
         selectedPage = 0;
-        wasAltDown = false;
+        lastPageCount = 0;
+        scrollOffset = 0;
+        lastMaxScrollOffset = 0;
+        lastPreparedAtMs = 0L;
         lastHoveredItem = null;
     }
 
     private static Component pageHintComponent(int pageIndex, int pageCount) {
-        return Component.translatable("tooltip.zenithlib.page_hint", pageIndex + 1, pageCount)
+        return Component.translatable(
+                        "tooltip.zenithlib.page_hint_navigation",
+                        pageIndex + 1,
+                        pageCount,
+                        InputHandler.TOOLTIP_PREVIOUS_PAGE.getTranslatedKeyMessage(),
+                        InputHandler.TOOLTIP_NEXT_PAGE.getTranslatedKeyMessage()
+                )
                 .withStyle(ChatFormatting.DARK_GRAY);
+    }
+
+    private static List<FormattedCharSequence> footerLines(
+            Font font,
+            int width,
+            boolean hasMultiplePages,
+            int pageIndex,
+            int pageCount,
+            boolean scrollable,
+            int currentOffset,
+            int maxOffset
+    ) {
+        List<FormattedCharSequence> lines = new ArrayList<>();
+
+        if (hasMultiplePages) {
+            lines.addAll(split(font, pageHintComponent(pageIndex, pageCount), width));
+        }
+
+        if (scrollable) {
+            lines.addAll(split(font, scrollHintComponent(currentOffset, maxOffset), width));
+        }
+
+        return List.copyOf(lines);
+    }
+
+    private static Component scrollHintComponent(int currentOffset, int maxOffset) {
+        String key;
+
+        if (currentOffset <= 0) {
+            key = "tooltip.zenithlib.scroll_hint.down";
+        } else if (currentOffset >= maxOffset) {
+            key = "tooltip.zenithlib.scroll_hint.up";
+        } else {
+            key = "tooltip.zenithlib.scroll_hint.both";
+        }
+
+        return Component.translatable(key).withStyle(ChatFormatting.DARK_GRAY);
     }
 
     public record Layout(
             ZenithTooltipTheme theme,
             List<FormattedCharSequence> titleLines,
+            @Nullable PreparedTitleIcon titleIconHeader,
             List<PreparedElement> elements,
             List<FormattedCharSequence> pageHintLines,
             int width,
             int height,
-            int innerWidth
+            int innerWidth,
+            int bodyViewportHeight,
+            int bodyContentHeight,
+            int scrollOffset,
+            boolean scrollable
     ) {}
 
     public sealed interface PreparedElement
-            permits PreparedText, PreparedHeader, PreparedDivider, PreparedSpacer, PreparedRow, PreparedIcon, PreparedTitleIcon {
+            permits PreparedText, PreparedHeader, PreparedDivider, PreparedSpacer, PreparedRow,
+            PreparedIcon, PreparedTitleIcon, PreparedBadge, PreparedBar {
         int height();
     }
 
@@ -265,4 +638,32 @@ public final class ZenithTooltipLayout {
             List<FormattedCharSequence> subtitleLines,
             int height
     ) implements PreparedElement {}
+
+    public record PreparedBadge(
+            List<FormattedCharSequence> lines,
+            int textColor,
+            int backgroundColor,
+            int borderColor,
+            int height
+    ) implements PreparedElement {}
+
+    public record PreparedBar(
+            List<FormattedCharSequence> labelLines,
+            List<FormattedCharSequence> valueLines,
+            int color,
+            float progress,
+            int labelHeight,
+            int height
+    ) implements PreparedElement {}
+
+    private record ResolvedBarValue(int value, int max) {
+        private ResolvedBarValue {
+            max = Math.max(1, max);
+            value = Math.max(0, Math.min(value, max));
+        }
+
+        private float progress() {
+            return (float) value / (float) max;
+        }
+    }
 }

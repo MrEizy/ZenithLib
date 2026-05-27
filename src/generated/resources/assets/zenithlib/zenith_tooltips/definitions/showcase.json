@@ -1,0 +1,261 @@
+{
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "title_icon",
+          "subtitle": {
+            "translate": "tooltip.zenithlib.diamond.header"
+          },
+          "title": {
+            "translate": "tooltip.zenithlib.diamond.title"
+          }
+        },
+        {
+          "type": "badge",
+          "background_color": "accent",
+          "text": {
+            "literal": "RARE MATERIAL"
+          },
+          "text_color": "background"
+        },
+        {
+          "type": "text",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.line_1"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "translate": "tooltip.zenithlib.diamond.row.rarity"
+          },
+          "right": {
+            "translate": "tooltip.zenithlib.diamond.row.rarity_value"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "translate": "tooltip.zenithlib.diamond.row.origin"
+          },
+          "right": {
+            "translate": "tooltip.zenithlib.diamond.row.origin_value"
+          }
+        }
+      ],
+      "title": {
+        "translate": "tooltip.zenithlib.diamond.title"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.header"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.line_1"
+          }
+        },
+        {
+          "type": "spacer"
+        },
+        {
+          "type": "text",
+          "color": "accent",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.line_2"
+          }
+        }
+      ],
+      "title": {
+        "translate": "tooltip.zenithlib.diamond.page_2.title"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "color": "warning",
+          "text": {
+            "literal": "Bars"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "Bars support bounded values with optional custom display text. These are Placeholders"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "bar",
+          "color": "positive",
+          "label": {
+            "literal": "Integrity"
+          },
+          "max": 100,
+          "value": 78,
+          "value_text": {
+            "literal": "78%"
+          }
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Stored Qi"
+          },
+          "max": 100,
+          "value": 42
+        },
+        {
+          "type": "bar",
+          "color": "negative",
+          "label": {
+            "literal": "Impurities"
+          },
+          "max": 100,
+          "value": 16
+        }
+      ],
+      "title": {
+        "literal": "Gauge Preview"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Long Tooltip Preview"
+          }
+        },
+        {
+          "type": "badge",
+          "background_color": "warning",
+          "border_color": "warning",
+          "text": {
+            "literal": "EXPERIMENTAL • PLACEHOLDER"
+          },
+          "text_color": "background"
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "This page exceeds the theme height. Use the mouse wheel while hovering to browse the body without losing its heading or page controls."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "header",
+          "color": "text",
+          "text": {
+            "literal": "Attunement"
+          }
+        },
+        {
+          "type": "bar",
+          "color": "positive",
+          "label": {
+            "literal": "Alignment"
+          },
+          "max": 100,
+          "value": 91
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Stored Qi"
+          },
+          "max": 100,
+          "value": 63
+        },
+        {
+          "type": "bar",
+          "color": "negative",
+          "label": {
+            "literal": "Karma"
+          },
+          "max": 100,
+          "value": 12
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "header",
+          "color": "warning",
+          "text": {
+            "literal": "Requirements"
+          }
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Cultivation Realm"
+          },
+          "right": {
+            "literal": "Golden Core"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Strength"
+          },
+          "right": {
+            "literal": "12"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Agility"
+          },
+          "right": {
+            "literal": "8"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Intelligence"
+          },
+          "right": {
+            "literal": "92"
+          },
+          "right_color": "negative"
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "Damageable converted items can display live durability bars, while authored documents can use bars for any lore or resource value."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Scrollable Detail Sheet"
+      }
+    }
+  ]
+}

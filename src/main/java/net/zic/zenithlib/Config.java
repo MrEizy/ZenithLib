@@ -10,13 +10,21 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 // Demonstrates how to use Neo's config APIs
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
+
 
     public static final ModConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
             .comment("Whether to log the dirt block on common setup")
             .define("logDirtBlock", true);
 
-
     static final ModConfigSpec SPEC = BUILDER.build();
+
+    public static final ModConfigSpec.BooleanValue ENABLE_ZENITH_TOOLTIPS = CLIENT_BUILDER
+            .comment("Whether ZenithLib replaces vanilla item tooltips with themed Zenith tooltips.")
+            .translation("config.zenithlib.tooltips.enabled")
+            .define("tooltips.enabled", true);
+
+    public static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     private static boolean validateItemName(final Object obj) {
         return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(Identifier.parse(itemName));
