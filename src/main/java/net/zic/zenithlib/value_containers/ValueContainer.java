@@ -1,5 +1,7 @@
 package net.zic.zenithlib.value_containers;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -28,12 +30,22 @@ public class ValueContainer {
     private static final StreamCodec<ByteBuf,ValueContainer> STREAM_CODEC = StreamCodec.of(ValueContainer::encode,ValueContainer::decode);
 
 
+    private static final Codec<BaseModifier> BASE_MODIFIER_CODEC = RecordCodecBuilder.create(instance->
+            instance.group(
+                    Identifier.CODEC.fieldOf("id").forGetter(BaseModifier::container),
+                    Codec.DOUBLE.fieldOf("value").forGetter(BaseModifier::val)
+            ).apply(instance,BaseModifier::new)
+            );
+
     public ValueContainer(Identifier valueIdentifier,double base){
         this.valueIdentifier = valueIdentifier;
         this.base = base;
 
         calculateCachedVal();
     }
+
+    public record BaseModifier(Identifier container,double val){}
+
     public Collection<ValueContainerModifier> getAllModifiers(){
         List<ValueContainerModifier> modifiers = new ArrayList<>();
         modifiers.addAll(addBase.values());

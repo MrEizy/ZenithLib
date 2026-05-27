@@ -1,6 +1,9 @@
 package net.zic.zenithlib.stats;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+
 // CONSIDER making this datapackable
 public class Stat {
     private final Component name;
@@ -19,6 +22,7 @@ public class Stat {
         description =component;
         return this;
     }
+
 
     public StatInstance newInstance(double base){
         return new StatInstance(this,base);

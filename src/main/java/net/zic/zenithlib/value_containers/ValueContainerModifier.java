@@ -1,10 +1,14 @@
 package net.zic.zenithlib.value_containers;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.network.ByteBufHelpers;
+
+import java.util.Optional;
 
 public class ValueContainerModifier {
     private final double val;
@@ -12,6 +16,17 @@ public class ValueContainerModifier {
     private final Identifier modifierIdentifier;
     private final Identifier groupIdentifier;
 
+    public static final Codec<ValueContainerModifier> CODEC = RecordCodecBuilder.create(instance -> // Given an instance
+            instance.group(
+                    Codec.DOUBLE.fieldOf("value").forGetter(ValueContainerModifier::getVal),
+                    Codec.STRING.fieldOf("operation").forGetter((container)->container.getOperation().toString()),
+                    Identifier.CODEC.fieldOf("id").forGetter(ValueContainerModifier::getIdentifier),
+                    Identifier.CODEC.optionalFieldOf("group").forGetter((val)-> Optional.of(val.getGroupIdentifier()))
+            ).apply(instance,
+                    (value,operation,id,group)->group.map(identifier ->
+                            new ValueContainerModifier(value, ModifierOperation.valueOf(operation), id, identifier)).orElseGet(() -> new ValueContainerModifier(value, ModifierOperation.valueOf(operation), id))
+            )
+    );
     public ValueContainerModifier(double val, ModifierOperation operation, Identifier modifierIdentifier) {
         this(val,operation,modifierIdentifier,Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"default"));
     }
@@ -41,5 +56,10 @@ public class ValueContainerModifier {
         Identifier id = ByteBufHelpers.decodeIdentifier(buf);
         Identifier group = ByteBufHelpers.decodeIdentifier(buf);
         return new ValueContainerModifier(val,operation,id,group);
+    }
+
+    //copies this modifier with a new id
+    public ValueContainerModifier copy(Identifier identifier){
+        return new ValueContainerModifier(getVal(),getOperation(),identifier,getGroupIdentifier());
     }
 }
