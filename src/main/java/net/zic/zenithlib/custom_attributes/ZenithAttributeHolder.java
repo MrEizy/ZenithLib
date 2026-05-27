@@ -47,6 +47,7 @@ public class ZenithAttributeHolder {
 
 
     public void addAttribute(Holder<Attribute> attributeHolder){
+        if(hasAttribute(attributeHolder)) return;
         attributes.put(attributeHolder,new ZenithAttribute(attributeHolder,attachedEntity));
     }
 
