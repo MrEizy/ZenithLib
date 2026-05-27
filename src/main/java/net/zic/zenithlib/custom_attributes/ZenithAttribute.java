@@ -58,7 +58,7 @@ public class ZenithAttribute extends ValueContainer {
         validateAttributeValue();
     }
     public Holder<Attribute> getAttribute(){
-        return Holder.direct(Objects.requireNonNull(BuiltInRegistries.ATTRIBUTE.getValue(getIdentifier())));
+        return BuiltInRegistries.ATTRIBUTE.get(getIdentifier()).get();
     }
 
 

@@ -38,7 +38,7 @@ import java.util.Objects;
 public class ZenithAttributeHolder {
 
     private final LivingEntity attachedEntity;
-    private final HashMap<Holder<Attribute>,ZenithAttribute> attributes = new HashMap();
+    private final HashMap<Holder<Attribute>,ZenithAttribute> attributes = new HashMap<>();
 
 
     public ZenithAttributeHolder(LivingEntity attachedEntity){
