@@ -26,12 +26,12 @@ public class RegistryHelper {
         }
     }
 
-    public static <T> DataPackRegistry<T> dataPackRegistry(String key, String modId, Supplier<Codec<T>> codec){
-        return new DataPackRegistry<>(key(key,modId),codec);
+    public static <T> DataPackRegistry<T> dataPackRegistry(String namespace, String key, Supplier<Codec<T>> codec){
+        return new DataPackRegistry<>(key(namespace,key),codec);
     }
 
-    public static <T> ResourceKey<Registry<T>> key(String key,String modId){
-        return ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(modId,key));
+    public static <T> ResourceKey<Registry<T>> key(String namespace,String key){
+        return ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(namespace,key));
     }
 
 
