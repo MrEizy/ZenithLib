@@ -8,6 +8,8 @@ import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.network.ByteBufHelpers;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class ValueContainerModifier {
@@ -27,6 +29,8 @@ public class ValueContainerModifier {
                             new ValueContainerModifier(value, ModifierOperation.valueOf(operation), id, identifier)).orElseGet(() -> new ValueContainerModifier(value, ModifierOperation.valueOf(operation), id))
             )
     );
+
+    public static final Codec<Map<Identifier, List<ValueContainerModifier>>> MAP_CODEC = Codec.unboundedMap(Identifier.CODEC, ValueContainerModifier.CODEC.listOf());
     public ValueContainerModifier(double val, ModifierOperation operation, Identifier modifierIdentifier) {
         this(val,operation,modifierIdentifier,Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"default"));
     }
