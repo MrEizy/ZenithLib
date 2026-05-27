@@ -7,7 +7,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.util.FormattedCharSequence;
+import net.zic.zenithlib.Config;
 import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
@@ -15,6 +17,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
+import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.IconElement;
 import net.zic.zenithlib.tooltip.api.element.RowElement;
@@ -80,6 +83,11 @@ public final class ZenithTooltipLayout {
 
         List<PreparedElement> prepared = new ArrayList<>(page.elements().size());
         for (ZenithTooltipElement element : page.elements()) {
+            if (element instanceof EntityPreviewElement
+                    && (!Config.SHOW_SPAWN_EGG_ENTITY_PREVIEWS.get() || SpawnEggItem.getType(stack) == null)) {
+                continue;
+            }
+
             prepared.add(prepareElement(font, theme, stack, maxInnerWidth, element));
         }
 
@@ -297,6 +305,10 @@ public final class ZenithTooltipLayout {
             return prepareBar(font, theme, stack, innerWidth, bar);
         }
 
+        if (element instanceof EntityPreviewElement preview) {
+            return ZenithTooltipEntityPreviewRenderer.prepare(stack, preview, innerWidth);
+        }
+
         if (element instanceof IconElement) {
             return new PreparedIcon(theme.iconHolder().boxSize() + ICON_ELEMENT_BOTTOM_GAP);
         }
@@ -439,6 +451,10 @@ public final class ZenithTooltipLayout {
 
         if (element instanceof PreparedBar bar) {
             return maxLineWidth(font, bar.labelLines()) + ROW_COLUMN_GAP + maxLineWidth(font, bar.valueLines());
+        }
+
+        if (element instanceof PreparedEntityPreview preview) {
+            return preview.width();
         }
 
         if (element instanceof PreparedIcon) {
@@ -611,7 +627,7 @@ public final class ZenithTooltipLayout {
 
     public sealed interface PreparedElement
             permits PreparedText, PreparedHeader, PreparedDivider, PreparedSpacer, PreparedRow,
-            PreparedIcon, PreparedTitleIcon, PreparedBadge, PreparedBar {
+            PreparedIcon, PreparedTitleIcon, PreparedBadge, PreparedBar, PreparedEntityPreview {
         int height();
     }
 
@@ -632,6 +648,13 @@ public final class ZenithTooltipLayout {
     ) implements PreparedElement {}
 
     public record PreparedIcon(int height) implements PreparedElement {}
+
+    public record PreparedEntityPreview(
+            int width,
+            int height,
+            boolean rotate,
+            EntityPreviewElement.Placement placement
+    ) implements PreparedElement {}
 
     public record PreparedTitleIcon(
             List<FormattedCharSequence> titleLines,

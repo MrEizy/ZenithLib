@@ -35,5 +35,7 @@
   "key.zenithlib.tooltip.next_page": "ZenithLib: Next Tooltip Page",
   "tooltip.zenithlib.page_hint_navigation": "Page %1$s/%2$s  %3$s / %4$s",
   "tooltip.zenithlib.page_hint_navigation_scroll": "Page %1$s/%2$s  %3$s / %4$s  Scroll",
-  "tooltip.zenithlib.scroll_hint": "Scroll to view more"
+  "tooltip.zenithlib.scroll_hint": "Scroll to view more",
+  "config.zenithlib.tooltips.enabled": "Enable Zenith Tooltips",
+  "config.zenithlib.tooltips.spawn_egg_entity_previews": "Show Spawn Egg Entity Previews"
 }
