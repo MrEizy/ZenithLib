@@ -24,6 +24,11 @@ public class Config {
             .translation("config.zenithlib.tooltips.enabled")
             .define("tooltips.enabled", true);
 
+    public static final ModConfigSpec.BooleanValue SHOW_SPAWN_EGG_ENTITY_PREVIEWS = CLIENT_BUILDER
+            .comment("Whether Zenith tooltips render entity previews for spawn eggs.")
+            .translation("config.zenithlib.tooltips.spawn_egg_entity_previews")
+            .define("tooltips.spawnEggEntityPreviews", true);
+
     public static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
 
     private static boolean validateItemName(final Object obj) {

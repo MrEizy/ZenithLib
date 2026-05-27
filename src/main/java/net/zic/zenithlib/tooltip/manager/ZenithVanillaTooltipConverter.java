@@ -5,6 +5,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
@@ -14,6 +15,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
+import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
@@ -174,6 +176,10 @@ public final class ZenithVanillaTooltipConverter {
                 ZenithTooltipText.literal(itemName),
                 ZenithTooltipText.translatable("tooltip.zenithlib.vanilla.converted")
         ));
+
+        if (SpawnEggItem.getType(stack) != null) {
+            elements.add(EntityPreviewElement.automaticSpawnEggPreview());
+        }
         appendTextSection(elements, lines.overview(), ZenithTooltipColor.TEXT, false, "");
         appendStatsSection(elements, stack, lines.stats());
         appendTextSection(elements, lines.details(), DETAIL_COLOR, true, "tooltip.zenithlib.vanilla.details");

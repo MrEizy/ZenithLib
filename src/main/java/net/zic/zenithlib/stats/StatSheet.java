@@ -5,6 +5,7 @@ import net.zic.zenithlib.value_containers.ValueContainerModifier;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 public class StatSheet {
 
@@ -36,6 +37,9 @@ public class StatSheet {
         addStat(stat,-val);
     }
 
+    public Map<Stat,StatInstance> asMap(){
+        return statInstances;
+    }
 
     public StatInstance getStatInstance(Stat stat){
         return statInstances.get(stat);

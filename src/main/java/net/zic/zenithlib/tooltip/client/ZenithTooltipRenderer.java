@@ -256,6 +256,16 @@ public final class ZenithTooltipRenderer {
             return;
         }
 
+        if (element instanceof ZenithTooltipLayout.PreparedEntityPreview preview) {
+            int previewX = switch (preview.placement()) {
+                case LEFT -> textX;
+                case CENTER -> textX + Math.max(0, (innerWidth - preview.width()) / 2);
+                case RIGHT -> textX + Math.max(0, innerWidth - preview.width());
+            };
+            ZenithTooltipEntityPreviewRenderer.render(graphics, previewX, textY, stack, theme, preview);
+            return;
+        }
+
         if (element instanceof ZenithTooltipLayout.PreparedIcon) {
             renderCenteredIcon(graphics, textX, textY, stack, theme, innerWidth);
             return;
