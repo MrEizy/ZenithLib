@@ -109,6 +109,19 @@ public class ZenithAttribute extends ValueContainer {
 
         calculateCachedVal();
     }
+
+    @Override
+    public double getBaseValue() {
+        validateAttributeValue();
+        return super.getBaseValue();
+    }
+
+    @Override
+    public double getValue() {
+        validateAttributeValue();
+        return super.getValue();
+    }
+
     public void validateAttributeValue(){
         if(attachedEntity == null) return;
         var inst = attachedEntity.getAttribute(getAttribute());
