@@ -7,8 +7,8 @@ public final class ZenithLibDataGenerators {
 
     public static void gatherData(GatherDataEvent.Client event) {
 
-        // Tooltip Provider for Zenithlib, other mods that use Zenithlib can extend ZenithTooltipDataProvider
         event.createProvider(ZenithLibTooltipDataProvider::new);
+        event.createProvider(ZenithLanguageProvider::new);
 
     }
 }
