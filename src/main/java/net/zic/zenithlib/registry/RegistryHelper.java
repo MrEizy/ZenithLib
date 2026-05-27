@@ -35,12 +35,12 @@ public class RegistryHelper {
     }
 
 
-    public static <T> Registry<T> registry(String key){
-        return registry(key,"none");
+    public static <T> Registry<T> registry(String namespace,String key){
+        return registry(namespace,key,"none");
     }
-    public static <T> Registry<T> registry(String key,String defaultKey){
-        Identifier identifier = Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,key);
-        Identifier defaultIdentifier = Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,defaultKey);
+    public static <T> Registry<T> registry(String namespace,String key,String defaultKey){
+        Identifier identifier = Identifier.fromNamespaceAndPath(namespace,key);
+        Identifier defaultIdentifier = Identifier.fromNamespaceAndPath(namespace,defaultKey);
 
         ResourceKey<Registry<T>> registryKey = ResourceKey.createRegistryKey(identifier);
         return new RegistryBuilder<>(registryKey)
