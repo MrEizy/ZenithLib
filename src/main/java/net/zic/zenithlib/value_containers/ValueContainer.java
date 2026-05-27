@@ -124,6 +124,7 @@ public class ValueContainer {
             Identifier group = modifier.getGroupIdentifier();
             multiBaseByGroup.get(group).remove(modifier);
         }
+        calculateCachedVal();
     }
 
     public double getValue(){return cachedVal;}

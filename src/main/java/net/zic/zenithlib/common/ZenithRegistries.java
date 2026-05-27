@@ -11,7 +11,7 @@ import net.zic.zenithlib.stats.Stat;
 @EventBusSubscriber(modid = ZenithLib.MOD_ID)
 public class ZenithRegistries {
 
-    public static final Registry<Stat> STAT_REGISTRY = RegistryHelper.registry("stats");
+    public static final Registry<Stat> STAT_REGISTRY = RegistryHelper.registry(ZenithLib.MOD_ID,"stats");
 
 
 
