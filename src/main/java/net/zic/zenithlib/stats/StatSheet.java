@@ -12,6 +12,10 @@ public class StatSheet {
     private final HashMap<Stat,StatInstance> statInstances = new HashMap<>();
 
 
+    //mainly used for syncing
+    public void setStat(StatInstance instance){
+        statInstances.put(instance.getStat(),instance);
+    }
 
     public void addStat(Stat stat,double val){
         if(!statInstances.containsKey(stat)) statInstances.put(stat,stat.newInstance(val));
