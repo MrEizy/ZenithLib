@@ -148,11 +148,7 @@ public class ValueContainer {
         buf.writeDouble(container.base);
         ByteBufHelpers.encodeCollection(container.getAllModifiers(),buf,ValueContainerModifier::encode);
     }
-
-    public static ValueContainer decode(ByteBuf buf){
-        Identifier identifier = ByteBufHelpers.decodeIdentifier(buf);
-        double base = buf.readDouble();
-        ValueContainer container = new ValueContainer(identifier,base);
+    public static void decode(ByteBuf buf,ValueContainer container){
 
         Collection<ValueContainerModifier> modifiers = ByteBufHelpers.decodeArray(buf,ValueContainerModifier::decode);
         for(ValueContainerModifier modifier : modifiers){
@@ -160,6 +156,12 @@ public class ValueContainer {
         }
 
         container.calculateCachedVal();
+    }
+    public static ValueContainer decode(ByteBuf buf){
+        Identifier identifier = ByteBufHelpers.decodeIdentifier(buf);
+        double base = buf.readDouble();
+        ValueContainer container = new ValueContainer(identifier,base);
+        decode(buf,container);
         return container;
     }
 }
