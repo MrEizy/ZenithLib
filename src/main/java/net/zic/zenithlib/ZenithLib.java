@@ -1,9 +1,8 @@
 package net.zic.zenithlib;
 
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.zic.zenithlib.command.ZenithInspectCommand;
 import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.datagen.ZenithLibDataGenerators;
 import org.slf4j.Logger;
@@ -34,6 +33,7 @@ public class ZenithLib {
 
 
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(ZenithInspectCommand::onRegisterCommands);
 
         ZenithAttachments.register(modEventBus);
 
