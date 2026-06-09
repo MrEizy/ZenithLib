@@ -58,6 +58,7 @@ public class EntityCooldownHandler {
     public void removeCooldown(Identifier identifier){
         if(!cooldowns.containsKey(identifier)) return;
         NeoForge.EVENT_BUS.post(new CooldownEvent.Finished(entity,identifier));
+        cooldowns.remove(identifier);
     }
 
 
