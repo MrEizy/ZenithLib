@@ -3,6 +3,7 @@ package net.zic.zenithlib.common;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -19,7 +20,7 @@ public class ZenithAttachments {
 
     public static final Supplier<AttachmentType<PlayerActionManager>> ACTION_MANAGER = ATTACHMENT_TYPES.register(
             "action_manager",()-> AttachmentType.builder(
-                    (holder)-> new PlayerActionManager((ServerPlayer) holder)
+                    (holder)-> new PlayerActionManager((Player) holder)
             ).build()
     );
     public static final Supplier<AttachmentType<ZenithAttributeHolder>> ATTRIBUTE_HOLDER = ATTACHMENT_TYPES.register(

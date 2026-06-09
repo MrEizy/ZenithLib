@@ -23,13 +23,12 @@ public class PlayerActionManager {
         if(activeActions.contains(identifier)) return;
         activeActions.add(identifier);
 
-        System.out.println("action started");
+
         NeoForge.EVENT_BUS.post(new ActionEvent.Start(player,identifier));
     }
     protected void actionEnd(Identifier identifier){
         if(!activeActions.contains(identifier))return;
         activeActions.remove(identifier);
-        System.out.println("action ended");
         NeoForge.EVENT_BUS.post(new ActionEvent.End(player,identifier));
     }
     public void handleActionUpdate(Identifier identifier,boolean isDown){
