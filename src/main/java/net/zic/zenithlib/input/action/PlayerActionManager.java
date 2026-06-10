@@ -15,7 +15,7 @@ public class PlayerActionManager {
     }
 
 
-    boolean isActive(Identifier identifier){
+    public boolean isActive(Identifier identifier){
         return activeActions.contains(identifier);
     }
 

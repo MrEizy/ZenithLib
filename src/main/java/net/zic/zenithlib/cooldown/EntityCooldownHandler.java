@@ -95,7 +95,8 @@ public class EntityCooldownHandler {
     public void decode(ByteBuf buf){
         cooldowns.clear();
         ByteBufHelpers.decodeMap(
-                cooldowns,ByteBufHelpers::decodeIdentifier,
+                cooldowns,
+                ByteBufHelpers::decodeIdentifier,
                 (byteBuf)->new Cooldown(byteBuf.readInt()),
                 buf
         );
