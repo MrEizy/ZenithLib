@@ -1,9 +1,11 @@
 package net.zic.zenithlib.input.action;
 
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.input.MappingHandler;
 
 /**
@@ -25,12 +27,19 @@ public class ActionHandler extends MappingHandler {
     @Override
     public void onDown(int ticks) {
         super.onDown(ticks);
+
         ClientPacketDistributor.sendToServer(new ActionChangedPacket(identifier,true));
+        if(Minecraft.getInstance() == null || Minecraft.getInstance().player == null) return;
+        PlayerActionManager manager = Minecraft.getInstance().player.getData(ZenithAttachments.ACTION_MANAGER);
+        manager.actionStart(identifier);
     }
 
     @Override
     public void onUp(int ticks) {
         super.onUp(ticks);
         ClientPacketDistributor.sendToServer(new ActionChangedPacket(identifier,false));
+        if(Minecraft.getInstance() == null || Minecraft.getInstance().player == null) return;
+        PlayerActionManager manager = Minecraft.getInstance().player.getData(ZenithAttachments.ACTION_MANAGER);
+        manager.actionEnd(identifier);
     }
 }

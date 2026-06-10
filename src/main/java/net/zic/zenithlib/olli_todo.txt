@@ -1,0 +1,74 @@
+
+set up a tooltip registry
+
+each tooltip should be able to receive some sort of context that tells it what we are trying to render
+
+for example
+"ascension:item_name"
+
+would be a tooltip that uses the item provided and returns it's name in the context
+
+
+potentially change this to be a type
+
+so we can define a tooltip_contents as such
+source -> determines WHAT text is used
+styles -> a list of custom style types that are applied TO the text
+
+style_registry
+    ->rare,common etc
+
+ascension:rare_physique
+
+"source":"ascension:physique_name",
+"style":[
+    }
+         "type":"zenith:rgba"
+         "r":255,
+         "g":255,
+         "b":255,
+         "a":255
+    }
+]
+
+zenith:special_item_name
+"source":"zenith:item_name",
+"style":[
+    {
+        "type":"zenith:rgba_animated_gradient"
+        "r_1":255,
+        "g_1":255,
+        "b_1":255,
+        "a_1":255,
+
+        "r_2":255,
+        "g_2":255,
+        "b_2":255,
+        "a_1":255
+        time:3
+    }
+]
+
+zenith:unknown_item_name
+"source":"zenith:item_name",
+styles:[
+    {
+        "type":"zenith:jumbled"
+        "switch_time":0.5
+    },
+    {
+          "type":"zenith:rgba_animated_gradient"
+          "r_1":255,
+          "g_1":255,
+          "b_1":255,
+          "a_1":255,
+
+          "r_2":155,
+          "g_2":155,
+          "b_2":155,
+          "a_1":255,
+
+          time:3
+    }
+]
+
