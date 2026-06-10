@@ -38,9 +38,6 @@ import java.util.Optional;
  * and unmatched items are converted from their vanilla tooltip content by
  * {@link ZenithVanillaTooltipConverter}. It also selects a transparent vanilla
  * tooltip texture so only the Zenith renderer's themed frame is visible.</p>
- *
- * <p>This class owns NeoForge event wiring only; resource loading and visual rendering
- * are delegated to dedicated collaborators.</p>
  */
 
 @EventBusSubscriber(

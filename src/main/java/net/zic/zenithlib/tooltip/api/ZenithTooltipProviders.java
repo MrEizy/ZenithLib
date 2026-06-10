@@ -12,11 +12,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Small runtime provider registry for contextual Zenith tooltips.
- *
- * <p>This is intentionally separate from the JSON tooltip repository. The JSON
- * repository is for static item rules; this provider registry is for dependent
- * mods that need to inspect item components, datapack registries, capabilities,
- * or other runtime state before building a tooltip document.</p>
  */
 public final class ZenithTooltipProviders {
     private static final List<Entry> PROVIDERS = new CopyOnWriteArrayList<>();
