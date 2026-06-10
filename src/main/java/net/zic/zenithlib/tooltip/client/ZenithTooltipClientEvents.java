@@ -2,6 +2,8 @@ package net.zic.zenithlib.tooltip.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Either;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.Identifier;
@@ -18,22 +20,24 @@ import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipData;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
+import net.zic.zenithlib.tooltip.api.ZenithTooltipProviders;
 import net.zic.zenithlib.tooltip.manager.ZenithTooltipRepository;
 import net.zic.zenithlib.tooltip.manager.ZenithVanillaTooltipConverter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Client event integration layer for custom Zenith tooltips.
  *
  * <p>The subscriber registers the client-side component factory, intercepts tooltip
  * component gathering, and replaces normal tooltip output with one
- * {@link ZenithTooltipData} component. Configured items obtain documents from
- * {@link ZenithTooltipRepository}; unmatched items are converted from their vanilla
- * tooltip content by {@link ZenithVanillaTooltipConverter}. It also selects a
- * transparent vanilla tooltip texture so only the Zenith renderer's themed frame is
- * visible.</p>
+ * {@link ZenithTooltipData} component. Contextual provider documents are checked
+ * first, configured items obtain documents from {@link ZenithTooltipRepository},
+ * and unmatched items are converted from their vanilla tooltip content by
+ * {@link ZenithVanillaTooltipConverter}. It also selects a transparent vanilla
+ * tooltip texture so only the Zenith renderer's themed frame is visible.</p>
  *
  * <p>This class owns NeoForge event wiring only; resource loading and visual rendering
  * are delegated to dedicated collaborators.</p>
@@ -64,7 +68,15 @@ public final class ZenithTooltipClientEvents {
 
         Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         List<Either<FormattedText, TooltipComponent>> tooltipElements = event.getTooltipElements();
-        ZenithTooltipDocument document = ZenithTooltipRepository.get(stack, id);
+
+        Optional<RegistryAccess> registryAccess = Optional.empty();
+
+        if (Minecraft.getInstance().level != null) {
+            registryAccess = Optional.of(Minecraft.getInstance().level.registryAccess());
+        }
+
+        ZenithTooltipDocument document = ZenithTooltipProviders.create(stack, id, registryAccess)
+                .orElseGet(() -> ZenithTooltipRepository.get(stack, id));
 
         if (document == null) {
             List<FormattedText> vanillaLines = new ArrayList<>();
