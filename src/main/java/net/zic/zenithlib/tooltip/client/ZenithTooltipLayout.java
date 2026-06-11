@@ -14,6 +14,7 @@ import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
+import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
@@ -29,6 +30,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Prepares complete, draw-ready layouts for resolved Zenith tooltip documents.
@@ -62,14 +64,14 @@ public final class ZenithTooltipLayout {
     private static int scrollOffset;
     private static int lastMaxScrollOffset;
     private static long lastPreparedAtMs;
-    private static @Nullable Identifier lastHoveredItem;
 
     private ZenithTooltipLayout() {}
 
     public static Layout prepare(Font font, Identifier itemId, ItemStack stack, ZenithTooltipDocument document) {
+        ZenithTooltipAnimationState.Update animationUpdate = ZenithTooltipAnimationState.update(itemId, stack);
         ZenithTooltipTheme theme = document.theme();
         int maxInnerWidth = safeInnerWidth(theme);
-        int pageIndex = pageIndex(itemId, document.pages().size());
+        int pageIndex = pageIndex(animationUpdate.changed(), document.pages().size());
         ZenithTooltipPage page = document.page(pageIndex);
 
         boolean titleProvidedByHeader = hasLeadingTitleIcon(page);
@@ -82,13 +84,15 @@ public final class ZenithTooltipLayout {
                 );
 
         List<PreparedElement> prepared = new ArrayList<>(page.elements().size());
-        for (ZenithTooltipElement element : page.elements()) {
+        for (int elementIndex = 0; elementIndex < page.elements().size(); elementIndex++) {
+            ZenithTooltipElement element = page.elements().get(elementIndex);
             if (element instanceof EntityPreviewElement
                     && (!Config.SHOW_SPAWN_EGG_ENTITY_PREVIEWS.get() || SpawnEggItem.getType(stack) == null)) {
                 continue;
             }
 
-            prepared.add(prepareElement(font, theme, stack, maxInnerWidth, element));
+            long elementSeed = ((long) elementIndex << 32) ^ element.hashCode();
+            prepared.add(prepareElement(font, theme, stack, maxInnerWidth, element, elementSeed));
         }
 
         PreparedTitleIcon titleIconHeader = null;
@@ -155,7 +159,8 @@ public final class ZenithTooltipLayout {
                     bodyContentHeight,
                     bodyContentHeight,
                     0,
-                    false
+                    false,
+                    animationUpdate.frame()
             );
         }
 
@@ -187,7 +192,8 @@ public final class ZenithTooltipLayout {
                 bodyViewportHeight,
                 bodyContentHeight,
                 scrollOffset,
-                lastMaxScrollOffset > 0
+                lastMaxScrollOffset > 0,
+                animationUpdate.frame()
         );
     }
 
@@ -259,11 +265,18 @@ public final class ZenithTooltipLayout {
             ZenithTooltipTheme theme,
             ItemStack stack,
             int innerWidth,
-            ZenithTooltipElement element
+            ZenithTooltipElement element,
+            long elementSeed
     ) {
         if (element instanceof TextElement text) {
             List<FormattedCharSequence> lines = split(font, text.text().component(), innerWidth);
-            return new PreparedText(lines, text.color().resolve(theme), lineBlockHeight(font, lines.size(), LINE_GAP));
+            return new PreparedText(
+                    lines,
+                    text.color().resolve(theme),
+                    lineBlockHeight(font, lines.size(), LINE_GAP),
+                    text.effect(),
+                    elementSeed
+            );
         }
 
         if (element instanceof HeaderElement header) {
@@ -495,17 +508,16 @@ public final class ZenithTooltipLayout {
         return lineCount * lineHeight + (lineCount - 1) * gap;
     }
 
-    private static int pageIndex(Identifier itemId, int pageCount) {
+    private static int pageIndex(boolean hoveredTooltipChanged, int pageCount) {
         if (pageCount <= 0) {
             resetPageState();
             return 0;
         }
 
-        if (!itemId.equals(lastHoveredItem)) {
+        if (hoveredTooltipChanged) {
             selectedPage = 0;
             scrollOffset = 0;
             lastMaxScrollOffset = 0;
-            lastHoveredItem = itemId;
         }
 
         lastPageCount = pageCount;
@@ -550,7 +562,7 @@ public final class ZenithTooltipLayout {
     }
 
     private static boolean hasRecentlyRenderedTooltip() {
-        return lastHoveredItem != null && Util.getMillis() - lastPreparedAtMs <= NAVIGATION_ACTIVE_WINDOW_MS;
+        return lastPreparedAtMs != 0L && Util.getMillis() - lastPreparedAtMs <= NAVIGATION_ACTIVE_WINDOW_MS;
     }
 
     private static void resetPageState() {
@@ -559,7 +571,6 @@ public final class ZenithTooltipLayout {
         scrollOffset = 0;
         lastMaxScrollOffset = 0;
         lastPreparedAtMs = 0L;
-        lastHoveredItem = null;
     }
 
     private static Component pageHintComponent(int pageIndex, int pageCount) {
@@ -622,7 +633,8 @@ public final class ZenithTooltipLayout {
             int bodyViewportHeight,
             int bodyContentHeight,
             int scrollOffset,
-            boolean scrollable
+            boolean scrollable,
+            ZenithTooltipAnimationState.Frame animationFrame
     ) {}
 
     public sealed interface PreparedElement
@@ -631,7 +643,13 @@ public final class ZenithTooltipLayout {
         int height();
     }
 
-    public record PreparedText(List<FormattedCharSequence> lines, int color, int height) implements PreparedElement {}
+    public record PreparedText(
+            List<FormattedCharSequence> lines,
+            int color,
+            int height,
+            Optional<ZenithTooltipTextEffect> effect,
+            long animationSeed
+    ) implements PreparedElement {}
 
     public record PreparedHeader(List<FormattedCharSequence> lines, int color, int height) implements PreparedElement {}
 

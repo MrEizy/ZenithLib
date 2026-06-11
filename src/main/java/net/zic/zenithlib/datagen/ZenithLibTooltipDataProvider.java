@@ -6,17 +6,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
 import net.zic.zenithlib.tooltip.datagen.ZenithTooltipDataProvider;
 
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.badge;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.bar;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.divider;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.header;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.literal;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.page;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.row;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.spacer;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.text;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.titleIcon;
-import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.translated;
+import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.*;
 
 /*
 A temporary setup that just generates the showcase tooltips I made, and the themes.
@@ -60,6 +50,8 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                 .page(page(translated("tooltip.zenithlib.diamond.page_2.title"))
                         .add(header(translated("tooltip.zenithlib.diamond.page_2.header"), ZenithTooltipColor.ACCENT))
                         .add(text(translated("tooltip.zenithlib.diamond.page_2.line_1")))
+                        .add(text(literal("Sometimes I do not care. Sometimes I wish to tell them this world they take for truth is merely an illusion, and that they see so little of reality in their long dream."),
+                                ZenithTooltipColor.TEXT, scrambleReveal(0.55F, 20)))
                         .add(spacer(4))
                         .add(text(translated("tooltip.zenithlib.diamond.page_2.line_2"), ZenithTooltipColor.ACCENT)))
                 .page(page(literal("Gauge Preview"))

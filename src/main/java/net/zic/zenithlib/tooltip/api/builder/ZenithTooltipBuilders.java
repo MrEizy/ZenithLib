@@ -3,6 +3,8 @@ package net.zic.zenithlib.tooltip.api.builder;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
+import net.zic.zenithlib.tooltip.api.animation.ScrambleRevealTextEffect;
+import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
@@ -55,6 +57,36 @@ public final class ZenithTooltipBuilders {
 
     public static TextElement text(ZenithTooltipText text, ZenithTooltipColor color) {
         return new TextElement(text, color);
+    }
+
+    public static TextElement text(
+            ZenithTooltipText text,
+            ZenithTooltipColor color,
+            ZenithTooltipTextEffect effect
+    ) {
+        return TextElement.animated(text, color, effect);
+    }
+
+    public static ScrambleRevealTextEffect scrambleReveal(float reveal, int speed) {
+        return new ScrambleRevealTextEffect(
+                reveal,
+                speed,
+                ScrambleRevealTextEffect.Mode.SCATTERED,
+                ScrambleRevealTextEffect.DEFAULT_GLYPHS
+        );
+    }
+
+    public static ScrambleRevealTextEffect scrambleReveal(
+            float reveal,
+            int speed,
+            ScrambleRevealTextEffect.Mode mode
+    ) {
+        return new ScrambleRevealTextEffect(
+                reveal,
+                speed,
+                mode,
+                ScrambleRevealTextEffect.DEFAULT_GLYPHS
+        );
     }
 
     public static HeaderElement header(ZenithTooltipText text) {

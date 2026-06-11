@@ -70,7 +70,17 @@ public final class ZenithTooltipRenderer {
 
         for (int i = 0; i < layout.elements().size(); i++) {
             ZenithTooltipLayout.PreparedElement element = layout.elements().get(i);
-            renderElement(font, graphics, textX, textY, stack, theme, layout.innerWidth(), element);
+            renderElement(
+                    font,
+                    graphics,
+                    textX,
+                    textY,
+                    stack,
+                    theme,
+                    layout.innerWidth(),
+                    element,
+                    layout.animationFrame()
+            );
             textY += element.height();
 
             if (i + 1 < layout.elements().size()) {
@@ -214,10 +224,20 @@ public final class ZenithTooltipRenderer {
             ItemStack stack,
             ZenithTooltipTheme theme,
             int innerWidth,
-            ZenithTooltipLayout.PreparedElement element
+            ZenithTooltipLayout.PreparedElement element,
+            ZenithTooltipAnimationState.Frame animationFrame
     ) {
         if (element instanceof ZenithTooltipLayout.PreparedText text) {
-            renderLines(font, graphics, textX, textY, text.lines(), text.color(), ZenithTooltipLayout.LINE_GAP);
+            List<FormattedCharSequence> lines = text.effect()
+                    .map(effect -> ZenithTooltipTextAnimator.apply(
+                            font,
+                            text.lines(),
+                            effect,
+                            animationFrame,
+                            text.animationSeed()
+                    ))
+                    .orElse(text.lines());
+            renderLines(font, graphics, textX, textY, lines, text.color(), ZenithTooltipLayout.LINE_GAP);
             return;
         }
 
