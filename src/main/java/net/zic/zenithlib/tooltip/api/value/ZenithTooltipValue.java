@@ -2,18 +2,25 @@ package net.zic.zenithlib.tooltip.api.value;
 
 import net.minecraft.network.chat.Component;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
  * Neutral runtime value returned by a registered tooltip source.
  *
- * <p>Value sources describe data, while authored tooltip elements decide how that data
- * is presented. The initial built-in forms cover text and bounded integer progress;
- * additional generic value forms can be added without teaching the renderer about a
- * dependent mod's gameplay concepts.</p>
+ * <p>Value sources describe data, while tooltip elements decide how that data
+ * is presented.</p>
  */
 public interface ZenithTooltipValue {
+    enum Tone {
+        POSITIVE,
+        NEGATIVE,
+        NEUTRAL,
+        SPECIAL
+    }
+
     record Text(Component component) implements ZenithTooltipValue {
         public Text {
             Objects.requireNonNull(component, "component");
@@ -53,6 +60,45 @@ public interface ZenithTooltipValue {
         }
     }
 
+    record TextList(List<Component> entries) implements ZenithTooltipValue {
+        public TextList {
+            Objects.requireNonNull(entries, "entries");
+            entries = copyComponents(entries);
+        }
+
+        @Override
+        public List<Component> entries() {
+            return copyComponents(entries);
+        }
+    }
+
+    record Row(Component left, Component right, Tone tone) {
+        public Row {
+            Objects.requireNonNull(left, "left");
+            Objects.requireNonNull(right, "right");
+            left = left.copy();
+            right = right.copy();
+            tone = tone == null ? Tone.NEUTRAL : tone;
+        }
+
+        @Override
+        public Component left() {
+            return left.copy();
+        }
+
+        @Override
+        public Component right() {
+            return right.copy();
+        }
+    }
+
+    record Rows(List<Row> entries) implements ZenithTooltipValue {
+        public Rows {
+            Objects.requireNonNull(entries, "entries");
+            entries = List.copyOf(entries);
+        }
+    }
+
     static Text text(Component component) {
         return new Text(component);
     }
@@ -63,5 +109,23 @@ public interface ZenithTooltipValue {
 
     static Progress progress(int value, int max, Component displayText) {
         return new Progress(value, max, displayText);
+    }
+
+    static TextList textList(Collection<Component> entries) {
+        return new TextList(List.copyOf(entries));
+    }
+
+    static Rows rows(Collection<Row> entries) {
+        return new Rows(List.copyOf(entries));
+    }
+
+    static Row row(Component left, Component right, Tone tone) {
+        return new Row(left, right, tone);
+    }
+
+    private static List<Component> copyComponents(Collection<Component> components) {
+        return components.stream()
+                .<Component>map(Component::copy)
+                .toList();
     }
 }

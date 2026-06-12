@@ -7,6 +7,7 @@ import net.zic.zenithlib.tooltip.api.animation.ScrambleRevealTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
+import net.zic.zenithlib.tooltip.api.element.CollectionElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.IconElement;
@@ -17,11 +18,7 @@ import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValueSources;
 
 /**
- * Compact factory helpers for authoring Zenith tooltip resources in Java.
- *
- * <p>The returned objects are the same immutable API records encoded by the runtime
- * codecs. These helpers are intended for datagen and do not register runtime-only
- * tooltip state.</p>
+ * Compact factory helpers for Zenith tooltip resources in Java.
  */
 public final class ZenithTooltipBuilders {
     private static final ZenithTooltipText EMPTY_TEXT = ZenithTooltipText.literal("");
@@ -40,17 +37,14 @@ public final class ZenithTooltipBuilders {
         return ZenithTooltipText.translatable(key);
     }
 
-    /** Creates text whose runtime value is supplied by a registered source. */
     public static ZenithTooltipText sourced(Identifier source) {
         return ZenithTooltipText.source(source);
     }
 
-    /** Creates text whose runtime value is supplied by a source identifier. */
     public static ZenithTooltipText sourced(String source) {
         return ZenithTooltipText.source(source);
     }
 
-    /** Creates text whose runtime value is supplied by a namespaced source. */
     public static ZenithTooltipText sourced(String namespace, String path) {
         return sourced(identifier(namespace, path));
     }
@@ -150,12 +144,10 @@ public final class ZenithTooltipBuilders {
         return new TitleIconElement(title, subtitle);
     }
 
-    /** Creates an accent-filled badge with background-coloured text. */
     public static BadgeElement badge(ZenithTooltipText text) {
         return badge(text, ZenithTooltipColor.ACCENT);
     }
 
-    /** Creates a filled badge whose border shares the supplied background colour. */
     public static BadgeElement badge(ZenithTooltipText text, ZenithTooltipColor backgroundColor) {
         return new BadgeElement(text, ZenithTooltipColor.BACKGROUND, backgroundColor, backgroundColor);
     }
@@ -202,6 +194,34 @@ public final class ZenithTooltipBuilders {
             ZenithTooltipColor color
     ) {
         return BarElement.dynamic(label, source, color);
+    }
+
+    public static CollectionElement dynamicBadges(
+            Identifier source,
+            ZenithTooltipText header
+    ) {
+        return CollectionElement.badges(source.toString(), header);
+    }
+
+    public static CollectionElement dynamicBadges(
+            String source,
+            ZenithTooltipText header
+    ) {
+        return CollectionElement.badges(source, header);
+    }
+
+    public static CollectionElement dynamicRows(
+            Identifier source,
+            ZenithTooltipText header
+    ) {
+        return CollectionElement.rows(source.toString(), header);
+    }
+
+    public static CollectionElement dynamicRows(
+            String source,
+            ZenithTooltipText header
+    ) {
+        return CollectionElement.rows(source, header);
     }
 
     public static BarElement durabilityBar(ZenithTooltipText label, ZenithTooltipColor color) {
