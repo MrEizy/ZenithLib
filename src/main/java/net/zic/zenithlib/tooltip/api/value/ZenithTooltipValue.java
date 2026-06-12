@@ -111,10 +111,6 @@ public interface ZenithTooltipValue {
         return new Progress(value, max, displayText);
     }
 
-    static TextList textList(Collection<Component> entries) {
-        return new TextList(List.copyOf(entries));
-    }
-
     static Rows rows(Collection<Row> entries) {
         return new Rows(List.copyOf(entries));
     }
@@ -123,7 +119,13 @@ public interface ZenithTooltipValue {
         return new Row(left, right, tone);
     }
 
-    private static List<Component> copyComponents(Collection<Component> components) {
+    static TextList textList(Collection<? extends Component> entries) {
+        return new TextList(copyComponents(entries));
+    }
+
+    private static List<Component> copyComponents(
+            Collection<? extends Component> components
+    ) {
         return components.stream()
                 .<Component>map(Component::copy)
                 .toList();
