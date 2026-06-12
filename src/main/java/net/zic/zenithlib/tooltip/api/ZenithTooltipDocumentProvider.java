@@ -7,8 +7,13 @@ import net.minecraft.world.item.ItemStack;
 import java.util.Optional;
 
 /**
- * Runtime hook for mods that want to supply a Zenith tooltip document from
- * context that is not known to ZenithLib's normal resource-pack tooltip rules.
+ * Original runtime hook for mods that supply a Zenith tooltip document from context
+ * not known to ordinary resource-pack rules.
+ *
+ * <p>This interface remains source-compatible for existing integrations. Providers
+ * that need to attach a registry subject for dynamic value sources should implement
+ * {@link ZenithContextualTooltipDocumentProvider} and register it through
+ * {@link ZenithTooltipProviders#registerContextual(Identifier, ZenithContextualTooltipDocumentProvider)}.</p>
  */
 @FunctionalInterface
 public interface ZenithTooltipDocumentProvider {

@@ -14,6 +14,7 @@ import net.zic.zenithlib.tooltip.api.element.RowElement;
 import net.zic.zenithlib.tooltip.api.element.SpacerElement;
 import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
+import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValueSources;
 
 /**
  * Compact factory helpers for authoring Zenith tooltip resources in Java.
@@ -37,6 +38,21 @@ public final class ZenithTooltipBuilders {
 
     public static ZenithTooltipText translated(String key) {
         return ZenithTooltipText.translatable(key);
+    }
+
+    /** Creates text whose runtime value is supplied by a registered source. */
+    public static ZenithTooltipText sourced(Identifier source) {
+        return ZenithTooltipText.source(source);
+    }
+
+    /** Creates text whose runtime value is supplied by a source identifier. */
+    public static ZenithTooltipText sourced(String source) {
+        return ZenithTooltipText.source(source);
+    }
+
+    /** Creates text whose runtime value is supplied by a namespaced source. */
+    public static ZenithTooltipText sourced(String namespace, String path) {
+        return sourced(identifier(namespace, path));
     }
 
     public static ZenithTooltipColor color(String tokenOrHex) {
@@ -180,7 +196,15 @@ public final class ZenithTooltipBuilders {
         return BarElement.dynamic(label, source, color);
     }
 
+    public static BarElement dynamicBar(
+            ZenithTooltipText label,
+            Identifier source,
+            ZenithTooltipColor color
+    ) {
+        return BarElement.dynamic(label, source, color);
+    }
+
     public static BarElement durabilityBar(ZenithTooltipText label, ZenithTooltipColor color) {
-        return dynamicBar(label, "durability", color);
+        return dynamicBar(label, ZenithTooltipValueSources.DURABILITY, color);
     }
 }

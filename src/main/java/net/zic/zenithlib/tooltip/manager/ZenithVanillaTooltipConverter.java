@@ -20,6 +20,7 @@ import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
+import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValueSources;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -218,7 +219,7 @@ public final class ZenithVanillaTooltipConverter {
         if (hasDurability(stack)) {
             elements.add(BarElement.dynamic(
                     ZenithTooltipText.translatable("tooltip.zenithlib.vanilla.durability"),
-                    "durability",
+                    ZenithTooltipValueSources.DURABILITY,
                     ZenithTooltipColor.POSITIVE
             ));
         }

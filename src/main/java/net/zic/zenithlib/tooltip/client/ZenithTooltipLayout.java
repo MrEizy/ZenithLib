@@ -3,7 +3,6 @@ package net.zic.zenithlib.tooltip.client;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.Font;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -315,7 +314,7 @@ public final class ZenithTooltipLayout {
         }
 
         if (element instanceof BarElement bar) {
-            return prepareBar(font, theme, stack, innerWidth, bar);
+            return prepareBar(font, theme, innerWidth, bar);
         }
 
         if (element instanceof EntityPreviewElement preview) {
@@ -388,11 +387,10 @@ public final class ZenithTooltipLayout {
     private static PreparedBar prepareBar(
             Font font,
             ZenithTooltipTheme theme,
-            ItemStack stack,
             int innerWidth,
             BarElement bar
     ) {
-        ResolvedBarValue resolved = resolveBarValue(stack, bar);
+        ResolvedBarValue resolved = resolveBarValue(bar);
         Component value = bar.valueText().isBlank()
                 ? Component.literal(resolved.value() + " / " + resolved.max())
                 : bar.valueText().component();
@@ -410,16 +408,7 @@ public final class ZenithTooltipLayout {
         return new PreparedBar(labelLines, valueLines, bar.color().resolve(theme), resolved.progress(), labelHeight, height);
     }
 
-    private static ResolvedBarValue resolveBarValue(ItemStack stack, BarElement bar) {
-        if (bar.source().equals("durability") || bar.source().equals("zenithlib:durability")) {
-            Integer maxDamage = stack.get(DataComponents.MAX_DAMAGE);
-            Integer damage = stack.get(DataComponents.DAMAGE);
-
-            if (maxDamage != null && damage != null && maxDamage > 0) {
-                return new ResolvedBarValue(Math.max(0, maxDamage - damage), maxDamage);
-            }
-        }
-
+    private static ResolvedBarValue resolveBarValue(BarElement bar) {
         return new ResolvedBarValue(bar.value(), bar.max());
     }
 

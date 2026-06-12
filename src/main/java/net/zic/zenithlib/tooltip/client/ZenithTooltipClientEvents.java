@@ -7,6 +7,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
@@ -20,8 +21,11 @@ import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipData;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
+import net.zic.zenithlib.tooltip.api.ZenithTooltipProviderResult;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipProviders;
+import net.zic.zenithlib.tooltip.api.context.ZenithTooltipContext;
 import net.zic.zenithlib.tooltip.manager.ZenithTooltipRepository;
+import net.zic.zenithlib.tooltip.manager.ZenithTooltipResolver;
 import net.zic.zenithlib.tooltip.manager.ZenithVanillaTooltipConverter;
 
 import java.util.ArrayList;
@@ -72,7 +76,15 @@ public final class ZenithTooltipClientEvents {
             registryAccess = Optional.of(Minecraft.getInstance().level.registryAccess());
         }
 
-        ZenithTooltipDocument document = ZenithTooltipProviders.create(stack, id, registryAccess)
+        Optional<Player> player = Optional.ofNullable((Player) Minecraft.getInstance().player);
+        ZenithTooltipContext baseContext = ZenithTooltipContext.of(stack, id, registryAccess, player);
+        Optional<ZenithTooltipProviderResult> provided = ZenithTooltipProviders.create(baseContext);
+
+        ZenithTooltipContext resolutionContext = provided
+                .map(ZenithTooltipProviderResult::context)
+                .orElse(baseContext);
+        ZenithTooltipDocument document = provided
+                .map(ZenithTooltipProviderResult::document)
                 .orElseGet(() -> ZenithTooltipRepository.get(stack, id));
 
         if (document == null) {
@@ -85,8 +97,8 @@ public final class ZenithTooltipClientEvents {
             document = ZenithVanillaTooltipConverter.convert(stack, vanillaLines);
         }
 
+        document = ZenithTooltipResolver.resolve(document, resolutionContext);
         tooltipElements.clear();
-
         tooltipElements.add(Either.right(new ZenithTooltipData(id, stack.copy(), document)));
     }
 

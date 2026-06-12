@@ -3,6 +3,7 @@ package net.zic.zenithlib.tooltip.api.element;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 
@@ -10,10 +11,9 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
  * Labelled horizontal progress/value bar for durability, charge, mana, affinity,
  * upgrade progress, or other bounded numerical values.
  *
- * <p>Bars may be authored with fixed {@code value}/{@code max} data, or bind to a
- * runtime item-stack value through {@code source}. ZenithLib currently resolves the
- * built-in {@code durability} source; namespaced providers can be added later without
- * replacing the JSON shape used by resource packs.</p>
+ * <p>Bars may be authored with fixed {@code value}/{@code max} data or bind to a
+ * registered runtime value through {@code source}. Source-backed bars are converted to
+ * fixed bars by the tooltip resolution pass before layout.</p>
  */
 public record BarElement(
         ZenithTooltipText label,
@@ -51,8 +51,20 @@ public record BarElement(
         this(label, value, max, valueText, color, "");
     }
 
-    public static BarElement dynamic(ZenithTooltipText label, String source, ZenithTooltipColor color) {
+    public static BarElement dynamic(
+            ZenithTooltipText label,
+            String source,
+            ZenithTooltipColor color
+    ) {
         return new BarElement(label, 0, 1, ZenithTooltipText.literal(""), color, source);
+    }
+
+    public static BarElement dynamic(
+            ZenithTooltipText label,
+            Identifier source,
+            ZenithTooltipColor color
+    ) {
+        return dynamic(label, source.toString(), color);
     }
 
     public boolean isDynamic() {
