@@ -96,6 +96,76 @@
       "elements": [
         {
           "type": "header",
+          "text": {
+            "literal": "Living Lettering"
+          }
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "rainbow"
+          },
+          "text": {
+            "literal": "A full-spectrum gradient travels through every glyph."
+          }
+        },
+        {
+          "type": "text",
+          "color": "accent",
+          "effect": {
+            "type": "wave"
+          },
+          "text": {
+            "literal": "Each letter takes its turn hopping through the wave."
+          }
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "stack",
+            "effects": [
+              {
+                "type": "rainbow",
+                "period": 2000,
+                "spread": 0.055
+              },
+              {
+                "type": "wave",
+                "period": 850,
+                "wavelength": 6.0
+              }
+            ]
+          },
+          "text": {
+            "literal": "Prismatic resonance"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "rainbow",
+            "max_hue": 0.82,
+            "min_hue": 0.52,
+            "mode": "ping_pong",
+            "period": 2600,
+            "spread": 0.035
+          },
+          "text": {
+            "literal": "A bounded hue range recreates the old ping-pong gradient."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Text Animation Lab"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
           "color": "warning",
           "text": {
             "literal": "Bars"

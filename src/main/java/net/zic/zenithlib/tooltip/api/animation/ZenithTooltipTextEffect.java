@@ -5,20 +5,24 @@ import com.mojang.serialization.MapCodec;
 
 /**
  * Base type for serialisable effects applied to ordinary Zenith tooltip text.
- *
- * <p>Effects alter only the rendered glyphs. Tooltip wrapping and measurement still
- * use the final, fully readable text so animations cannot resize or reflow the card.</p>
  */
-public sealed interface ZenithTooltipTextEffect permits ScrambleRevealTextEffect {
+public sealed interface ZenithTooltipTextEffect
+        permits ScrambleRevealTextEffect, RainbowTextEffect, WaveTextEffect, TextEffectStack {
     MapCodec<? extends ZenithTooltipTextEffect> codec();
 
     Codec<ZenithTooltipTextEffect> CODEC = Codec.STRING.dispatch(
             "type",
             effect -> switch (effect) {
                 case ScrambleRevealTextEffect ignored -> "scramble_reveal";
+                case RainbowTextEffect ignored -> "rainbow";
+                case WaveTextEffect ignored -> "wave";
+                case TextEffectStack ignored -> "stack";
             },
             type -> switch (type) {
                 case "scramble_reveal" -> ScrambleRevealTextEffect.CODEC;
+                case "rainbow" -> RainbowTextEffect.CODEC;
+                case "wave" -> WaveTextEffect.CODEC;
+                case "stack" -> TextEffectStack.CODEC;
                 default -> throw new IllegalArgumentException("Unknown Zenith tooltip text effect type: " + type);
             }
     );

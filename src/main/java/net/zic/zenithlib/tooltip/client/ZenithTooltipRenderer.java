@@ -228,16 +228,22 @@ public final class ZenithTooltipRenderer {
             ZenithTooltipAnimationState.Frame animationFrame
     ) {
         if (element instanceof ZenithTooltipLayout.PreparedText text) {
-            List<FormattedCharSequence> lines = text.effect()
-                    .map(effect -> ZenithTooltipTextAnimator.apply(
-                            font,
-                            text.lines(),
-                            effect,
-                            animationFrame,
-                            text.animationSeed()
-                    ))
-                    .orElse(text.lines());
-            renderLines(font, graphics, textX, textY, lines, text.color(), ZenithTooltipLayout.LINE_GAP);
+            if (text.effect().isPresent()) {
+                ZenithTooltipTextAnimator.render(
+                        font,
+                        graphics,
+                        textX,
+                        textY + text.animationPadding(),
+                        text.lines(),
+                        text.color(),
+                        ZenithTooltipLayout.LINE_GAP,
+                        text.effect().orElseThrow(),
+                        animationFrame,
+                        text.animationSeed()
+                );
+            } else {
+                renderLines(font, graphics, textX, textY, text.lines(), text.color(), ZenithTooltipLayout.LINE_GAP);
+            }
             return;
         }
 

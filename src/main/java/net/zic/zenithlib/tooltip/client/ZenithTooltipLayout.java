@@ -269,11 +269,15 @@ public final class ZenithTooltipLayout {
     ) {
         if (element instanceof TextElement text) {
             List<FormattedCharSequence> lines = split(font, text.text().component(), innerWidth);
+            int animationPadding = text.effect()
+                    .map(ZenithTooltipTextAnimator::verticalPadding)
+                    .orElse(0);
             return new PreparedText(
                     lines,
                     text.color().resolve(theme),
-                    lineBlockHeight(font, lines.size(), LINE_GAP),
+                    lineBlockHeight(font, lines.size(), LINE_GAP) + animationPadding * 2,
                     text.effect(),
+                    animationPadding,
                     elementSeed
             );
         }
@@ -637,6 +641,7 @@ public final class ZenithTooltipLayout {
             int color,
             int height,
             Optional<ZenithTooltipTextEffect> effect,
+            int animationPadding,
             long animationSeed
     ) implements PreparedElement {}
 

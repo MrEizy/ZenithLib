@@ -54,6 +54,29 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                                 ZenithTooltipColor.TEXT, scrambleReveal(0.55F, 20)))
                         .add(spacer(4))
                         .add(text(translated("tooltip.zenithlib.diamond.page_2.line_2"), ZenithTooltipColor.ACCENT)))
+                .page(page(literal("Text Animation Lab"))
+                        .add(header(literal("Living Lettering"), ZenithTooltipColor.ACCENT))
+                        .add(text(
+                                literal("A full-spectrum gradient travels through every glyph."),
+                                ZenithTooltipColor.TEXT,
+                                rainbow()
+                        ))
+                        .add(text(
+                                literal("Each letter takes its turn hopping through the wave."),
+                                ZenithTooltipColor.ACCENT,
+                                wave()
+                        ))
+                        .add(text(
+                                literal("Prismatic resonance"),
+                                ZenithTooltipColor.TEXT,
+                                combine(rainbow(2000, 0.055F), wave(850, 6.0F, 2))
+                        ))
+                        .add(divider())
+                        .add(text(
+                                literal("A bounded hue range recreates the old ping-pong gradient."),
+                                ZenithTooltipColor.TEXT,
+                                gradient(2600, 0.035F, 0.52F, 0.82F)
+                        )))
                 .page(page(literal("Gauge Preview"))
                         .add(header(literal("Bars"), ZenithTooltipColor.WARNING))
                         .add(text(literal("Bars support bounded values with optional custom display text. These are Placeholders")))

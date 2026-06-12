@@ -3,7 +3,10 @@ package net.zic.zenithlib.tooltip.api.builder;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
+import net.zic.zenithlib.tooltip.api.animation.RainbowTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ScrambleRevealTextEffect;
+import net.zic.zenithlib.tooltip.api.animation.TextEffectStack;
+import net.zic.zenithlib.tooltip.api.animation.WaveTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
@@ -16,6 +19,8 @@ import net.zic.zenithlib.tooltip.api.element.SpacerElement;
 import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValueSources;
+
+import java.util.List;
 
 /**
  * Compact factory helpers for Zenith tooltip resources in Java.
@@ -97,6 +102,59 @@ public final class ZenithTooltipBuilders {
                 mode,
                 ScrambleRevealTextEffect.DEFAULT_GLYPHS
         );
+    }
+
+    public static RainbowTextEffect rainbow() {
+        return rainbow(2400, 0.045F);
+    }
+
+    public static RainbowTextEffect rainbow(int period, float spread) {
+        return new RainbowTextEffect(
+                period,
+                spread,
+                0.9F,
+                1.0F,
+                RainbowTextEffect.Mode.SPECTRUM,
+                0.0F,
+                1.0F,
+                false
+        );
+    }
+
+    public static RainbowTextEffect gradient(
+            int period,
+            float spread,
+            float minHue,
+            float maxHue
+    ) {
+        return new RainbowTextEffect(
+                period,
+                spread,
+                0.9F,
+                1.0F,
+                RainbowTextEffect.Mode.PING_PONG,
+                minHue,
+                maxHue,
+                false
+        );
+    }
+
+    public static WaveTextEffect wave() {
+        return wave(900, 7.0F, 2);
+    }
+
+    public static WaveTextEffect wave(int period, float wavelength, int amplitude) {
+        return new WaveTextEffect(
+                period,
+                wavelength,
+                amplitude,
+                WaveTextEffect.Mode.BOUNCE,
+                false
+        );
+    }
+
+    public static TextEffectStack combine(ZenithTooltipTextEffect... effects) {
+        return new TextEffectStack(List.of(effects));
     }
 
     public static HeaderElement header(ZenithTooltipText text) {
