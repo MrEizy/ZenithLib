@@ -7,7 +7,7 @@ import com.mojang.serialization.MapCodec;
 
 public sealed interface ZenithTooltipElement
         permits TextElement, DividerElement, SpacerElement, HeaderElement, RowElement,
-        IconElement, TitleIconElement, BadgeElement, BarElement, EntityPreviewElement {
+        IconElement, TitleIconElement, BadgeElement, BarElement, EntityPreviewElement, CollectionElement {
 
     MapCodec<? extends ZenithTooltipElement> codec();
 
@@ -24,6 +24,7 @@ public sealed interface ZenithTooltipElement
                 case BadgeElement ignored -> "badge";
                 case BarElement ignored -> "bar";
                 case EntityPreviewElement ignored -> "entity_preview";
+                case CollectionElement ignored -> "collection";
             },
             type -> switch (type) {
                 case "text" -> TextElement.CODEC;
@@ -36,6 +37,7 @@ public sealed interface ZenithTooltipElement
                 case "badge" -> BadgeElement.CODEC;
                 case "bar" -> BarElement.CODEC;
                 case "entity_preview" -> EntityPreviewElement.CODEC;
+                case "collection" -> CollectionElement.CODEC;
                 default -> throw new IllegalArgumentException("Unknown Zenith tooltip element type: " + type);
             }
     );
