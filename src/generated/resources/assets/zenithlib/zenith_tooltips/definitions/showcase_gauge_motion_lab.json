@@ -15,7 +15,7 @@
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "Kinetic bars combine segmented cells, a moving scanline, pulse overlays, and edge sparks."
+            "literal": "Kinetic bars favour segments and a single edge spark at the current value."
           }
         },
         {

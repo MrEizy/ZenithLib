@@ -30,6 +30,9 @@ import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.*;
  *      Quartz - Border and Divider Animations
  *      Blaze Powder - Gauge Motions
  *      Clock - Page Motions </p>
+ *
+ *      I will be so for real, I couldn't be bothered to make updated tooltips after refactoring everything,
+ *      so I had AI make these showcase tooltips for me...
 */
 
 public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvider {
@@ -169,23 +172,23 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
 
     private void addCelestialPresetTemplate() {
         template(id("showcase_celestial_preset"))
-                .animationPreset(ZenithTooltipPresets.NEBULA)
+                .animationPreset(ZenithTooltipPresets.CELESTIAL)
                 .page(page(literal("Celestial Preset"))
-                        .add(titleIcon(literal("Celestial"), literal("stars, frame, and soft bloom")))
+                        .add(titleIcon(literal("Celestial"), literal("stars, gentle frame, and soft bloom")))
                         .add(badge(literal("PRESET • STARS • FRAME"), ZenithTooltipColor.ACCENT))
-                        .add(text(literal("Stars drift behind the glass while the frame draws a slow orbit of light.")))
+                        .add(text(literal("Sparse stars and a single border glint give rare items motion without stealing the page.")))
                         .add(divider())
                         .add(text(
-                                literal("The glow is calm enough for lore pages and rare drops."),
+                                literal("A good default for rare drops: visible, calm, and not divider-heavy."),
                                 ZenithTooltipColor.MUTED
                         )));
     }
 
     private void addCorruptedPresetTemplate() {
         template(id("showcase_corrupted_preset"))
-                .animationPreset(ZenithTooltipPresets.RUNIC)
+                .animationPreset(ZenithTooltipPresets.CORRUPTED)
                 .page(page(literal("Corrupted Preset"))
-                        .add(titleIcon(literal("Corrupted Signal"), literal("mist, pulse, and fractured glyphs")))
+                        .add(titleIcon(literal("Corrupted Signal"), literal("mist, scanlines, and an unstable pulse")))
                         .add(badge(
                                 literal("UNSTABLE"),
                                 ZenithTooltipColor.BACKGROUND,
@@ -193,7 +196,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                                 ZenithTooltipColor.NEGATIVE
                         ))
                         .add(text(
-                                literal("The frame hums, mist drifts, and glyphs fracture without drowning the card in noise."),
+                                literal("Mist and scanlines create interference while the divider only breathes instead of sweeping constantly."),
                                 ZenithTooltipColor.TEXT,
                                 combine(scrambleReveal(0.7F, 28), shimmer(2600, 0.13F, 0.45F))
                         ))
@@ -204,10 +207,10 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
 
     private void addMechanicalGaugeTemplate() {
         template(id("showcase_mechanical_gauges"))
-                .animationPreset(ZenithTooltipPresets.KINETIC)
+                .animationPreset(ZenithTooltipPresets.MECHANICAL)
                 .page(page(literal("Gauge Preview"))
                         .add(header(literal("Bars"), ZenithTooltipColor.WARNING))
-                        .add(text(literal("Segmented motion, scan lines, and edge sparks sit on top of the real bar value.")))
+                        .add(text(literal("Segmented fills and a quiet scanline show mechanical motion without sparks on every bar.")))
                         .add(divider())
                         .add(bar(literal("Integrity"), 78, 100, literal("78%"), ZenithTooltipColor.POSITIVE))
                         .add(bar(literal("Stored Qi"), 42, 100, ZenithTooltipColor.ACCENT))
@@ -223,13 +226,13 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
         template(id("showcase_background_lab"))
                 .animationPreset(ZenithTooltipPresets.NEBULA)
                 .page(page(literal("Background Animation Lab"))
-                        .add(titleIcon(literal("Nebula Surface"), literal("Stars, mist, motes, and aurora bands")))
-                        .add(text(literal("This card stacks the quieter background effects so you can judge whether they feel magical without turning into visual soup.")))
+                        .add(titleIcon(literal("Nebula Surface"), literal("Stars, motes, and aurora bands")))
+                        .add(text(literal("Nebula keeps to ambient texture: stars, tiny motes, and a soft aurora layer behind the content.")))
                         .add(divider())
-                        .add(row(literal("Stars"), literal("deterministic twinkle"), ZenithTooltipColor.TEXT, ZenithTooltipColor.ACCENT))
-                        .add(row(literal("Mist"), literal("slow horizontal drift"), ZenithTooltipColor.TEXT, ZenithTooltipColor.MUTED))
+                        .add(row(literal("Stars"), literal("deterministic pinpoints"), ZenithTooltipColor.TEXT, ZenithTooltipColor.ACCENT))
                         .add(row(literal("Motes"), literal("tiny rising particles"), ZenithTooltipColor.TEXT, ZenithTooltipColor.POSITIVE))
                         .add(row(literal("Aurora"), literal("soft moving bands"), ZenithTooltipColor.TEXT, ZenithTooltipColor.WARNING))
+                        .add(row(literal("Frame"), literal("no extra border noise"), ZenithTooltipColor.TEXT, ZenithTooltipColor.MUTED))
                         .add(divider())
                         .add(text(literal("Reduced motion pares this back to the still card."), ZenithTooltipColor.MUTED)))
                 .page(page(literal("Background Stress Page"))
@@ -243,17 +246,17 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
         template(id("showcase_frame_divider_lab"))
                 .animationPreset(ZenithTooltipPresets.RUNIC)
                 .page(page(literal("Frame + Divider Lab"))
-                        .add(titleIcon(literal("Runic Circuit"), literal("Border pulses, sparks, and animated dividers")))
-                        .add(text(literal("This preset layers pulsing inner borders, travelling perimeter energy, tiny corner sparks, divider sweeps, and embedded rune ticks.")))
+                        .add(titleIcon(literal("Runic Circuit"), literal("etched frame and readable rune ticks")))
+                        .add(text(literal("Runic motion is intentionally narrow: the frame assembles, the border hums, and dividers receive small rune ticks only.")))
                         .add(divider())
                         .add(header(literal("Divider Variants"), ZenithTooltipColor.ACCENT))
-                        .add(text(literal("A plain divider turns into a tiny rune channel."), ZenithTooltipColor.MUTED))
+                        .add(text(literal("A divider becomes a quiet inscription line, not a moving spotlight."), ZenithTooltipColor.MUTED))
                         .add(divider())
-                        .add(row(literal("Border"), literal("pulse + comet"), ZenithTooltipColor.TEXT, ZenithTooltipColor.WARNING))
-                        .add(row(literal("Corners"), literal("spark ticks"), ZenithTooltipColor.TEXT, ZenithTooltipColor.ACCENT)))
+                        .add(row(literal("Border"), literal("pulse + assembly"), ZenithTooltipColor.TEXT, ZenithTooltipColor.WARNING))
+                        .add(row(literal("Dividers"), literal("small rune ticks"), ZenithTooltipColor.TEXT, ZenithTooltipColor.ACCENT)))
                 .page(page(literal("Page Transition Check"))
-                        .add(header(literal("Slide + Wash"), ZenithTooltipColor.ACCENT))
-                        .add(text(literal("Fresh pages slide in with a quick wash of light.")))
+                        .add(header(literal("Slide Only"), ZenithTooltipColor.ACCENT))
+                        .add(text(literal("Fresh pages slide in briefly, then the card settles.")))
                         .add(divider())
                         .add(text(literal("The motion is brief, then the card settles."), ZenithTooltipColor.MUTED)));
     }
@@ -263,7 +266,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                 .animationPreset(ZenithTooltipPresets.KINETIC)
                 .page(page(literal("Gauge Motion Lab"))
                         .add(header(literal("Mechanical Bars"), ZenithTooltipColor.WARNING))
-                        .add(text(literal("Kinetic bars combine segmented cells, a moving scanline, pulse overlays, and edge sparks.")))
+                        .add(text(literal("Kinetic bars favour segments and a single edge spark at the current value.")))
                         .add(divider())
                         .add(bar(literal("Ignition"), 6, 100, literal("6%"), ZenithTooltipColor.NEGATIVE))
                         .add(bar(literal("Pressure"), 37, 100, literal("37%"), ZenithTooltipColor.WARNING))
@@ -281,11 +284,11 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
         template(id("showcase_page_motion_lab"))
                 .animationPreset(ZenithTooltipPresets.KINETIC)
                 .page(page(literal("Page Motion Lab"))
-                        .add(titleIcon(literal("Opening Sequence"), literal("Bloom, assembly, wash, and slide")))
-                        .add(text(literal("Open the card and flip pages to compare bloom, assembly, wash, and slide.")))
+                        .add(titleIcon(literal("Opening Sequence"), literal("border motion, page slide, and staged rows")))
+                        .add(text(literal("Open the card and flip pages to compare border motion, page slide, and staged entry.")))
                         .add(divider())
-                        .add(row(literal("Open"), literal("bloom + frame assembly"), ZenithTooltipColor.TEXT, ZenithTooltipColor.ACCENT))
-                        .add(row(literal("Page Entry"), literal("slide + wash"), ZenithTooltipColor.TEXT, ZenithTooltipColor.WARNING)))
+                        .add(row(literal("Open"), literal("border glint"), ZenithTooltipColor.TEXT, ZenithTooltipColor.ACCENT))
+                        .add(row(literal("Page Entry"), literal("slide + stagger"), ZenithTooltipColor.TEXT, ZenithTooltipColor.WARNING)))
                 .page(page(literal("Second Page"))
                         .add(header(literal("Fresh Page Entry"), ZenithTooltipColor.ACCENT))
                         .add(text(literal("This page starts its own entry beat, separate from the first hover.")))
@@ -293,7 +296,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                         .add(text(literal("Small offsets, short duration, no jitter."), ZenithTooltipColor.MUTED)))
                 .page(page(literal("Third Page"))
                         .add(header(literal("Reduced Motion Check"), ZenithTooltipColor.WARNING))
-                        .add(text(literal("Reduced motion drops the slide and wash, leaving the static card.")))
+                        .add(text(literal("Reduced motion drops the slide and staged motion, leaving the static card.")))
                         .add(bar(literal("Clarity"), 100, 100, literal("steady"), ZenithTooltipColor.POSITIVE)));
     }
 
@@ -369,7 +372,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
         ));
         progress.page(page(literal("Mechanical Additions"))
                 .add(header(literal("Segmented Motion"), ZenithTooltipColor.WARNING))
-                .add(text(literal("Segmented motion and border scans circle the 64% assembly bar.")))
+                .add(text(literal("Mechanical motion keeps the segmented bar readable and avoids animated divider clutter.")))
                 .add(bar(literal("Calibration"), 33, 100, literal("33 / 100"), ZenithTooltipColor.ACCENT)));
 
         ZenithTooltipTemplateBuilder requirements = template(id("showcase_template_requirements"))

@@ -8,7 +8,7 @@
         {
           "type": "zenithlib:title_icon",
           "subtitle": {
-            "literal": "Stars, mist, motes, and aurora bands"
+            "literal": "Stars, motes, and aurora bands"
           },
           "title": {
             "literal": "Nebula Surface"
@@ -17,7 +17,7 @@
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "This card stacks the quieter background effects so you can judge whether they feel magical without turning into visual soup."
+            "literal": "Nebula keeps to ambient texture: stars, tiny motes, and a soft aurora layer behind the content."
           }
         },
         {
@@ -29,18 +29,8 @@
             "literal": "Stars"
           },
           "right": {
-            "literal": "deterministic twinkle"
+            "literal": "deterministic pinpoints"
           }
-        },
-        {
-          "type": "zenithlib:row",
-          "left": {
-            "literal": "Mist"
-          },
-          "right": {
-            "literal": "slow horizontal drift"
-          },
-          "right_color": "muted"
         },
         {
           "type": "zenithlib:row",
@@ -61,6 +51,16 @@
             "literal": "soft moving bands"
           },
           "right_color": "warning"
+        },
+        {
+          "type": "zenithlib:row",
+          "left": {
+            "literal": "Frame"
+          },
+          "right": {
+            "literal": "no extra border noise"
+          },
+          "right_color": "muted"
         },
         {
           "type": "zenithlib:divider"

@@ -8,7 +8,7 @@
         {
           "type": "zenithlib:title_icon",
           "subtitle": {
-            "literal": "Border pulses, sparks, and animated dividers"
+            "literal": "etched frame and readable rune ticks"
           },
           "title": {
             "literal": "Runic Circuit"
@@ -17,7 +17,7 @@
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "This preset layers pulsing inner borders, travelling perimeter energy, tiny corner sparks, divider sweeps, and embedded rune ticks."
+            "literal": "Runic motion is intentionally narrow: the frame assembles, the border hums, and dividers receive small rune ticks only."
           }
         },
         {
@@ -33,7 +33,7 @@
           "type": "zenithlib:text",
           "color": "muted",
           "text": {
-            "literal": "A plain divider turns into a tiny rune channel."
+            "literal": "A divider becomes a quiet inscription line, not a moving spotlight."
           }
         },
         {
@@ -45,17 +45,17 @@
             "literal": "Border"
           },
           "right": {
-            "literal": "pulse + comet"
+            "literal": "pulse + assembly"
           },
           "right_color": "warning"
         },
         {
           "type": "zenithlib:row",
           "left": {
-            "literal": "Corners"
+            "literal": "Dividers"
           },
           "right": {
-            "literal": "spark ticks"
+            "literal": "small rune ticks"
           }
         }
       ],
@@ -68,13 +68,13 @@
         {
           "type": "zenithlib:header",
           "text": {
-            "literal": "Slide + Wash"
+            "literal": "Slide Only"
           }
         },
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "Fresh pages slide in with a quick wash of light."
+            "literal": "Fresh pages slide in briefly, then the card settles."
           }
         },
         {

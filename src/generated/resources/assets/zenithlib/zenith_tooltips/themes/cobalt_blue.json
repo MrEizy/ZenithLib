@@ -1,44 +1,48 @@
 {
   "background_style": {
-    "alpha": 12,
-    "pattern": "stars",
-    "spacing": 11
+    "alpha": 7,
+    "pattern": "grid",
+    "spacing": 9
   },
   "badge_style": {
-    "fill_alpha": 220
+    "fill_alpha": 190,
+    "vertical_padding": 1
   },
   "bar_style": {
+    "border": "accent",
     "border_width": 1,
+    "fill_alpha": 220,
     "height": 4,
     "label_gap": 1,
-    "track_alpha": 72
+    "track": "border_bottom",
+    "track_alpha": 58
   },
   "colors": {
-    "accent": "#7DA4FFFF",
-    "background": "#091226DD",
-    "border_bottom": "#263E92FF",
-    "border_top": "#6D95FFFF",
-    "muted": "#8C9FCFFF",
+    "accent": "#88AFFFFF",
+    "background": "#08152CDD",
+    "border_bottom": "#1D347CFF",
+    "border_top": "#6E98FFFF",
+    "muted": "#8D9FCFFF",
     "negative": "#FF7782FF",
     "positive": "#8EF0A6FF",
-    "text": "#EDF2FFFF",
+    "text": "#EDF3FFFF",
     "warning": "#FFD875FF"
-  },
-  "divider_style": {
-    "decoration": "center_rune"
   },
   "frame_style": {
     "corner_decoration": "bracket",
+    "corner_inset": 1,
     "corner_size": 5,
     "inner_border": true,
-    "inner_border_alpha": 88
+    "inner_border_alpha": 68,
+    "inner_border_inset": 1
   },
   "header_style": {
     "ornament": "side_lines"
   },
   "icon_holder": {
-    "box_size": 29,
-    "fill_alpha": 96,
-    "shape": "octagon"
+    "border_width": 1,
+    "box_size": 28,
+    "fill_alpha": 70,
+    "shape": "square"
   }
 }

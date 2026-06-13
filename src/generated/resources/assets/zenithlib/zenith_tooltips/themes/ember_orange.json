@@ -1,46 +1,51 @@
 {
   "background_style": {
-    "alpha": 10,
+    "alpha": 8,
     "color": "warning",
     "pattern": "diagonal_lines",
-    "spacing": 10
+    "spacing": 11
   },
   "badge_style": {
     "border_width": 2,
-    "fill_alpha": 230
+    "fill_alpha": 210
   },
   "bar_style": {
-    "border": "accent",
+    "border": "warning",
     "border_width": 1,
+    "fill_alpha": 238,
     "height": 6,
     "track": "border_bottom",
-    "track_alpha": 115
+    "track_alpha": 96
   },
   "colors": {
-    "accent": "#FFB45CFF",
+    "accent": "#FFB35CFF",
     "background": "#211006DD",
-    "border_bottom": "#9A3F12FF",
-    "border_top": "#FFB45CFF",
-    "muted": "#C69A74FF",
-    "negative": "#FF765CFF",
+    "border_bottom": "#7D2D0EFF",
+    "border_top": "#FFB35CFF",
+    "muted": "#C18A63FF",
+    "negative": "#FF6A48FF",
     "positive": "#B9F27CFF",
     "text": "#FFF0D6FF"
   },
   "divider_style": {
+    "color": "warning",
     "decoration": "dotted",
     "thickness": 2
   },
   "frame_style": {
+    "corner_color": "warning",
     "corner_decoration": "bracket",
-    "corner_size": 5
+    "corner_size": 5,
+    "inner_border_alpha": 92
   },
   "header_style": {
     "color": "warning",
     "ornament": "corner_ticks"
   },
   "icon_holder": {
+    "border": "warning",
     "box_size": 29,
-    "fill_alpha": 96,
+    "fill_alpha": 86,
     "shape": "bracket"
   }
 }

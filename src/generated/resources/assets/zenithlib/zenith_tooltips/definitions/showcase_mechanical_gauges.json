@@ -1,6 +1,6 @@
 {
   "animation_presets": [
-    "zenithlib:kinetic"
+    "zenithlib:mechanical"
   ],
   "pages": [
     {
@@ -15,7 +15,7 @@
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "Segmented motion, scan lines, and edge sparks sit on top of the real bar value."
+            "literal": "Segmented fills and a quiet scanline show mechanical motion without sparks on every bar."
           }
         },
         {

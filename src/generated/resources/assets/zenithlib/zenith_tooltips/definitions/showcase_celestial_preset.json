@@ -1,6 +1,6 @@
 {
   "animation_presets": [
-    "zenithlib:nebula"
+    "zenithlib:celestial"
   ],
   "pages": [
     {
@@ -8,7 +8,7 @@
         {
           "type": "zenithlib:title_icon",
           "subtitle": {
-            "literal": "stars, frame, and soft bloom"
+            "literal": "stars, gentle frame, and soft bloom"
           },
           "title": {
             "literal": "Celestial"
@@ -25,7 +25,7 @@
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "Stars drift behind the glass while the frame draws a slow orbit of light."
+            "literal": "Sparse stars and a single border glint give rare items motion without stealing the page."
           }
         },
         {
@@ -35,7 +35,7 @@
           "type": "zenithlib:text",
           "color": "muted",
           "text": {
-            "literal": "The glow is calm enough for lore pages and rare drops."
+            "literal": "A good default for rare drops: visible, calm, and not divider-heavy."
           }
         }
       ],

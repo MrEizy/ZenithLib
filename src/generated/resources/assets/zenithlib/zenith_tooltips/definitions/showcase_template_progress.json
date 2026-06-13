@@ -34,7 +34,7 @@
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "Segmented motion and border scans circle the 64% assembly bar."
+            "literal": "Mechanical motion keeps the segmented bar readable and avoids animated divider clutter."
           }
         },
         {

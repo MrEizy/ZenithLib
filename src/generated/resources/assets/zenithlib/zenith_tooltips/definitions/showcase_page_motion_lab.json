@@ -8,7 +8,7 @@
         {
           "type": "zenithlib:title_icon",
           "subtitle": {
-            "literal": "Bloom, assembly, wash, and slide"
+            "literal": "border motion, page slide, and staged rows"
           },
           "title": {
             "literal": "Opening Sequence"
@@ -17,7 +17,7 @@
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "Open the card and flip pages to compare bloom, assembly, wash, and slide."
+            "literal": "Open the card and flip pages to compare border motion, page slide, and staged entry."
           }
         },
         {
@@ -29,7 +29,7 @@
             "literal": "Open"
           },
           "right": {
-            "literal": "bloom + frame assembly"
+            "literal": "border glint"
           }
         },
         {
@@ -38,7 +38,7 @@
             "literal": "Page Entry"
           },
           "right": {
-            "literal": "slide + wash"
+            "literal": "slide + stagger"
           },
           "right_color": "warning"
         }
@@ -88,7 +88,7 @@
         {
           "type": "zenithlib:text",
           "text": {
-            "literal": "Reduced motion drops the slide and wash, leaving the static card."
+            "literal": "Reduced motion drops the slide and staged motion, leaving the static card."
           }
         },
         {

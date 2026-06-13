@@ -1,6 +1,6 @@
 {
   "animation_presets": [
-    "zenithlib:runic"
+    "zenithlib:corrupted"
   ],
   "pages": [
     {
@@ -8,7 +8,7 @@
         {
           "type": "zenithlib:title_icon",
           "subtitle": {
-            "literal": "mist, pulse, and fractured glyphs"
+            "literal": "mist, scanlines, and an unstable pulse"
           },
           "title": {
             "literal": "Corrupted Signal"
@@ -42,7 +42,7 @@
             ]
           },
           "text": {
-            "literal": "The frame hums, mist drifts, and glyphs fracture without drowning the card in noise."
+            "literal": "Mist and scanlines create interference while the divider only breathes instead of sweeping constantly."
           }
         },
         {
