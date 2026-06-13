@@ -1,0 +1,123 @@
+{
+  "animation_presets": [
+    "zenithlib:nebula"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "title_icon",
+          "subtitle": {
+            "literal": "Stars, mist, motes, and aurora bands"
+          },
+          "title": {
+            "literal": "Nebula Surface"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "This card stacks the quieter background effects so you can judge whether they feel magical without turning into visual soup."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Stars"
+          },
+          "right": {
+            "literal": "deterministic twinkle"
+          }
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Mist"
+          },
+          "right": {
+            "literal": "slow horizontal drift"
+          },
+          "right_color": "muted"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Motes"
+          },
+          "right": {
+            "literal": "tiny rising particles"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Aurora"
+          },
+          "right": {
+            "literal": "soft moving bands"
+          },
+          "right_color": "warning"
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "Reduced motion pares this back to the still card."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Background Animation Lab"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Stacked With Content"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "The glow stays behind the rows and bars instead of resizing the card."
+          }
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Ambient Budget"
+          },
+          "max": 32,
+          "value": 32,
+          "value_text": {
+            "literal": "32 motes max"
+          }
+        },
+        {
+          "type": "bar",
+          "color": "positive",
+          "label": {
+            "literal": "Motion Strength"
+          },
+          "max": 100,
+          "value": 100,
+          "value_text": {
+            "literal": "configurable"
+          }
+        }
+      ],
+      "title": {
+        "literal": "Background Stress Page"
+      }
+    }
+  ]
+}

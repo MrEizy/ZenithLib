@@ -57,7 +57,7 @@
           "type": "text",
           "color": "muted",
           "text": {
-            "literal": "This compact card shows the default authored layout: title icon, badge, rows, divider, and theme colours."
+            "literal": "A compact card with a title icon, badge, rows, divider, and the mana-blue theme."
           }
         }
       ],
@@ -70,25 +70,25 @@
         {
           "type": "header",
           "text": {
-            "literal": "Stable Layout"
+            "literal": "Quiet Motion"
           }
         },
         {
           "type": "text",
           "text": {
-            "literal": "The celestial preset adds stars, border energy, frame assembly, icon float, and divider sweeps without changing measured layout bounds."
+            "literal": "Stars shimmer behind the card while the frame gathers at the edges."
           }
         },
         {
           "type": "text",
           "color": "muted",
           "text": {
-            "literal": "Good for dependent mods that want a polished tooltip without hand-authoring every animation."
+            "literal": "The motion stays decorative: no extra space, no shifting rows."
           }
         }
       ],
       "title": {
-        "literal": "Authoring Notes"
+        "literal": "Celestial Motion"
       }
     }
   ]

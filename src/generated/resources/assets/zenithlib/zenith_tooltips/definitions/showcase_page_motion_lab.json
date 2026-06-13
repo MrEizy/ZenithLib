@@ -1,0 +1,112 @@
+{
+  "animation_presets": [
+    "zenithlib:kinetic"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "title_icon",
+          "subtitle": {
+            "literal": "Bloom, assembly, wash, and slide"
+          },
+          "title": {
+            "literal": "Opening Sequence"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "Open the card and flip pages to compare bloom, assembly, wash, and slide."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Open"
+          },
+          "right": {
+            "literal": "bloom + frame assembly"
+          }
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Page Entry"
+          },
+          "right": {
+            "literal": "slide + wash"
+          },
+          "right_color": "warning"
+        }
+      ],
+      "title": {
+        "literal": "Page Motion Lab"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Fresh Page Entry"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "This page starts its own entry beat, separate from the first hover."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "Small offsets, short duration, no jitter."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Second Page"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "color": "warning",
+          "text": {
+            "literal": "Reduced Motion Check"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "Reduced motion drops the slide and wash, leaving the static card."
+          }
+        },
+        {
+          "type": "bar",
+          "color": "positive",
+          "label": {
+            "literal": "Clarity"
+          },
+          "max": 100,
+          "value": 100,
+          "value_text": {
+            "literal": "steady"
+          }
+        }
+      ],
+      "title": {
+        "literal": "Third Page"
+      }
+    }
+  ]
+}

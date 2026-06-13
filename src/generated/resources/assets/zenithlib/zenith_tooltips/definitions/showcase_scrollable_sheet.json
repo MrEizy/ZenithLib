@@ -118,20 +118,20 @@
         {
           "type": "header",
           "text": {
-            "literal": "Renderer Notes"
+            "literal": "Stress Notes"
           }
         },
         {
           "type": "text",
           "text": {
-            "literal": "This is mostly here to test clipped pages, page controls, wheel scrolling, dividers, rows, bars, and staged entry in one place."
+            "literal": "Clipped pages, controls, rows, bars, and staged entry share one long scroll."
           }
         },
         {
           "type": "text",
           "color": "muted",
           "text": {
-            "literal": "Damageable converted items can display live durability bars, while authored documents can use bars for any lore or resource value."
+            "literal": "Converted damageable items use live durability; authored cards can reuse bars for lore, charge, or progress."
           }
         }
       ],

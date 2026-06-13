@@ -8,7 +8,7 @@
         {
           "type": "title_icon",
           "subtitle": {
-            "literal": "Built with ZenithTooltipTemplates.iconTitleSummary"
+            "literal": "Icon, title, and summary"
           },
           "title": {
             "literal": "Template: Icon Summary"
@@ -21,7 +21,7 @@
         {
           "type": "text",
           "text": {
-            "literal": "This document was generated through a beginner-friendly template helper, then assigned a normal animation preset and theme by the rule."
+            "literal": "The helper creates the opening page; the rule supplies the theme and preset."
           }
         }
       ],
@@ -40,7 +40,7 @@
         {
           "type": "text",
           "text": {
-            "literal": "Template builders do not create a parallel system. They simply emit regular pages and elements that can be extended afterwards."
+            "literal": "Template pages are normal pages, so extra sections can be added after them."
           }
         },
         {

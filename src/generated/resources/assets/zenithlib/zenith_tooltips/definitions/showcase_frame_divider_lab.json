@@ -1,0 +1,96 @@
+{
+  "animation_presets": [
+    "zenithlib:runic"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "title_icon",
+          "subtitle": {
+            "literal": "Border pulses, sparks, and animated dividers"
+          },
+          "title": {
+            "literal": "Runic Circuit"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "This preset layers pulsing inner borders, travelling perimeter energy, tiny corner sparks, divider sweeps, and embedded rune ticks."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "header",
+          "text": {
+            "literal": "Divider Variants"
+          }
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "A plain divider turns into a tiny rune channel."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Border"
+          },
+          "right": {
+            "literal": "pulse + comet"
+          },
+          "right_color": "warning"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Corners"
+          },
+          "right": {
+            "literal": "spark ticks"
+          }
+        }
+      ],
+      "title": {
+        "literal": "Frame + Divider Lab"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Slide + Wash"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "Fresh pages slide in with a quick wash of light."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "The motion is brief, then the card settles."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Page Transition Check"
+      }
+    }
+  ]
+}

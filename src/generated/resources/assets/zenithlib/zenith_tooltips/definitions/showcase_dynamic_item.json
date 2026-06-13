@@ -1,6 +1,6 @@
 {
   "animation_presets": [
-    "zenithlib:mechanical"
+    "zenithlib:kinetic"
   ],
   "pages": [
     {
@@ -17,7 +17,7 @@
         {
           "type": "text",
           "text": {
-            "literal": "This card demonstrates the simple dependent-mod style: authored elements mixed with data-driven values from the hovered stack."
+            "literal": "Authored text mixes with values pulled from the hovered stack."
           }
         },
         {
@@ -39,13 +39,6 @@
             "literal": "Live Durability"
           },
           "source": "zenithlib:durability"
-        },
-        {
-          "type": "text",
-          "color": "muted",
-          "text": {
-            "literal": "Try this on a damageable item. If the stack has no durability component, the dynamic bar simply has nothing useful to resolve."
-          }
         }
       ],
       "title": {

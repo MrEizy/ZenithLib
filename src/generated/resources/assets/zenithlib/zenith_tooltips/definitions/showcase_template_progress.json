@@ -1,6 +1,6 @@
 {
   "animation_presets": [
-    "zenithlib:mechanical"
+    "zenithlib:kinetic"
   ],
   "pages": [
     {
@@ -34,7 +34,7 @@
         {
           "type": "text",
           "text": {
-            "literal": "The mechanical preset can add segmented bar animation and border scans while the bar value remains exactly 64%."
+            "literal": "Segmented motion and border scans circle the 64% assembly bar."
           }
         },
         {

@@ -9,13 +9,13 @@
           "type": "header",
           "color": "warning",
           "text": {
-            "literal": "Bars"
+            "literal": "Mechanical Bars"
           }
         },
         {
           "type": "text",
           "text": {
-            "literal": "Segmented motion, scan lines, and edge sparks sit on top of the real bar value."
+            "literal": "Kinetic bars combine segmented cells, a moving scanline, pulse overlays, and edge sparks."
           }
         },
         {
@@ -23,36 +23,54 @@
         },
         {
           "type": "bar",
-          "color": "positive",
+          "color": "negative",
           "label": {
-            "literal": "Integrity"
+            "literal": "Ignition"
           },
           "max": 100,
-          "value": 78,
+          "value": 6,
           "value_text": {
-            "literal": "78%"
+            "literal": "6%"
+          }
+        },
+        {
+          "type": "bar",
+          "color": "warning",
+          "label": {
+            "literal": "Pressure"
+          },
+          "max": 100,
+          "value": 37,
+          "value_text": {
+            "literal": "37%"
           }
         },
         {
           "type": "bar",
           "label": {
-            "literal": "Stored Qi"
+            "literal": "Charge"
           },
           "max": 100,
-          "value": 42
+          "value": 84,
+          "value_text": {
+            "literal": "84%"
+          }
         },
         {
           "type": "bar",
-          "color": "negative",
+          "color": "positive",
           "label": {
-            "literal": "Impurities"
+            "literal": "Output"
           },
           "max": 100,
-          "value": 16
+          "value": 100,
+          "value_text": {
+            "literal": "Stable"
+          }
         }
       ],
       "title": {
-        "literal": "Gauge Preview"
+        "literal": "Gauge Motion Lab"
       }
     },
     {
@@ -60,14 +78,20 @@
         {
           "type": "header",
           "text": {
-            "literal": "Low / High Checks"
+            "literal": "Value Check"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "The spark rides the edge; the fill width stays locked to the value."
           }
         },
         {
           "type": "bar",
           "color": "negative",
           "label": {
-            "literal": "Almost Empty"
+            "literal": "One Tick"
           },
           "max": 100,
           "value": 1,
@@ -79,7 +103,7 @@
           "type": "bar",
           "color": "warning",
           "label": {
-            "literal": "Half Charge"
+            "literal": "Exact Half"
           },
           "max": 100,
           "value": 50,
@@ -91,17 +115,17 @@
           "type": "bar",
           "color": "positive",
           "label": {
-            "literal": "Overflow Test"
+            "literal": "Complete"
           },
           "max": 100,
           "value": 100,
           "value_text": {
-            "literal": "Full"
+            "literal": "100 / 100"
           }
         }
       ],
       "title": {
-        "literal": "Value Extremes"
+        "literal": "Animation Integrity"
       }
     }
   ]

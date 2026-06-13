@@ -1,0 +1,10 @@
+{
+  "document": "zenithlib:showcase_page_motion_lab",
+  "priority": 100,
+  "selector": {
+    "items": [
+      "minecraft:clock"
+    ]
+  },
+  "theme": "zenithlib:cobalt_blue"
+}

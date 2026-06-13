@@ -1,6 +1,6 @@
 {
   "animation_presets": [
-    "zenithlib:corrupted"
+    "zenithlib:runic"
   ],
   "pages": [
     {
@@ -8,7 +8,7 @@
         {
           "type": "title_icon",
           "subtitle": {
-            "literal": "Restrained instability demo"
+            "literal": "mist, pulse, and fractured glyphs"
           },
           "title": {
             "literal": "Corrupted Signal"
@@ -42,7 +42,7 @@
             ]
           },
           "text": {
-            "literal": "The frame hums, mist drifts, and text can glitch without forcing the whole tooltip to become unreadable."
+            "literal": "The frame hums, mist drifts, and glyphs fracture without drowning the card in noise."
           }
         },
         {

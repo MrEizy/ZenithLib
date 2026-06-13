@@ -14,38 +14,89 @@ public final class ZenithTooltipPresets {
     public static final Identifier CORRUPTED = id("corrupted");
     public static final Identifier LIVING = id("living");
     public static final Identifier MECHANICAL = id("mechanical");
+    public static final Identifier NEBULA = id("nebula");
+    public static final Identifier RUNIC = id("runic");
+    public static final Identifier KINETIC = id("kinetic");
 
     private static final Map<Identifier, ZenithTooltipPreset> PRESETS = new LinkedHashMap<>();
 
     static {
         register(ZenithTooltipPreset.builder(CELESTIAL)
                 .starField(true)
+                .auroraBackground(true)
                 .travellingBorderEnergy(true)
+                .twinBorderComets(true)
                 .frameAssembly(true)
+                .openingBloom(true)
+                .pageWash(true)
                 .titleShimmer(true)
                 .iconFloat(true)
                 .dividerSweep(true)
+                .dividerRunes(true)
                 .staggeredElements(true)
                 .build());
         register(ZenithTooltipPreset.builder(CORRUPTED)
                 .driftingMist(true)
+                .moteField(true)
+                .scanlineBackground(true)
                 .travellingBorderEnergy(true)
+                .pulsingBorder(true)
+                .cornerSparks(true)
                 .frameAssembly(true)
+                .pageWash(true)
                 .titleShimmer(true)
                 .barEdgeSparks(true)
                 .dividerSweep(true)
+                .dividerPulse(true)
                 .build());
         register(ZenithTooltipPreset.builder(LIVING)
                 .driftingMist(true)
+                .moteField(true)
+                .auroraBackground(true)
+                .openingBloom(true)
+                .pageSlide(true)
                 .iconFloat(true)
+                .barPulse(true)
                 .barEdgeSparks(true)
+                .dividerPulse(true)
                 .staggeredElements(true)
                 .build());
         register(ZenithTooltipPreset.builder(MECHANICAL)
+                .scanlineBackground(true)
                 .travellingBorderEnergy(true)
-                .segmentedBars(true)
-                .dividerSweep(true)
+                .twinBorderComets(true)
                 .frameAssembly(true)
+                .openingBloom(true)
+                .pageSlide(true)
+                .segmentedBars(true)
+                .barScanline(true)
+                .barPulse(true)
+                .dividerSweep(true)
+                .dividerPulse(true)
+                .build());
+        register(ZenithTooltipPreset.builder(NEBULA)
+                .parent(CELESTIAL)
+                .driftingMist(true)
+                .moteField(true)
+                .auroraBackground(true)
+                .iconOrbit(true)
+                .barPulse(true)
+                .dividerPulse(true)
+                .build());
+        register(ZenithTooltipPreset.builder(RUNIC)
+                .parent(CORRUPTED)
+                .dividerRunes(true)
+                .pulsingBorder(true)
+                .cornerSparks(true)
+                .openingBloom(true)
+                .pageSlide(true)
+                .build());
+        register(ZenithTooltipPreset.builder(KINETIC)
+                .parent(MECHANICAL)
+                .barEdgeSparks(true)
+                .cornerSparks(true)
+                .pageWash(true)
+                .staggeredElements(true)
                 .build());
     }
 
@@ -80,14 +131,27 @@ public final class ZenithTooltipPresets {
         }
         resolved.starField |= preset.starField();
         resolved.driftingMist |= preset.driftingMist();
+        resolved.auroraBackground |= preset.auroraBackground();
+        resolved.moteField |= preset.moteField();
+        resolved.scanlineBackground |= preset.scanlineBackground();
         resolved.travellingBorderEnergy |= preset.travellingBorderEnergy();
+        resolved.pulsingBorder |= preset.pulsingBorder();
+        resolved.cornerSparks |= preset.cornerSparks();
+        resolved.twinBorderComets |= preset.twinBorderComets();
         resolved.frameAssembly |= preset.frameAssembly();
+        resolved.openingBloom |= preset.openingBloom();
+        resolved.pageSlide |= preset.pageSlide();
+        resolved.pageWash |= preset.pageWash();
         resolved.titleShimmer |= preset.titleShimmer();
         resolved.iconFloat |= preset.iconFloat();
         resolved.iconOrbit |= preset.iconOrbit();
         resolved.segmentedBars |= preset.segmentedBars();
+        resolved.barScanline |= preset.barScanline();
+        resolved.barPulse |= preset.barPulse();
         resolved.barEdgeSparks |= preset.barEdgeSparks();
         resolved.dividerSweep |= preset.dividerSweep();
+        resolved.dividerRunes |= preset.dividerRunes();
+        resolved.dividerPulse |= preset.dividerPulse();
         resolved.staggeredElements |= preset.staggeredElements();
     }
 
@@ -98,57 +162,64 @@ public final class ZenithTooltipPresets {
     public static final class Resolved {
         private boolean starField;
         private boolean driftingMist;
+        private boolean auroraBackground;
+        private boolean moteField;
+        private boolean scanlineBackground;
         private boolean travellingBorderEnergy;
+        private boolean pulsingBorder;
+        private boolean cornerSparks;
+        private boolean twinBorderComets;
         private boolean frameAssembly;
+        private boolean openingBloom;
+        private boolean pageSlide;
+        private boolean pageWash;
         private boolean titleShimmer;
         private boolean iconFloat;
         private boolean iconOrbit;
         private boolean segmentedBars;
+        private boolean barScanline;
+        private boolean barPulse;
         private boolean barEdgeSparks;
         private boolean dividerSweep;
+        private boolean dividerRunes;
+        private boolean dividerPulse;
         private boolean staggeredElements;
 
         private Resolved() {}
 
-        public boolean starField() {
-            return starField;
-        }
-        public boolean driftingMist() {
-            return driftingMist;
-        }
-        public boolean travellingBorderEnergy() {
-            return travellingBorderEnergy;
-        }
-        public boolean frameAssembly() {
-            return frameAssembly;
-        }
-        public boolean titleShimmer() {
-            return titleShimmer;
-        }
-        public boolean iconFloat() {
-            return iconFloat;
-        }
-        public boolean iconOrbit() {
-            return iconOrbit;
-        }
-        public boolean segmentedBars() {
-            return segmentedBars;
-        }
-        public boolean barEdgeSparks() {
-            return barEdgeSparks;
-        }
-        public boolean dividerSweep() {
-            return dividerSweep;
-        }
-        public boolean staggeredElements() {
-            return staggeredElements;
-        }
+        public boolean starField() { return starField; }
+        public boolean driftingMist() { return driftingMist; }
+        public boolean auroraBackground() { return auroraBackground; }
+        public boolean moteField() { return moteField; }
+        public boolean scanlineBackground() { return scanlineBackground; }
+        public boolean travellingBorderEnergy() { return travellingBorderEnergy; }
+        public boolean pulsingBorder() { return pulsingBorder; }
+        public boolean cornerSparks() { return cornerSparks; }
+        public boolean twinBorderComets() { return twinBorderComets; }
+        public boolean frameAssembly() { return frameAssembly; }
+        public boolean openingBloom() { return openingBloom; }
+        public boolean pageSlide() { return pageSlide; }
+        public boolean pageWash() { return pageWash; }
+        public boolean titleShimmer() { return titleShimmer; }
+        public boolean iconFloat() { return iconFloat; }
+        public boolean iconOrbit() { return iconOrbit; }
+        public boolean segmentedBars() { return segmentedBars; }
+        public boolean barScanline() { return barScanline; }
+        public boolean barPulse() { return barPulse; }
+        public boolean barEdgeSparks() { return barEdgeSparks; }
+        public boolean dividerSweep() { return dividerSweep; }
+        public boolean dividerRunes() { return dividerRunes; }
+        public boolean dividerPulse() { return dividerPulse; }
+        public boolean staggeredElements() { return staggeredElements; }
         public boolean hasAmbient() {
-            return starField || driftingMist;
+            return starField || driftingMist || auroraBackground || moteField || scanlineBackground;
         }
         public boolean isEmpty() {
-            return !(starField || driftingMist || travellingBorderEnergy || frameAssembly || titleShimmer
-                    || iconFloat || iconOrbit || segmentedBars || barEdgeSparks || dividerSweep || staggeredElements);
+            return !(starField || driftingMist || auroraBackground || moteField || scanlineBackground
+                    || travellingBorderEnergy || pulsingBorder || cornerSparks || twinBorderComets
+                    || frameAssembly || openingBloom || pageSlide || pageWash || titleShimmer
+                    || iconFloat || iconOrbit || segmentedBars || barScanline || barPulse || barEdgeSparks
+                    || dividerSweep || dividerRunes || dividerPulse || staggeredElements);
         }
     }
 }

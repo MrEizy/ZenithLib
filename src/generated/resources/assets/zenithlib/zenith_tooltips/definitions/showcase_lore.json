@@ -37,16 +37,6 @@
           "text": {
             "translate": "tooltip.zenithlib.diamond.page_2.line_2"
           }
-        },
-        {
-          "type": "divider"
-        },
-        {
-          "type": "text",
-          "color": "muted",
-          "text": {
-            "literal": "Living preset: calmer mist, icon breathing, edge sparks, and staggered element entry."
-          }
         }
       ],
       "title": {
