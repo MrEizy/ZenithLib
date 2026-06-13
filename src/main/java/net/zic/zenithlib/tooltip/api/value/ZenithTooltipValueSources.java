@@ -1,5 +1,6 @@
 package net.zic.zenithlib.tooltip.api.value;
 
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -60,6 +61,43 @@ public final class ZenithTooltipValueSources {
         if (ModList.get().isLoaded(requiredModId)) {
             register(id, source);
         }
+    }
+
+    public static void registerTextSource(
+            Identifier id,
+            Function<ZenithTooltipContext, Optional<Component>> source
+    ) {
+        Objects.requireNonNull(source, "source");
+        register(id, context -> source.apply(context).map(ZenithTooltipValue::text));
+    }
+
+    public static void registerProgressSource(
+            Identifier id,
+            Function<ZenithTooltipContext, Optional<ZenithTooltipValue.Progress>> source
+    ) {
+        Objects.requireNonNull(source, "source");
+        register(id, context -> source.apply(context).map(value -> (ZenithTooltipValue) value));
+    }
+
+    public static void registerRowsSource(
+            Identifier id,
+            Function<ZenithTooltipContext, Optional<ZenithTooltipValue.Rows>> source
+    ) {
+        Objects.requireNonNull(source, "source");
+        register(id, context -> source.apply(context).map(value -> (ZenithTooltipValue) value));
+    }
+
+    public static <T> void registerItemComponentSource(
+            Identifier id,
+            DataComponentType<T> componentType,
+            BiFunction<T, ZenithTooltipContext, Optional<ZenithTooltipValue>> source
+    ) {
+        Objects.requireNonNull(componentType, "componentType");
+        Objects.requireNonNull(source, "source");
+        register(id, context -> {
+            T component = context.stack().get(componentType);
+            return component == null ? Optional.empty() : source.apply(component, context);
+        });
     }
 
     public static void registerItemSource(

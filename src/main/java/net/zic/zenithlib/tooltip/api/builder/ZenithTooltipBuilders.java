@@ -15,6 +15,7 @@ import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.CollectionElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
+import net.zic.zenithlib.tooltip.api.element.DynamicElement;
 import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.IconElement;
@@ -289,6 +290,19 @@ public final class ZenithTooltipBuilders {
             ZenithTooltipColor color
     ) {
         return BarElement.dynamic(label, source, color);
+    }
+
+
+    public static DynamicElement dynamic(Identifier source) {
+        return new DynamicElement(source);
+    }
+
+    public static DynamicElement dynamic(String source) {
+        return new DynamicElement(ZenithTooltipValueSources.identifier(source));
+    }
+
+    public static DynamicElement dynamic(Identifier source, List<net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement> fallback) {
+        return new DynamicElement(source, fallback, true);
     }
 
     public static CollectionElement dynamicBadges(

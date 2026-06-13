@@ -32,6 +32,7 @@ public final class ZenithTooltipElementTypes {
     public static final Identifier BAR = id("bar");
     public static final Identifier ENTITY_PREVIEW = id("entity_preview");
     public static final Identifier COLLECTION = id("collection");
+    public static final Identifier DYNAMIC = id("dynamic");
 
     private static final Map<String, Entry<?>> BY_NAME = new ConcurrentHashMap<>();
     private static final Map<Identifier, Entry<?>> BY_ID = new ConcurrentHashMap<>();
@@ -50,6 +51,8 @@ public final class ZenithTooltipElementTypes {
         registerBuiltIn("bar", BAR, BarElement.CODEC);
         registerBuiltIn("entity_preview", ENTITY_PREVIEW, EntityPreviewElement.CODEC);
         registerBuiltIn("collection", COLLECTION, CollectionElement.CODEC);
+        registerBuiltIn("dynamic", DYNAMIC, DynamicElement.CODEC);
+        alias("source", DYNAMIC);
     }
 
     private ZenithTooltipElementTypes() {}
@@ -129,6 +132,13 @@ public final class ZenithTooltipElementTypes {
 
     private static <T extends ZenithTooltipElement> void registerBuiltIn(String legacyName, Identifier id, MapCodec<T> codec) {
         registerInternal(legacyName, id, codec);
+    }
+
+    private static void alias(String legacyName, Identifier id) {
+        Entry<?> entry = BY_ID.get(id);
+        if (entry != null && legacyName != null && !legacyName.isBlank()) {
+            BY_NAME.put(legacyName, entry);
+        }
     }
 
     private static <T extends ZenithTooltipElement> void registerInternal(

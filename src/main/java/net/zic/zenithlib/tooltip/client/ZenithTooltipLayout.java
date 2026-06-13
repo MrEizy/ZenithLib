@@ -6,23 +6,11 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.util.FormattedCharSequence;
-import net.zic.zenithlib.Config;
 import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
-import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
-import net.zic.zenithlib.tooltip.api.element.BadgeElement;
-import net.zic.zenithlib.tooltip.api.element.BarElement;
-import net.zic.zenithlib.tooltip.api.element.DividerElement;
-import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
-import net.zic.zenithlib.tooltip.api.element.HeaderElement;
-import net.zic.zenithlib.tooltip.api.element.IconElement;
-import net.zic.zenithlib.tooltip.api.element.RowElement;
-import net.zic.zenithlib.tooltip.api.element.SpacerElement;
-import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
 import org.jspecify.annotations.Nullable;
@@ -86,13 +74,8 @@ public final class ZenithTooltipLayout {
         List<PreparedElement> prepared = new ArrayList<>(page.elements().size());
         for (int elementIndex = 0; elementIndex < page.elements().size(); elementIndex++) {
             ZenithTooltipElement element = page.elements().get(elementIndex);
-            if (element instanceof EntityPreviewElement
-                    && (!Config.SHOW_SPAWN_EGG_ENTITY_PREVIEWS.get() || SpawnEggItem.getType(stack) == null)) {
-                continue;
-            }
-
             long elementSeed = ((long) elementIndex << 32) ^ element.hashCode();
-            prepared.add(prepareElement(font, theme, stack, maxInnerWidth, element, elementSeed));
+            prepareElement(font, theme, stack, maxInnerWidth, element, elementSeed).ifPresent(prepared::add);
         }
 
         PreparedTitleIcon titleIconHeader = null;
@@ -204,11 +187,11 @@ public final class ZenithTooltipLayout {
     }
 
     static int gapAfter(ZenithTooltipTheme theme, PreparedElement current, PreparedElement next) {
-        if (current instanceof PreparedRow && next instanceof PreparedRow) {
+        if (current.gapKind() == GapKind.ROW && next.gapKind() == GapKind.ROW) {
             return theme.rowGap();
         }
 
-        if (current instanceof PreparedBar && next instanceof PreparedBar) {
+        if (current.gapKind() == GapKind.BAR && next.gapKind() == GapKind.BAR) {
             return theme.rowGap() + 1;
         }
 
@@ -262,7 +245,7 @@ public final class ZenithTooltipLayout {
         return !page.elements().isEmpty() && page.elements().get(0) instanceof TitleIconElement;
     }
 
-    private static PreparedElement prepareElement(
+    private static Optional<PreparedElement> prepareElement(
             Font font,
             ZenithTooltipTheme theme,
             ItemStack stack,
@@ -270,160 +253,14 @@ public final class ZenithTooltipLayout {
             ZenithTooltipElement element,
             long elementSeed
     ) {
-        Optional<PreparedCustom> custom = ZenithTooltipElementRenderers.prepare(
-                font, theme, stack, innerWidth, element, elementSeed
+        return ZenithTooltipElementRenderers.prepare(
+                font,
+                theme,
+                stack,
+                innerWidth,
+                element,
+                elementSeed
         );
-        if (custom.isPresent()) {
-            return custom.orElseThrow();
-        }
-
-        if (element instanceof TextElement text) {
-            List<FormattedCharSequence> lines = split(font, text.text().component(), innerWidth);
-            int animationPadding = text.effect()
-                    .map(ZenithTooltipTextAnimator::verticalPadding)
-                    .orElse(0);
-            return new PreparedText(
-                    lines,
-                    text.color().resolve(theme),
-                    lineBlockHeight(font, lines.size(), LINE_GAP) + animationPadding * 2,
-                    text.effect(),
-                    animationPadding,
-                    elementSeed
-            );
-        }
-
-        if (element instanceof HeaderElement header) {
-            List<FormattedCharSequence> lines = split(
-                    font,
-                    header.text().component().copy().withStyle(ChatFormatting.BOLD),
-                    innerWidth
-            );
-            return new PreparedHeader(lines, header.color().resolve(theme), lineBlockHeight(font, lines.size(), LINE_GAP) + 2);
-        }
-
-        if (element instanceof DividerElement) {
-            return new PreparedDivider(theme.dividerStyle().height());
-        }
-
-        if (element instanceof SpacerElement spacer) {
-            return new PreparedSpacer(Math.max(0, spacer.height()));
-        }
-
-        if (element instanceof RowElement row) {
-            return prepareRow(font, theme, innerWidth, row);
-        }
-
-        if (element instanceof BadgeElement badge) {
-            ZenithTooltipTheme.BadgeStyle style = theme.badgeStyle();
-            int textWidth = Math.max(1, innerWidth - style.horizontalPadding() * 2);
-            List<FormattedCharSequence> lines = split(font, badge.text().component(), textWidth);
-            int height = lineBlockHeight(font, lines.size(), 0) + style.verticalPadding() * 2;
-            return new PreparedBadge(
-                    lines,
-                    badge.textColor().resolve(theme),
-                    badge.backgroundColor().resolve(theme),
-                    badge.borderColor().resolve(theme),
-                    height
-            );
-        }
-
-        if (element instanceof BarElement bar) {
-            return prepareBar(font, theme, innerWidth, bar);
-        }
-
-        if (element instanceof EntityPreviewElement preview) {
-            return ZenithTooltipEntityPreviewRenderer.prepare(stack, preview, innerWidth);
-        }
-
-        if (element instanceof IconElement) {
-            return new PreparedIcon(theme.iconHolder().boxSize() + ICON_ELEMENT_BOTTOM_GAP);
-        }
-
-        if (element instanceof TitleIconElement titleIcon) {
-            ZenithTooltipTheme.IconHolder holder = theme.iconHolder();
-            int labelWidth = Math.max(1, innerWidth - holder.boxSize() - holder.gap());
-            List<FormattedCharSequence> titleLines = split(
-                    font,
-                    titleIcon.title().component().copy().withStyle(ChatFormatting.BOLD),
-                    labelWidth
-            );
-            List<FormattedCharSequence> subtitleLines = titleIcon.subtitle().isBlank()
-                    ? List.of()
-                    : split(font, titleIcon.subtitle().component(), labelWidth);
-            int labelLineCount = titleLines.size() + subtitleLines.size();
-            int labelHeight = lineBlockHeight(font, labelLineCount, ICON_LINE_GAP);
-            int height = Math.max(holder.boxSize(), labelHeight) + TITLE_ICON_BOTTOM_GAP;
-            return new PreparedTitleIcon(titleLines, subtitleLines, height);
-        }
-
-        return new PreparedSpacer(0);
-    }
-
-    private static PreparedRow prepareRow(Font font, ZenithTooltipTheme theme, int innerWidth, RowElement row) {
-        int availableWidth = Math.max(2, innerWidth - ROW_COLUMN_GAP);
-        int minimumColumnWidth = Math.max(1, Math.min(ROW_MIN_COLUMN_WIDTH, availableWidth / 2));
-        int leftNaturalWidth = font.width(row.left().component());
-        int rightNaturalWidth = font.width(row.right().component());
-
-        int leftWidth;
-        int rightWidth;
-
-        if (leftNaturalWidth + rightNaturalWidth <= availableWidth) {
-            leftWidth = Math.max(1, leftNaturalWidth);
-            rightWidth = Math.max(1, rightNaturalWidth);
-        } else if (leftNaturalWidth <= availableWidth - minimumColumnWidth) {
-            leftWidth = Math.max(1, leftNaturalWidth);
-            rightWidth = Math.max(1, availableWidth - leftWidth);
-        } else if (rightNaturalWidth <= availableWidth - minimumColumnWidth) {
-            rightWidth = Math.max(1, rightNaturalWidth);
-            leftWidth = Math.max(1, availableWidth - rightWidth);
-        } else {
-            leftWidth = Math.max(minimumColumnWidth, availableWidth * 11 / 20);
-            rightWidth = Math.max(1, availableWidth - leftWidth);
-        }
-
-        List<FormattedCharSequence> leftLines = split(font, row.left().component(), leftWidth);
-        List<FormattedCharSequence> rightLines = split(font, row.right().component(), rightWidth);
-        int height = Math.max(
-                lineBlockHeight(font, leftLines.size(), LINE_GAP),
-                lineBlockHeight(font, rightLines.size(), LINE_GAP)
-        );
-
-        return new PreparedRow(
-                leftLines,
-                rightLines,
-                row.leftColor().resolve(theme),
-                row.rightColor().resolve(theme),
-                height
-        );
-    }
-
-    private static PreparedBar prepareBar(
-            Font font,
-            ZenithTooltipTheme theme,
-            int innerWidth,
-            BarElement bar
-    ) {
-        ResolvedBarValue resolved = resolveBarValue(bar);
-        Component value = bar.valueText().isBlank()
-                ? Component.literal(resolved.value() + " / " + resolved.max())
-                : bar.valueText().component();
-        int valueNaturalWidth = font.width(value);
-        int labelWidth = Math.max(1, innerWidth - ROW_COLUMN_GAP - valueNaturalWidth);
-        int valueWidth = Math.max(1, Math.min(innerWidth / 2, valueNaturalWidth));
-        List<FormattedCharSequence> labelLines = split(font, bar.label().component(), labelWidth);
-        List<FormattedCharSequence> valueLines = split(font, value, valueWidth);
-        int labelHeight = Math.max(
-                lineBlockHeight(font, labelLines.size(), LINE_GAP),
-                lineBlockHeight(font, valueLines.size(), LINE_GAP)
-        );
-        int height = labelHeight + theme.barStyle().labelGap() + theme.barStyle().height();
-
-        return new PreparedBar(labelLines, valueLines, bar.color().resolve(theme), resolved.progress(), labelHeight, height);
-    }
-
-    private static ResolvedBarValue resolveBarValue(BarElement bar) {
-        return new ResolvedBarValue(bar.value(), bar.max());
     }
 
     private static int measuredInnerWidth(
@@ -449,54 +286,14 @@ public final class ZenithTooltipLayout {
     }
 
     private static int preparedElementWidth(Font font, ZenithTooltipTheme theme, PreparedElement element) {
-        if (element instanceof PreparedText text) {
-            return maxLineWidth(font, text.lines());
-        }
-
-        if (element instanceof PreparedHeader header) {
-            return maxLineWidth(font, header.lines());
-        }
-
-        if (element instanceof PreparedRow row) {
-            return maxLineWidth(font, row.leftLines()) + ROW_COLUMN_GAP + maxLineWidth(font, row.rightLines());
-        }
-
-        if (element instanceof PreparedBadge badge) {
-            return maxLineWidth(font, badge.lines()) + theme.badgeStyle().horizontalPadding() * 2;
-        }
-
-        if (element instanceof PreparedBar bar) {
-            return maxLineWidth(font, bar.labelLines()) + ROW_COLUMN_GAP + maxLineWidth(font, bar.valueLines());
-        }
-
-        if (element instanceof PreparedEntityPreview preview) {
-            return preview.width();
-        }
-
-        if (element instanceof PreparedIcon) {
-            return theme.iconHolder().boxSize();
-        }
-
-        if (element instanceof PreparedTitleIcon titleIcon) {
-            int labelWidth = Math.max(
-                    maxLineWidth(font, titleIcon.titleLines()),
-                    maxLineWidth(font, titleIcon.subtitleLines())
-            );
-            return theme.iconHolder().boxSize() + theme.iconHolder().gap() + labelWidth;
-        }
-
-        if (element instanceof PreparedCustom custom) {
-            return custom.width();
-        }
-
-        return 0;
+        return element.width();
     }
 
-    private static List<FormattedCharSequence> split(Font font, Component component, int width) {
+    static List<FormattedCharSequence> split(Font font, Component component, int width) {
         return List.copyOf(font.split(component, width));
     }
 
-    private static int maxLineWidth(Font font, List<FormattedCharSequence> lines) {
+    static int maxLineWidth(Font font, List<FormattedCharSequence> lines) {
         int width = 0;
         for (FormattedCharSequence line : lines) {
             width = Math.max(width, font.width(line));
@@ -648,44 +445,69 @@ public final class ZenithTooltipLayout {
     public sealed interface PreparedElement
             permits PreparedText, PreparedHeader, PreparedDivider, PreparedSpacer, PreparedRow,
             PreparedIcon, PreparedTitleIcon, PreparedBadge, PreparedBar, PreparedEntityPreview, PreparedCustom {
+        int width();
+
         int height();
+
+        default GapKind gapKind() {
+            return GapKind.DEFAULT;
+        }
+    }
+
+    public enum GapKind {
+        DEFAULT,
+        ROW,
+        BAR
     }
 
     public record PreparedText(
             List<FormattedCharSequence> lines,
             int color,
+            int width,
             int height,
-            Optional<ZenithTooltipTextEffect> effect,
+            Optional<net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect> effect,
             int animationPadding,
             long animationSeed
     ) implements PreparedElement {}
 
-    public record PreparedHeader(List<FormattedCharSequence> lines, int color, int height) implements PreparedElement {}
+    public record PreparedHeader(
+            List<FormattedCharSequence> lines,
+            int color,
+            int width,
+            int height
+    ) implements PreparedElement {}
 
-    public record PreparedDivider(int height) implements PreparedElement {}
+    public record PreparedDivider(int width, int height) implements PreparedElement {}
 
-    public record PreparedSpacer(int height) implements PreparedElement {}
+    public record PreparedSpacer(int width, int height) implements PreparedElement {}
 
     public record PreparedRow(
             List<FormattedCharSequence> leftLines,
             List<FormattedCharSequence> rightLines,
             int leftColor,
             int rightColor,
+            int width,
             int height
-    ) implements PreparedElement {}
+    ) implements PreparedElement {
+        @Override
+        public GapKind gapKind() {
+            return GapKind.ROW;
+        }
+    }
 
-    public record PreparedIcon(int height) implements PreparedElement {}
+    public record PreparedIcon(int width, int height) implements PreparedElement {}
 
     public record PreparedEntityPreview(
             int width,
             int height,
             boolean rotate,
-            EntityPreviewElement.Placement placement
+            net.zic.zenithlib.tooltip.api.element.EntityPreviewElement.Placement placement
     ) implements PreparedElement {}
 
     public record PreparedTitleIcon(
             List<FormattedCharSequence> titleLines,
             List<FormattedCharSequence> subtitleLines,
+            int width,
             int height
     ) implements PreparedElement {}
 
@@ -694,6 +516,7 @@ public final class ZenithTooltipLayout {
             int textColor,
             int backgroundColor,
             int borderColor,
+            int width,
             int height
     ) implements PreparedElement {}
 
@@ -703,8 +526,14 @@ public final class ZenithTooltipLayout {
             int color,
             float progress,
             int labelHeight,
+            int width,
             int height
-    ) implements PreparedElement {}
+    ) implements PreparedElement {
+        @Override
+        public GapKind gapKind() {
+            return GapKind.BAR;
+        }
+    }
 
     public record PreparedCustom(
             int width,
@@ -713,14 +542,5 @@ public final class ZenithTooltipLayout {
             ZenithTooltipElementRenderers.Renderer renderer
     ) implements PreparedElement {}
 
-    private record ResolvedBarValue(int value, int max) {
-        private ResolvedBarValue {
-            max = Math.max(1, max);
-            value = Math.max(0, Math.min(value, max));
-        }
 
-        private float progress() {
-            return (float) value / (float) max;
-        }
-    }
 }

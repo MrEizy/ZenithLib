@@ -10,6 +10,7 @@ import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.CollectionElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
+import net.zic.zenithlib.tooltip.api.element.DynamicElement;
 import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.IconElement;
@@ -19,6 +20,7 @@ import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElementTypes;
+import net.zic.zenithlib.tooltip.api.value.ZenithTooltipElementSources;
 import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValue;
 import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValueSources;
 
@@ -63,6 +65,9 @@ public final class ZenithTooltipResolver {
             ZenithTooltipElement element,
             ZenithTooltipContext context
     ) {
+        if (element instanceof DynamicElement dynamic) {
+            return resolveDynamic(dynamic, context);
+        }
         if (element instanceof TextElement text) {
             return List.of(new TextElement(resolveText(text.text(), context), text.color(), text.effect()));
         }
@@ -103,8 +108,46 @@ public final class ZenithTooltipResolver {
                 || element instanceof EntityPreviewElement) {
             return List.of(element);
         }
-        return ZenithTooltipElementTypes.resolve(element, context);
+        return resolveResolvedElements(element, ZenithTooltipElementTypes.resolve(element, context), context);
     }
+
+    private static List<ZenithTooltipElement> resolveDynamic(
+            DynamicElement dynamic,
+            ZenithTooltipContext context
+    ) {
+        List<ZenithTooltipElement> resolved = ZenithTooltipElementSources.resolve(dynamic.source(), context)
+                .orElseGet(dynamic::fallback);
+
+        if (resolved.isEmpty() && dynamic.hideWhenEmpty()) {
+            return List.of();
+        }
+
+        return resolveResolvedElements(dynamic, resolved, context);
+    }
+
+    private static List<ZenithTooltipElement> resolveResolvedElements(
+            ZenithTooltipElement original,
+            List<ZenithTooltipElement> resolved,
+            ZenithTooltipContext context
+    ) {
+        if (resolved.isEmpty()) {
+            return List.of();
+        }
+        if (resolved.size() == 1 && resolved.get(0) == original) {
+            return List.of(original);
+        }
+
+        List<ZenithTooltipElement> flattened = new ArrayList<>();
+        for (ZenithTooltipElement element : resolved) {
+            if (element == original) {
+                flattened.add(element);
+            } else {
+                flattened.addAll(resolveElement(element, context));
+            }
+        }
+        return List.copyOf(flattened);
+    }
+
 
     private static List<ZenithTooltipElement> resolveCollection(
             CollectionElement collection,

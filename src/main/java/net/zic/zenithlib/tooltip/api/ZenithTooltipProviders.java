@@ -138,6 +138,15 @@ public final class ZenithTooltipProviders {
         ) {
             return new Result(document, context.withSubject(subjectId, subjectValue, presentation));
         }
+
+        public static Result withData(
+                ZenithTooltipDocument document,
+                ZenithTooltipContext context,
+                Identifier key,
+                Object value
+        ) {
+            return new Result(document, context.withData(key, value));
+        }
     }
 
     private record Entry(Identifier id, ContextualProvider provider) {}

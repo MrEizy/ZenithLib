@@ -71,6 +71,10 @@ public record BarElement(
         return !source.isBlank();
     }
 
+    public float progress() {
+        return (float) value / (float) max;
+    }
+
     @Override
     public MapCodec<? extends ZenithTooltipElement> codec() {
         return CODEC;

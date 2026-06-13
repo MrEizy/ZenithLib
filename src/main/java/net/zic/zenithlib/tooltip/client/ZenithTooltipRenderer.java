@@ -1454,11 +1454,7 @@ public final class ZenithTooltipRenderer {
     }
 
     private static int maxLineWidth(Font font, List<FormattedCharSequence> lines) {
-        int width = 0;
-        for (FormattedCharSequence line : lines) {
-            width = Math.max(width, font.width(line));
-        }
-        return width;
+        return ZenithTooltipLayout.maxLineWidth(font, lines);
     }
 
     private enum Corner {

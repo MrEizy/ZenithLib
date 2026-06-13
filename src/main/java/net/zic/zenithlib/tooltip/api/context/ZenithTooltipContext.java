@@ -5,6 +5,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,19 +25,22 @@ public final class ZenithTooltipContext {
     private final Optional<RegistryAccess> registryAccess;
     private final Optional<Player> player;
     private final Optional<SubjectReference> subject;
+    private final Map<Identifier, Object> data;
 
     private ZenithTooltipContext(
             ItemStack stack,
             Identifier itemId,
             Optional<RegistryAccess> registryAccess,
             Optional<Player> player,
-            Optional<SubjectReference> subject
+            Optional<SubjectReference> subject,
+            Map<Identifier, Object> data
     ) {
         this.stack = Objects.requireNonNull(stack, "stack");
         this.itemId = Objects.requireNonNull(itemId, "itemId");
         this.registryAccess = registryAccess == null ? Optional.empty() : registryAccess;
         this.player = player == null ? Optional.empty() : player;
         this.subject = subject == null ? Optional.empty() : subject;
+        this.data = data == null ? Map.of() : Map.copyOf(data);
     }
 
     public static ZenithTooltipContext of(
@@ -44,7 +48,7 @@ public final class ZenithTooltipContext {
             Identifier itemId,
             Optional<RegistryAccess> registryAccess
     ) {
-        return new ZenithTooltipContext(stack, itemId, registryAccess, Optional.empty(), Optional.empty());
+        return new ZenithTooltipContext(stack, itemId, registryAccess, Optional.empty(), Optional.empty(), Map.of());
     }
 
     public static ZenithTooltipContext of(
@@ -53,7 +57,7 @@ public final class ZenithTooltipContext {
             Optional<RegistryAccess> registryAccess,
             Optional<Player> player
     ) {
-        return new ZenithTooltipContext(stack, itemId, registryAccess, player, Optional.empty());
+        return new ZenithTooltipContext(stack, itemId, registryAccess, player, Optional.empty(), Map.of());
     }
 
     public ItemStack stack() {
@@ -102,7 +106,29 @@ public final class ZenithTooltipContext {
             ZenithTooltipSubject presentation
     ) {
         SubjectReference reference = new SubjectReference(subjectId, value, presentation);
-        return new ZenithTooltipContext(stack, itemId, registryAccess, player, Optional.of(reference));
+        return new ZenithTooltipContext(stack, itemId, registryAccess, player, Optional.of(reference), data);
+    }
+
+    public ZenithTooltipContext withData(Identifier key, Object value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
+        java.util.LinkedHashMap<Identifier, Object> next = new java.util.LinkedHashMap<>(data);
+        next.put(key, value);
+        return new ZenithTooltipContext(stack, itemId, registryAccess, player, subject, next);
+    }
+
+    public Optional<Object> data(Identifier key) {
+        Objects.requireNonNull(key, "key");
+        return Optional.ofNullable(data.get(key));
+    }
+
+    public <T> Optional<T> data(Identifier key, Class<T> type) {
+        Objects.requireNonNull(type, "type");
+        return data(key).filter(type::isInstance).map(type::cast);
+    }
+
+    public Map<Identifier, Object> dataView() {
+        return data;
     }
 
     public Optional<Identifier> subjectId() {
