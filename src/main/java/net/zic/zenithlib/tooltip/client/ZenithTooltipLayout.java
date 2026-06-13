@@ -61,7 +61,7 @@ public final class ZenithTooltipLayout {
         int pageIndex = pageIndex(animationUpdate.changed(), document.pages().size());
         ZenithTooltipPage page = document.page(pageIndex);
         ZenithTooltipAnimationState.Frame animationFrame = ZenithTooltipAnimationState.pageFrame(pageIndex);
-        ZenithTooltipAnimationSettings animationSettings = ZenithTooltipAnimationSettings.capture();
+        ZenithTooltipAnimationContext.Settings animationSettings = ZenithTooltipAnimationContext.Settings.capture();
 
         boolean titleProvidedByHeader = hasLeadingTitleIcon(page);
         List<FormattedCharSequence> titleLines = titleProvidedByHeader
@@ -120,7 +120,6 @@ public final class ZenithTooltipLayout {
 
         int innerWidth = measuredInnerWidth(
                 font,
-                theme,
                 titleLines,
                 titleIconHeader,
                 elements,
@@ -145,7 +144,8 @@ public final class ZenithTooltipLayout {
                     bodyContentHeight,
                     0,
                     false,
-                    animationFrame
+                    animationFrame,
+                    animationSettings
             );
         }
 
@@ -179,7 +179,8 @@ public final class ZenithTooltipLayout {
                 bodyContentHeight,
                 scrollOffset,
                 lastMaxScrollOffset > 0,
-                animationFrame
+                animationFrame,
+                animationSettings
         );
     }
 
@@ -253,7 +254,7 @@ public final class ZenithTooltipLayout {
             int innerWidth,
             ZenithTooltipElement element,
             long elementSeed,
-            ZenithTooltipAnimationSettings animationSettings
+            ZenithTooltipAnimationContext.Settings animationSettings
     ) {
         return ZenithTooltipElementRenderers.prepare(
                 font,
@@ -268,7 +269,6 @@ public final class ZenithTooltipLayout {
 
     private static int measuredInnerWidth(
             Font font,
-            ZenithTooltipTheme theme,
             List<FormattedCharSequence> titleLines,
             @Nullable PreparedTitleIcon titleIconHeader,
             List<PreparedElement> elements,
@@ -278,18 +278,14 @@ public final class ZenithTooltipLayout {
         int contentWidth = Math.max(maxLineWidth(font, titleLines), maxLineWidth(font, pageHint));
 
         if (titleIconHeader != null) {
-            contentWidth = Math.max(contentWidth, preparedElementWidth(font, theme, titleIconHeader));
+            contentWidth = Math.max(contentWidth, titleIconHeader.width());
         }
 
         for (PreparedElement element : elements) {
-            contentWidth = Math.max(contentWidth, preparedElementWidth(font, theme, element));
+            contentWidth = Math.max(contentWidth, element.width());
         }
 
         return Math.max(MIN_WRAP_WIDTH, Math.min(maxInnerWidth, contentWidth));
-    }
-
-    private static int preparedElementWidth(Font font, ZenithTooltipTheme theme, PreparedElement element) {
-        return element.width();
     }
 
     static List<FormattedCharSequence> split(Font font, Component component, int width) {
@@ -442,7 +438,8 @@ public final class ZenithTooltipLayout {
             int bodyContentHeight,
             int scrollOffset,
             boolean scrollable,
-            ZenithTooltipAnimationState.Frame animationFrame
+            ZenithTooltipAnimationState.Frame animationFrame,
+            ZenithTooltipAnimationContext.Settings animationSettings
     ) {}
 
     public sealed interface PreparedElement

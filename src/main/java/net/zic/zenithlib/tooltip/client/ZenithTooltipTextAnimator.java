@@ -23,7 +23,7 @@ final class ZenithTooltipTextAnimator {
 
     private ZenithTooltipTextAnimator() {}
 
-    static int verticalPadding(ZenithTooltipTextEffect effect, ZenithTooltipAnimationSettings settings) {
+    static int verticalPadding(ZenithTooltipTextEffect effect, ZenithTooltipAnimationContext.Settings settings) {
         if (effect instanceof WaveTextEffect wave && settings.animationsEnabled() && !settings.reduceMotion()) {
             return wave.amplitude();
         }
@@ -38,7 +38,7 @@ final class ZenithTooltipTextAnimator {
     }
 
     static int verticalPadding(ZenithTooltipTextEffect effect) {
-        return verticalPadding(effect, ZenithTooltipAnimationSettings.capture());
+        return verticalPadding(effect, ZenithTooltipAnimationContext.Settings.capture());
     }
 
     static void render(
@@ -53,7 +53,7 @@ final class ZenithTooltipTextAnimator {
             ZenithTooltipAnimationState.Frame frame,
             long elementSeed
     ) {
-        render(font, graphics, x, y, lines, baseColor, lineGap, effect, ZenithTooltipAnimationSettings.capture(), frame, elementSeed);
+        render(font, graphics, x, y, lines, baseColor, lineGap, effect, ZenithTooltipAnimationContext.Settings.capture(), frame, elementSeed);
     }
 
     static void render(
@@ -65,7 +65,7 @@ final class ZenithTooltipTextAnimator {
             int baseColor,
             int lineGap,
             ZenithTooltipTextEffect effect,
-            ZenithTooltipAnimationSettings settings,
+            ZenithTooltipAnimationContext.Settings settings,
             ZenithTooltipAnimationState.Frame frame,
             long elementSeed
     ) {

@@ -3,6 +3,8 @@ package net.zic.zenithlib.tooltip.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.FormattedText;
@@ -31,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Client event integration layer for custom Zenith tooltips.
  *
@@ -55,7 +59,7 @@ public final class ZenithTooltipClientEvents {
 
     @SubscribeEvent
     public static void registerTooltipComponents(RegisterClientTooltipComponentFactoriesEvent event) {
-        event.register(ZenithTooltipData.class, ClientZenithTooltip::new);
+        event.register(ZenithTooltipData.class, TooltipComponentView::new);
     }
 
     @SubscribeEvent
@@ -165,4 +169,45 @@ public final class ZenithTooltipClientEvents {
             event.setCanceled(true);
         }
     }
+
+    private static final class TooltipComponentView implements net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent {
+        private final Identifier itemId;
+        private final ItemStack stack;
+        private final ZenithTooltipDocument document;
+
+        private @Nullable Font preparedFont;
+        private ZenithTooltipLayout.@Nullable Layout preparedLayout;
+
+        private TooltipComponentView(ZenithTooltipData data) {
+            this.itemId = data.itemId();
+            this.stack = data.stack();
+            this.document = data.document();
+        }
+
+        @Override
+        public int getHeight(Font font) {
+            return layout(font).height();
+        }
+
+        @Override
+        public int getWidth(Font font) {
+            return layout(font).width();
+        }
+
+        @Override
+        public void extractImage(Font font, int x, int y, int w, int h, GuiGraphicsExtractor graphics) {
+            ZenithTooltipRenderer.render(font, graphics, x, y, stack, layout(font));
+            preparedFont = null;
+            preparedLayout = null;
+        }
+
+        private ZenithTooltipLayout.Layout layout(Font font) {
+            if (preparedLayout == null || preparedFont != font) {
+                preparedFont = font;
+                preparedLayout = ZenithTooltipLayout.prepare(font, itemId, stack, document);
+            }
+            return preparedLayout;
+        }
+    }
+
 }

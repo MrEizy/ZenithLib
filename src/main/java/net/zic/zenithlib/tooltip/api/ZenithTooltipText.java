@@ -15,7 +15,7 @@ import java.util.Optional;
  *
  * <p>Resource JSON may provide a translation key, a literal string, or a namespaced
  * runtime {@code source}. Source-backed text is resolved before layout through
- * {@code ZenithTooltipValueSources}, allowing the same binding to be used in page
+ * {@code ZenithTooltipSources}, allowing the same binding to be used in page
  * titles, headers, badges, rows, bar labels, and ordinary text elements.</p>
  */
 public final class ZenithTooltipText {

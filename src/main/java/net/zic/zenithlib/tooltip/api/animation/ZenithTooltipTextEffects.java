@@ -69,12 +69,12 @@ public final class ZenithTooltipTextEffects {
         return Map.copyOf(copy);
     }
 
-    private static <T extends ZenithTooltipTextEffect> void registerBuiltIn(String legacyName, Identifier id, MapCodec<T> codec) {
-        registerInternal(legacyName, id, codec);
+    private static <T extends ZenithTooltipTextEffect> void registerBuiltIn(String aliasName, Identifier id, MapCodec<T> codec) {
+        registerInternal(aliasName, id, codec);
     }
 
     private static <T extends ZenithTooltipTextEffect> void registerInternal(
-            String legacyName,
+            String aliasName,
             Identifier id,
             MapCodec<T> codec
     ) {
@@ -89,8 +89,8 @@ public final class ZenithTooltipTextEffects {
         }
 
         BY_NAME.put(id.toString(), entry);
-        if (legacyName != null && !legacyName.isBlank()) {
-            BY_NAME.put(legacyName, entry);
+        if (aliasName != null && !aliasName.isBlank()) {
+            BY_NAME.put(aliasName, entry);
         }
         ID_BY_CODEC.put(codec, id);
     }

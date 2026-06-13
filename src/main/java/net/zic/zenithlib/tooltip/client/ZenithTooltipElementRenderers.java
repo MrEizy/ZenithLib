@@ -98,7 +98,7 @@ public final class ZenithTooltipElementRenderers {
             int innerWidth,
             ZenithTooltipElement element,
             long seed,
-            ZenithTooltipAnimationSettings animationSettings
+            ZenithTooltipAnimationContext.Settings animationSettings
     ) {
         Entry<?> entry = ENTRIES.get(element.type());
         if (entry == null) {
@@ -134,7 +134,7 @@ public final class ZenithTooltipElementRenderers {
             ItemStack stack,
             int innerWidth,
             long seed,
-            ZenithTooltipAnimationSettings animationSettings
+            ZenithTooltipAnimationContext.Settings animationSettings
     ) {
         public List<FormattedCharSequence> split(Component component, int width) {
             return List.copyOf(font.split(component, Math.max(1, width)));
@@ -159,7 +159,7 @@ public final class ZenithTooltipElementRenderers {
             int innerWidth,
             ZenithTooltipAnimationState.Frame animationFrame,
             ZenithTooltipPresets.Resolved presets,
-            ZenithTooltipAnimationSettings animationSettings
+            ZenithTooltipAnimationContext.Settings animationSettings
     ) {}
 
     @FunctionalInterface

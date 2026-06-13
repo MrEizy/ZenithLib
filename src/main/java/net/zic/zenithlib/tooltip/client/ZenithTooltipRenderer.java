@@ -20,8 +20,6 @@ import java.util.List;
 public final class ZenithTooltipRenderer {
     private static final int INNER_HIGHLIGHT = 0x33FFFFFF;
     private static final int ITEM_ICON_SIZE = 16;
-    private static final ThreadLocal<ZenithTooltipAnimationSettings> ACTIVE_SETTINGS =
-            ThreadLocal.withInitial(ZenithTooltipAnimationSettings::capture);
 
     private ZenithTooltipRenderer() {}
 
@@ -34,94 +32,89 @@ public final class ZenithTooltipRenderer {
             ZenithTooltipLayout.Layout layout
     ) {
         ZenithTooltipTheme theme = layout.theme();
-        ZenithTooltipAnimationContext animation = ZenithTooltipAnimationContext.create(layout.animationPresets(), layout.animationFrame());
-        ACTIVE_SETTINGS.set(animation.settings());
-        try {
-            ZenithTooltipPresets.Resolved presets = animation.presets();
-            ZenithTooltipAnimationState.Frame frame = animation.frame();
-            renderBackground(graphics, x, y, layout.width(), layout.height(), theme, animation);
+        ZenithTooltipAnimationContext animation = ZenithTooltipAnimationContext.create(layout.animationPresets(), layout.animationFrame(), layout.animationSettings());
+        ZenithTooltipPresets.Resolved presets = animation.presets();
+        ZenithTooltipAnimationState.Frame frame = animation.frame();
+        renderBackground(graphics, x, y, layout.width(), layout.height(), theme, animation);
 
-            int textX = x + theme.padding();
-            int textY = y + theme.padding();
+        int textX = x + theme.padding();
+        int textY = y + theme.padding();
 
-            if (!layout.titleLines().isEmpty()) {
-                if (presets.titleShimmer() && animation.allowsMotion()) {
-                    ZenithTooltipTextAnimator.render(
-                            font,
-                            graphics,
-                            textX,
-                            textY,
-                            layout.titleLines(),
-                            theme.text(),
-                            ZenithTooltipLayout.LINE_GAP,
-                            new ShimmerTextEffect(2600, 0.22F, 0.45F, false),
-                            animation.settings(),
-                            frame,
-                            frame.seed() ^ 0x5449544C45L
-                    );
-                } else {
-                    renderLines(font, graphics, textX, textY, layout.titleLines(), theme.text(), ZenithTooltipLayout.LINE_GAP);
-                }
-                renderHeaderOrnament(
+        if (!layout.titleLines().isEmpty()) {
+            if (presets.titleShimmer() && animation.allowsMotion()) {
+                ZenithTooltipTextAnimator.render(
+                        font,
                         graphics,
                         textX,
                         textY,
-                        layout.innerWidth(),
-                        maxLineWidth(font, layout.titleLines()),
-                        ZenithTooltipLayout.lineBlockHeight(font, layout.titleLines().size(), ZenithTooltipLayout.LINE_GAP),
-                        theme
+                        layout.titleLines(),
+                        theme.text(),
+                        ZenithTooltipLayout.LINE_GAP,
+                        new ShimmerTextEffect(2600, 0.22F, 0.45F, false),
+                        animation.settings(),
+                        frame,
+                        frame.seed() ^ 0x5449544C45L
                 );
-                textY += ZenithTooltipLayout.lineBlockHeight(font, layout.titleLines().size(), ZenithTooltipLayout.LINE_GAP)
-                        + ZenithTooltipLayout.TITLE_BODY_GAP;
-            } else if (layout.titleIconHeader() != null) {
-                ZenithTooltipLayout.PreparedTitleIcon titleIconHeader = layout.titleIconHeader();
-                renderTitleIcon(font, graphics, textX, textY, stack, theme, layout.innerWidth(), titleIconHeader, animation);
-                textY += titleIconHeader.height();
-                if (!layout.elements().isEmpty()) {
-                    textY += ZenithTooltipLayout.gapAfter(theme, titleIconHeader, layout.elements().get(0));
-                }
+            } else {
+                renderLines(font, graphics, textX, textY, layout.titleLines(), theme.text(), ZenithTooltipLayout.LINE_GAP);
             }
-
-            int bodyY = textY;
-            if (layout.scrollable()) {
-                graphics.enableScissor(
-                        textX,
-                        bodyY,
-                        textX + layout.innerWidth(),
-                        bodyY + layout.bodyViewportHeight()
-                );
-                textY -= layout.scrollOffset();
+            renderHeaderOrnament(
+                    graphics,
+                    textX,
+                    textY,
+                    layout.innerWidth(),
+                    maxLineWidth(font, layout.titleLines()),
+                    ZenithTooltipLayout.lineBlockHeight(font, layout.titleLines().size(), ZenithTooltipLayout.LINE_GAP),
+                    theme
+            );
+            textY += ZenithTooltipLayout.lineBlockHeight(font, layout.titleLines().size(), ZenithTooltipLayout.LINE_GAP)
+                    + ZenithTooltipLayout.TITLE_BODY_GAP;
+        } else if (layout.titleIconHeader() != null) {
+            ZenithTooltipLayout.PreparedTitleIcon titleIconHeader = layout.titleIconHeader();
+            renderTitleIcon(font, graphics, textX, textY, stack, theme, layout.innerWidth(), titleIconHeader, animation);
+            textY += titleIconHeader.height();
+            if (!layout.elements().isEmpty()) {
+                textY += ZenithTooltipLayout.gapAfter(theme, titleIconHeader, layout.elements().get(0));
             }
-
-            for (int i = 0; i < layout.elements().size(); i++) {
-                ZenithTooltipLayout.PreparedElement element = layout.elements().get(i);
-                renderElement(
-                        font,
-                        graphics,
-                        textX + elementEntryXOffset(animation, i),
-                        textY + elementEntryYOffset(animation, i),
-                        stack,
-                        theme,
-                        layout.innerWidth(),
-                        element,
-                        animation
-                );
-                textY += element.height();
-
-                if (i + 1 < layout.elements().size()) {
-                    textY += ZenithTooltipLayout.gapAfter(theme, element, layout.elements().get(i + 1));
-                }
-            }
-
-            if (layout.scrollable()) {
-                graphics.disableScissor();
-            }
-
-            int hintY = bodyY + layout.bodyViewportHeight();
-            renderPageHint(font, graphics, textX, hintY, layout.pageHintLines(), theme.muted());
-        } finally {
-            ACTIVE_SETTINGS.remove();
         }
+
+        int bodyY = textY;
+        if (layout.scrollable()) {
+            graphics.enableScissor(
+                    textX,
+                    bodyY,
+                    textX + layout.innerWidth(),
+                    bodyY + layout.bodyViewportHeight()
+            );
+            textY -= layout.scrollOffset();
+        }
+
+        for (int i = 0; i < layout.elements().size(); i++) {
+            ZenithTooltipLayout.PreparedElement element = layout.elements().get(i);
+            renderElement(
+                    font,
+                    graphics,
+                    textX + elementEntryXOffset(animation, i),
+                    textY + elementEntryYOffset(animation, i),
+                    stack,
+                    theme,
+                    layout.innerWidth(),
+                    element,
+                    animation
+            );
+            textY += element.height();
+
+            if (i + 1 < layout.elements().size()) {
+                textY += ZenithTooltipLayout.gapAfter(theme, element, layout.elements().get(i + 1));
+            }
+        }
+
+        if (layout.scrollable()) {
+            graphics.disableScissor();
+        }
+
+        int hintY = bodyY + layout.bodyViewportHeight();
+        renderPageHint(font, graphics, textX, hintY, layout.pageHintLines(), theme.muted());
     }
 
     private static void renderBackground(
@@ -439,19 +432,19 @@ public final class ZenithTooltipRenderer {
             }
         }
 
-        if (presets.dividerPulse() && animationsEnabled() && !reduceMotion()) {
-            int pulseAlpha = 55 + (int) ((Math.sin(frame.pageElapsedMillis() / 260.0D) + 1.0D) * 34.0D * intensity());
+        if (presets.dividerPulse() && animation.enabled() && !animation.reduceMotion()) {
+            int pulseAlpha = 55 + (int) ((Math.sin(frame.pageElapsedMillis() / 260.0D) + 1.0D) * 34.0D * animation.intensity());
             int pulseWidth = Math.max(18, innerWidth / 3);
             int pulseLeft = centerX - pulseWidth / 2;
             int pulseRight = centerX + pulseWidth / 2;
             graphics.fill(Math.max(textX, pulseLeft), lineY - 1, Math.min(textX + innerWidth, pulseRight), lineY + style.thickness() + 1, withAlpha(theme.accent(), pulseAlpha));
         }
 
-        if (presets.dividerRunes() && animationsEnabled()) {
-            renderDividerRunes(graphics, textX, lineY, innerWidth, style.thickness(), theme, frame);
+        if (presets.dividerRunes() && animation.enabled()) {
+            renderDividerRunes(graphics, textX, lineY, innerWidth, style.thickness(), theme, animation, frame);
         }
 
-        if (presets.dividerSweep() && animationsEnabled() && !reduceMotion()) {
+        if (presets.dividerSweep() && animation.enabled() && !animation.reduceMotion()) {
             int sweepWidth = Math.max(8, innerWidth / 5);
             int travel = innerWidth + sweepWidth;
             int offset = (int) ((frame.elapsedMillis() / 9L) % Math.max(1, travel));
@@ -474,11 +467,12 @@ public final class ZenithTooltipRenderer {
             int innerWidth,
             int thickness,
             ZenithTooltipTheme theme,
+            ZenithTooltipAnimationContext animation,
             ZenithTooltipAnimationState.Frame frame
     ) {
         int spacing = 18;
-        int color = withAlpha(theme.accent(), reduceMotion() ? 100 : 92 + Math.round(40 * intensity()));
-        int phase = reduceMotion() ? 0 : (int) ((frame.elapsedMillis() / 120L) % spacing);
+        int color = withAlpha(theme.accent(), animation.reduceMotion() ? 100 : 92 + Math.round(40 * animation.intensity()));
+        int phase = animation.reduceMotion() ? 0 : (int) ((frame.elapsedMillis() / 120L) % spacing);
         int centerY = lineY + Math.max(1, thickness) / 2;
         for (int px = textX + phase; px < textX + innerWidth; px += spacing) {
             if (px > textX + 3 && px < textX + innerWidth - 3) {
@@ -606,17 +600,17 @@ public final class ZenithTooltipRenderer {
                     barY + inset + fillHeight,
                     style.fillColor(bar.color())
             );
-            if (presets.barPulse() && animationsEnabled() && !reduceMotion()) {
-                renderBarPulse(graphics, textX + inset, barY + inset, fillWidth, fillHeight, bar.color(), frame);
+            if (presets.barPulse() && animation.enabled() && !animation.reduceMotion()) {
+                renderBarPulse(graphics, textX + inset, barY + inset, fillWidth, fillHeight, bar.color(), animation, frame);
             }
-            if (presets.segmentedBars() && animationsEnabled()) {
-                renderBarSegments(graphics, textX + inset, barY + inset, fillWidth, fillHeight, bar.color(), frame);
+            if (presets.segmentedBars() && animation.enabled()) {
+                renderBarSegments(graphics, textX + inset, barY + inset, fillWidth, fillHeight, bar.color(), animation, frame);
             }
-            if (presets.barScanline() && animationsEnabled() && !reduceMotion()) {
-                renderBarScanline(graphics, textX + inset, barY + inset, fillWidth, fillHeight, theme, frame);
+            if (presets.barScanline() && animation.enabled() && !animation.reduceMotion()) {
+                renderBarScanline(graphics, textX + inset, barY + inset, fillWidth, fillHeight, theme, animation, frame);
             }
-            if (presets.barEdgeSparks() && animationsEnabled() && !reduceMotion()) {
-                renderBarEdgeSparks(graphics, textX + inset + fillWidth, barY + inset, fillHeight, bar.color(), frame);
+            if (presets.barEdgeSparks() && animation.enabled() && !animation.reduceMotion()) {
+                renderBarEdgeSparks(graphics, textX + inset + fillWidth, barY + inset, fillHeight, bar.color(), animation, frame);
             }
         }
 
@@ -1082,7 +1076,7 @@ public final class ZenithTooltipRenderer {
                 long hash = mix64(frame.seed() + i * 0x9E3779B97F4A7C15L);
                 int px = x + 2 + Math.floorMod((int) hash, Math.max(1, width - 4));
                 int py = y + 2 + Math.floorMod((int) (hash >>> 24), Math.max(1, height - 4));
-                int alpha = reduceMotion() ? 70 : 45 + (int) ((Math.sin((frame.elapsedMillis() + i * 151L) / 720.0D) + 1.0D) * 28.0D);
+                int alpha = animation.reduceMotion() ? 70 : 45 + (int) ((Math.sin((frame.elapsedMillis() + i * 151L) / 720.0D) + 1.0D) * 28.0D);
                 graphics.fill(px, py, px + 1, py + 1, withAlpha(theme.accent(), alpha));
             }
         }
@@ -1092,23 +1086,23 @@ public final class ZenithTooltipRenderer {
             for (int i = 0; i < bands; i++) {
                 long hash = mix64(frame.seed() ^ (i * 0x632BE59BD9B4E019L));
                 int bandY = y + 3 + Math.floorMod((int) (hash >>> 20), Math.max(1, height - 6));
-                int base = reduceMotion() ? 0 : (int) ((frame.elapsedMillis() / 38L + i * 17L) % Math.max(1, width + 18));
+                int base = animation.reduceMotion() ? 0 : (int) ((frame.elapsedMillis() / 38L + i * 17L) % Math.max(1, width + 18));
                 int mistX = x + base - 18;
                 int bandWidth = Math.min(width - 2, 18 + Math.floorMod((int) hash, 18));
-                int color = withAlpha(theme.muted(), 28 + Math.round(18 * intensity()));
+                int color = withAlpha(theme.muted(), 28 + Math.round(18 * animation.intensity()));
                 if (mistX < x + width - 1 && mistX + bandWidth > x + 1) {
                     graphics.fill(Math.max(x + 1, mistX), bandY, Math.min(x + width - 1, mistX + bandWidth), bandY + 1, color);
                 }
             }
         }
 
-        if (presets.auroraBackground() && !reduceMotion()) {
+        if (presets.auroraBackground() && !animation.reduceMotion()) {
             int bands = Math.min(3, Math.max(1, particleBudget / 18));
             for (int i = 0; i < bands; i++) {
                 long hash = mix64(frame.seed() + i * 0x94D049BB133111EBL);
                 int bandHeight = 1 + Math.floorMod((int) hash, 2);
                 int bandY = y + 2 + Math.floorMod((int) (hash >>> 17), Math.max(1, height - 5));
-                int waveOffset = (int) Math.round(Math.sin((frame.elapsedMillis() + i * 220L) / 540.0D) * 5.0D * intensity());
+                int waveOffset = (int) Math.round(Math.sin((frame.elapsedMillis() + i * 220L) / 540.0D) * 5.0D * animation.intensity());
                 int bandWidth = Math.max(16, width / 3 + Math.floorMod((int) (hash >>> 9), Math.max(1, width / 3)));
                 int start = x + 1 + Math.floorMod((int) (frame.elapsedMillis() / 22L + hash), Math.max(1, width + bandWidth)) - bandWidth;
                 int left = Math.max(x + 1, start);
@@ -1117,10 +1111,10 @@ public final class ZenithTooltipRenderer {
                     int topBand = Math.max(y + 1, bandY + waveOffset);
                     int bottomBand = Math.min(y + height - 1, topBand + bandHeight);
                     if (bottomBand > topBand) {
-                        graphics.fill(left, topBand, right, bottomBand, withAlpha(theme.accent(), 20 + Math.round(22 * intensity())));
+                        graphics.fill(left, topBand, right, bottomBand, withAlpha(theme.accent(), 20 + Math.round(22 * animation.intensity())));
                     }
                     if (right - left > 6 && bottomBand + 1 < y + height - 1) {
-                        graphics.fill(left + 2, bottomBand, right - 2, bottomBand + 1, withAlpha(theme.borderTop(), 16 + Math.round(16 * intensity())));
+                        graphics.fill(left + 2, bottomBand, right - 2, bottomBand + 1, withAlpha(theme.borderTop(), 16 + Math.round(16 * animation.intensity())));
                     }
                 }
             }
@@ -1131,7 +1125,7 @@ public final class ZenithTooltipRenderer {
             for (int i = 0; i < motes; i++) {
                 long hash = mix64(frame.seed() ^ i * 0xD6E8FEB86659FD93L);
                 int travel = Math.max(1, height + 8);
-                int drift = reduceMotion() ? 0 : (int) ((frame.elapsedMillis() / 45L + i * 7L) % travel);
+                int drift = animation.reduceMotion() ? 0 : (int) ((frame.elapsedMillis() / 45L + i * 7L) % travel);
                 int px = x + 2 + Math.floorMod((int) hash, Math.max(1, width - 4));
                 int py = y + 2 + Math.floorMod((int) (hash >>> 23) - drift, Math.max(1, height - 4));
                 int alpha = 42 + Math.floorMod((int) (hash >>> 39), 34);
@@ -1141,8 +1135,8 @@ public final class ZenithTooltipRenderer {
 
         if (presets.scanlineBackground()) {
             int spacing = 7;
-            int offset = reduceMotion() ? 0 : (int) ((frame.elapsedMillis() / 70L) % spacing);
-            int color = withAlpha(theme.borderBottom(), 20 + Math.round(18 * intensity()));
+            int offset = animation.reduceMotion() ? 0 : (int) ((frame.elapsedMillis() / 70L) % spacing);
+            int color = withAlpha(theme.borderBottom(), 20 + Math.round(18 * animation.intensity()));
             for (int py = y + 2 + offset; py < y + height - 2; py += spacing) {
                 graphics.fill(x + 1, py, x + width - 1, py + 1, color);
             }
@@ -1175,7 +1169,7 @@ public final class ZenithTooltipRenderer {
         int left = Math.max(x + 1, center - washWidth / 2);
         int right = Math.min(x + width - 1, center + washWidth / 2);
         if (right > left) {
-            int alpha = Math.round((1.0F - progress) * 70.0F * intensity());
+            int alpha = Math.round((1.0F - progress) * 70.0F * animation.intensity());
             graphics.fill(left, y + 1, right, y + height - 1, withAlpha(theme.borderTop(), alpha));
             int head = Math.min(right, center + 1);
             graphics.fill(Math.max(left, head - 1), y + 1, head, y + height - 1, withAlpha(theme.accent(), Math.min(170, alpha + 70)));
@@ -1197,15 +1191,15 @@ public final class ZenithTooltipRenderer {
             return;
         }
 
-        if (presets.openingBloom() && frame.elapsedMillis() < 360L && !reduceMotion()) {
+        if (presets.openingBloom() && frame.elapsedMillis() < 360L && !animation.reduceMotion()) {
             float progress = easeOutCubic(Math.min(1.0F, frame.elapsedMillis() / 360.0F));
-            int alpha = Math.round((1.0F - progress) * 95.0F * intensity());
+            int alpha = Math.round((1.0F - progress) * 95.0F * animation.intensity());
             int inset = Math.round(3.0F * (1.0F - progress));
             graphics.outline(x - inset, y - inset, width + inset * 2, height + inset * 2, withAlpha(theme.accent(), alpha));
             graphics.fill(x + 1, y + 1, x + width - 1, y + 2, withAlpha(theme.borderTop(), alpha / 2));
         }
 
-        if (presets.frameAssembly() && frame.elapsedMillis() < 300L && !reduceMotion()) {
+        if (presets.frameAssembly() && frame.elapsedMillis() < 300L && !animation.reduceMotion()) {
             float progress = easeOutCubic(Math.min(1.0F, frame.elapsedMillis() / 300.0F));
             int horizontal = Math.round(width * progress * 0.5F);
             int vertical = Math.round(height * progress * 0.5F);
@@ -1220,12 +1214,12 @@ public final class ZenithTooltipRenderer {
             graphics.fill(x + width - 1, y + height - vertical, x + width, y + height, color);
         }
 
-        if (presets.pulsingBorder() && !reduceMotion()) {
-            int alpha = 45 + (int) ((Math.sin(frame.elapsedMillis() / 430.0D) + 1.0D) * 36.0D * intensity());
+        if (presets.pulsingBorder() && !animation.reduceMotion()) {
+            int alpha = 45 + (int) ((Math.sin(frame.elapsedMillis() / 430.0D) + 1.0D) * 36.0D * animation.intensity());
             graphics.outline(x + 1, y + 1, width - 2, height - 2, withAlpha(theme.accent(), alpha));
         }
 
-        if (presets.travellingBorderEnergy() && !reduceMotion()) {
+        if (presets.travellingBorderEnergy() && !animation.reduceMotion()) {
             int perimeter = Math.max(1, width * 2 + height * 2 - 4);
             int start = (int) ((frame.elapsedMillis() / 8L) % perimeter);
             int length = Math.max(10, Math.min(perimeter / 5, 34));
@@ -1237,8 +1231,8 @@ public final class ZenithTooltipRenderer {
             }
         }
 
-        if (presets.cornerSparks() && !reduceMotion()) {
-            renderCornerSparks(graphics, x, y, width, height, theme, frame);
+        if (presets.cornerSparks() && !animation.reduceMotion()) {
+            renderCornerSparks(graphics, x, y, width, height, theme, animation, frame);
         }
     }
 
@@ -1249,12 +1243,13 @@ public final class ZenithTooltipRenderer {
             int width,
             int height,
             ZenithTooltipTheme theme,
+            ZenithTooltipAnimationContext animation,
             ZenithTooltipAnimationState.Frame frame
     ) {
         if (width < 12 || height < 12) {
             return;
         }
-        int color = withAlpha(theme.accent(), 120 + Math.round(55 * intensity()));
+        int color = withAlpha(theme.accent(), 120 + Math.round(55 * animation.intensity()));
         int phase = (int) ((frame.elapsedMillis() / 95L) % 4L);
         int size = 2 + phase % 2;
         graphics.fill(x + 2 + phase, y + 1, x + 2 + phase + size, y + 2, color);
@@ -1314,7 +1309,7 @@ public final class ZenithTooltipRenderer {
             return 0;
         }
         float progress = easeOutCubic(Math.max(0.0F, Math.min(1.0F, local / 260.0F)));
-        return -Math.round((1.0F - progress) * 6.0F * intensity());
+        return -Math.round((1.0F - progress) * 6.0F * animation.intensity());
     }
 
     private static int elementEntryYOffset(
@@ -1331,7 +1326,7 @@ public final class ZenithTooltipRenderer {
             return 0;
         }
         float progress = easeOutCubic(Math.max(0.0F, Math.min(1.0F, local / 220.0F)));
-        return Math.round((1.0F - progress) * 3.0F * intensity());
+        return Math.round((1.0F - progress) * 3.0F * animation.intensity());
     }
 
     private static void renderBarSegments(
@@ -1341,6 +1336,7 @@ public final class ZenithTooltipRenderer {
             int width,
             int height,
             int color,
+            ZenithTooltipAnimationContext animation,
             ZenithTooltipAnimationState.Frame frame
     ) {
         if (width <= 4 || height <= 0) {
@@ -1351,7 +1347,7 @@ public final class ZenithTooltipRenderer {
         for (int px = x + segmentSpacing; px < x + width; px += segmentSpacing) {
             graphics.fill(px, y, px + 1, y + height, segmentColor);
         }
-        if (!reduceMotion()) {
+        if (!animation.reduceMotion()) {
             int scan = x + Math.floorMod((int) (frame.elapsedMillis() / 18L), Math.max(1, width));
             graphics.fill(scan, y, Math.min(x + width, scan + 2), y + height, withAlpha(0x00FFFFFF | color, 90));
         }
@@ -1364,12 +1360,13 @@ public final class ZenithTooltipRenderer {
             int width,
             int height,
             int color,
+            ZenithTooltipAnimationContext animation,
             ZenithTooltipAnimationState.Frame frame
     ) {
         if (width <= 1 || height <= 0) {
             return;
         }
-        int alpha = 26 + (int) ((Math.sin(frame.elapsedMillis() / 210.0D) + 1.0D) * 24.0D * intensity());
+        int alpha = 26 + (int) ((Math.sin(frame.elapsedMillis() / 210.0D) + 1.0D) * 24.0D * animation.intensity());
         graphics.fill(x, y, x + width, y + height, withAlpha(color, alpha));
     }
 
@@ -1380,6 +1377,7 @@ public final class ZenithTooltipRenderer {
             int width,
             int height,
             ZenithTooltipTheme theme,
+            ZenithTooltipAnimationContext animation,
             ZenithTooltipAnimationState.Frame frame
     ) {
         if (width <= 3 || height <= 0) {
@@ -1390,7 +1388,7 @@ public final class ZenithTooltipRenderer {
         int left = Math.max(x, scan);
         int right = Math.min(x + width, scan + scanWidth);
         if (right > left) {
-            graphics.fill(left, y, right, y + height, withAlpha(theme.borderTop(), 80 + Math.round(45 * intensity())));
+            graphics.fill(left, y, right, y + height, withAlpha(theme.borderTop(), 80 + Math.round(45 * animation.intensity())));
         }
     }
 
@@ -1400,12 +1398,13 @@ public final class ZenithTooltipRenderer {
             int y,
             int height,
             int color,
+            ZenithTooltipAnimationContext animation,
             ZenithTooltipAnimationState.Frame frame
     ) {
         if (height <= 1) {
             return;
         }
-        int count = Math.max(1, Math.min(3, particleBudget() / 24));
+        int count = Math.max(1, Math.min(3, animation.particleBudget() / 24));
         for (int i = 0; i < count; i++) {
             long hash = mix64(frame.seed() + i * 0xC2B2AE3D27D4EB4FL + frame.elapsedMillis() / 90L);
             int py = y + Math.floorMod((int) hash, height);
@@ -1418,7 +1417,7 @@ public final class ZenithTooltipRenderer {
         if (!animation.allowsMotion() || !animation.presets().iconFloat()) {
             return 0;
         }
-        return Math.round((float) Math.sin(animation.frame().elapsedMillis() / 360.0D) * 2.0F * intensity());
+        return Math.round((float) Math.sin(animation.frame().elapsedMillis() / 360.0D) * 2.0F * animation.intensity());
     }
 
     private static void renderIconOrbit(
@@ -1444,26 +1443,6 @@ public final class ZenithTooltipRenderer {
     private static float easeOutCubic(float value) {
         float inverse = 1.0F - value;
         return 1.0F - inverse * inverse * inverse;
-    }
-
-    private static boolean animationsEnabled() {
-        return ACTIVE_SETTINGS.get().animationsEnabled();
-    }
-
-    private static boolean reduceMotion() {
-        return ACTIVE_SETTINGS.get().reduceMotion();
-    }
-
-    private static boolean ambientEffectsEnabled() {
-        return ACTIVE_SETTINGS.get().ambientEffectsEnabled();
-    }
-
-    private static float intensity() {
-        return ACTIVE_SETTINGS.get().intensity();
-    }
-
-    private static int particleBudget() {
-        return ACTIVE_SETTINGS.get().scaledParticleBudget();
     }
 
     private static int withAlpha(int color, int alpha) {

@@ -3,6 +3,8 @@ package net.zic.zenithlib.tooltip.api.animation;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.ZenithLib;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +20,10 @@ public final class ZenithTooltipPresets {
     public static final Identifier RUNIC = id("runic");
     public static final Identifier KINETIC = id("kinetic");
 
-    private static final Map<Identifier, ZenithTooltipPreset> PRESETS = new LinkedHashMap<>();
+    private static final Map<Identifier, Preset> PRESETS = new LinkedHashMap<>();
 
     static {
-        register(ZenithTooltipPreset.builder(CELESTIAL)
+        register(Preset.builder(CELESTIAL)
                 .starField(true)
                 .travellingBorderEnergy(true)
                 .openingBloom(true)
@@ -29,7 +31,7 @@ public final class ZenithTooltipPresets {
                 .iconFloat(true)
                 .staggeredElements(true)
                 .build());
-        register(ZenithTooltipPreset.builder(CORRUPTED)
+        register(Preset.builder(CORRUPTED)
                 .driftingMist(true)
                 .scanlineBackground(true)
                 .pulsingBorder(true)
@@ -37,7 +39,7 @@ public final class ZenithTooltipPresets {
                 .pageWash(true)
                 .dividerPulse(true)
                 .build());
-        register(ZenithTooltipPreset.builder(LIVING)
+        register(Preset.builder(LIVING)
                 .driftingMist(true)
                 .moteField(true)
                 .openingBloom(true)
@@ -45,28 +47,28 @@ public final class ZenithTooltipPresets {
                 .barPulse(true)
                 .staggeredElements(true)
                 .build());
-        register(ZenithTooltipPreset.builder(MECHANICAL)
+        register(Preset.builder(MECHANICAL)
                 .scanlineBackground(true)
                 .frameAssembly(true)
                 .pageSlide(true)
                 .segmentedBars(true)
                 .barScanline(true)
                 .build());
-        register(ZenithTooltipPreset.builder(NEBULA)
+        register(Preset.builder(NEBULA)
                 .starField(true)
                 .auroraBackground(true)
                 .moteField(true)
                 .titleShimmer(true)
                 .iconOrbit(true)
                 .build());
-        register(ZenithTooltipPreset.builder(RUNIC)
+        register(Preset.builder(RUNIC)
                 .pulsingBorder(true)
                 .frameAssembly(true)
                 .pageSlide(true)
                 .dividerRunes(true)
                 .titleShimmer(true)
                 .build());
-        register(ZenithTooltipPreset.builder(KINETIC)
+        register(Preset.builder(KINETIC)
                 .travellingBorderEnergy(true)
                 .pageSlide(true)
                 .segmentedBars(true)
@@ -77,17 +79,17 @@ public final class ZenithTooltipPresets {
 
     private ZenithTooltipPresets() {}
 
-    public static void register(ZenithTooltipPreset preset) {
+    public static void register(Preset preset) {
         PRESETS.put(preset.id(), preset);
     }
 
-    public static ZenithTooltipPreset compose(Identifier id, Identifier... parents) {
-        ZenithTooltipPreset preset = ZenithTooltipPreset.builder(id).parents(parents).build();
+    public static Preset compose(Identifier id, Identifier... parents) {
+        Preset preset = Preset.builder(id).parents(parents).build();
         register(preset);
         return preset;
     }
 
-    public static Optional<ZenithTooltipPreset> get(Identifier id) {
+    public static Optional<Preset> get(Identifier id) {
         return Optional.ofNullable(PRESETS.get(id));
     }
 
@@ -103,7 +105,7 @@ public final class ZenithTooltipPresets {
         if (depth > 8) {
             return;
         }
-        ZenithTooltipPreset preset = PRESETS.get(id);
+        Preset preset = PRESETS.get(id);
         if (preset == null) {
             return;
         }
@@ -201,6 +203,183 @@ public final class ZenithTooltipPresets {
                     || frameAssembly || openingBloom || pageSlide || pageWash || titleShimmer
                     || iconFloat || iconOrbit || segmentedBars || barScanline || barPulse || barEdgeSparks
                     || dividerSweep || dividerRunes || dividerPulse || staggeredElements);
+        }
+    }
+
+    public record Preset(
+            Identifier id,
+            List<Identifier> parents,
+            boolean starField,
+            boolean driftingMist,
+            boolean auroraBackground,
+            boolean moteField,
+            boolean scanlineBackground,
+            boolean travellingBorderEnergy,
+            boolean pulsingBorder,
+            boolean cornerSparks,
+            boolean twinBorderComets,
+            boolean frameAssembly,
+            boolean openingBloom,
+            boolean pageSlide,
+            boolean pageWash,
+            boolean titleShimmer,
+            boolean iconFloat,
+            boolean iconOrbit,
+            boolean segmentedBars,
+            boolean barScanline,
+            boolean barPulse,
+            boolean barEdgeSparks,
+            boolean dividerSweep,
+            boolean dividerRunes,
+            boolean dividerPulse,
+            boolean staggeredElements
+    ) {
+        public Preset {
+            parents = parents == null ? List.of() : List.copyOf(parents);
+        }
+
+        public static Builder builder(Identifier id) {
+            return new Builder(id);
+        }
+
+        public Builder toBuilder(Identifier newId) {
+            return new Builder(newId)
+                    .parents(parents)
+                    .starField(starField)
+                    .driftingMist(driftingMist)
+                    .auroraBackground(auroraBackground)
+                    .moteField(moteField)
+                    .scanlineBackground(scanlineBackground)
+                    .travellingBorderEnergy(travellingBorderEnergy)
+                    .pulsingBorder(pulsingBorder)
+                    .cornerSparks(cornerSparks)
+                    .twinBorderComets(twinBorderComets)
+                    .frameAssembly(frameAssembly)
+                    .openingBloom(openingBloom)
+                    .pageSlide(pageSlide)
+                    .pageWash(pageWash)
+                    .titleShimmer(titleShimmer)
+                    .iconFloat(iconFloat)
+                    .iconOrbit(iconOrbit)
+                    .segmentedBars(segmentedBars)
+                    .barScanline(barScanline)
+                    .barPulse(barPulse)
+                    .barEdgeSparks(barEdgeSparks)
+                    .dividerSweep(dividerSweep)
+                    .dividerRunes(dividerRunes)
+                    .dividerPulse(dividerPulse)
+                    .staggeredElements(staggeredElements);
+        }
+
+        public static final class Builder {
+            private final Identifier id;
+            private List<Identifier> parents = List.of();
+            private boolean starField;
+            private boolean driftingMist;
+            private boolean auroraBackground;
+            private boolean moteField;
+            private boolean scanlineBackground;
+            private boolean travellingBorderEnergy;
+            private boolean pulsingBorder;
+            private boolean cornerSparks;
+            private boolean twinBorderComets;
+            private boolean frameAssembly;
+            private boolean openingBloom;
+            private boolean pageSlide;
+            private boolean pageWash;
+            private boolean titleShimmer;
+            private boolean iconFloat;
+            private boolean iconOrbit;
+            private boolean segmentedBars;
+            private boolean barScanline;
+            private boolean barPulse;
+            private boolean barEdgeSparks;
+            private boolean dividerSweep;
+            private boolean dividerRunes;
+            private boolean dividerPulse;
+            private boolean staggeredElements;
+
+            private Builder(Identifier id) {
+                this.id = id;
+            }
+
+            public Builder parents(List<Identifier> parents) {
+                this.parents = parents == null ? List.of() : List.copyOf(parents);
+                return this;
+            }
+
+            public Builder parent(Identifier parent) {
+                this.parents = List.of(parent);
+                return this;
+            }
+
+            public Builder parents(Identifier... parents) {
+                this.parents = parents == null ? List.of() : Arrays.stream(parents).toList();
+                return this;
+            }
+
+            public Builder addParent(Identifier parent) {
+                ArrayList<Identifier> next = new ArrayList<>(this.parents);
+                next.add(parent);
+                this.parents = List.copyOf(next);
+                return this;
+            }
+
+            public Builder starField(boolean value) { this.starField = value; return this; }
+            public Builder driftingMist(boolean value) { this.driftingMist = value; return this; }
+            public Builder auroraBackground(boolean value) { this.auroraBackground = value; return this; }
+            public Builder moteField(boolean value) { this.moteField = value; return this; }
+            public Builder scanlineBackground(boolean value) { this.scanlineBackground = value; return this; }
+            public Builder travellingBorderEnergy(boolean value) { this.travellingBorderEnergy = value; return this; }
+            public Builder pulsingBorder(boolean value) { this.pulsingBorder = value; return this; }
+            public Builder cornerSparks(boolean value) { this.cornerSparks = value; return this; }
+            public Builder twinBorderComets(boolean value) { this.twinBorderComets = value; return this; }
+            public Builder frameAssembly(boolean value) { this.frameAssembly = value; return this; }
+            public Builder openingBloom(boolean value) { this.openingBloom = value; return this; }
+            public Builder pageSlide(boolean value) { this.pageSlide = value; return this; }
+            public Builder pageWash(boolean value) { this.pageWash = value; return this; }
+            public Builder titleShimmer(boolean value) { this.titleShimmer = value; return this; }
+            public Builder iconFloat(boolean value) { this.iconFloat = value; return this; }
+            public Builder iconOrbit(boolean value) { this.iconOrbit = value; return this; }
+            public Builder segmentedBars(boolean value) { this.segmentedBars = value; return this; }
+            public Builder barScanline(boolean value) { this.barScanline = value; return this; }
+            public Builder barPulse(boolean value) { this.barPulse = value; return this; }
+            public Builder barEdgeSparks(boolean value) { this.barEdgeSparks = value; return this; }
+            public Builder dividerSweep(boolean value) { this.dividerSweep = value; return this; }
+            public Builder dividerRunes(boolean value) { this.dividerRunes = value; return this; }
+            public Builder dividerPulse(boolean value) { this.dividerPulse = value; return this; }
+            public Builder staggeredElements(boolean value) { this.staggeredElements = value; return this; }
+
+            public Preset build() {
+                return new Preset(
+                        id,
+                        parents,
+                        starField,
+                        driftingMist,
+                        auroraBackground,
+                        moteField,
+                        scanlineBackground,
+                        travellingBorderEnergy,
+                        pulsingBorder,
+                        cornerSparks,
+                        twinBorderComets,
+                        frameAssembly,
+                        openingBloom,
+                        pageSlide,
+                        pageWash,
+                        titleShimmer,
+                        iconFloat,
+                        iconOrbit,
+                        segmentedBars,
+                        barScanline,
+                        barPulse,
+                        barEdgeSparks,
+                        dividerSweep,
+                        dividerRunes,
+                        dividerPulse,
+                        staggeredElements
+                );
+            }
         }
     }
 }

@@ -14,7 +14,6 @@ import net.zic.zenithlib.tooltip.api.animation.WaveTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
-import net.zic.zenithlib.tooltip.api.element.CollectionElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
 import net.zic.zenithlib.tooltip.api.element.DynamicElement;
 import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
@@ -24,7 +23,7 @@ import net.zic.zenithlib.tooltip.api.element.RowElement;
 import net.zic.zenithlib.tooltip.api.element.SpacerElement;
 import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
-import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValueSources;
+import net.zic.zenithlib.tooltip.api.value.ZenithTooltipSources;
 
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +45,7 @@ public final class ZenithTooltipBuilders {
     }
 
     public static Identifier sourceId(String source) {
-        return ZenithTooltipValueSources.identifier(source);
+        return ZenithTooltipSources.identifier(source);
     }
 
     public static ZenithTooltipText literal(String text) {
@@ -90,23 +89,23 @@ public final class ZenithTooltipBuilders {
     }
 
     public static ZenithTooltipText itemName() {
-        return sourced(ZenithTooltipValueSources.ITEM_NAME);
+        return sourced(ZenithTooltipSources.ITEM_NAME);
     }
 
     public static ZenithTooltipText itemId() {
-        return sourced(ZenithTooltipValueSources.ITEM_ID);
+        return sourced(ZenithTooltipSources.ITEM_ID);
     }
 
     public static ZenithTooltipText subjectName() {
-        return sourced(ZenithTooltipValueSources.SUBJECT_NAME);
+        return sourced(ZenithTooltipSources.SUBJECT_NAME);
     }
 
     public static ZenithTooltipText subjectDescription() {
-        return sourced(ZenithTooltipValueSources.SUBJECT_DESCRIPTION);
+        return sourced(ZenithTooltipSources.SUBJECT_DESCRIPTION);
     }
 
     public static ZenithTooltipText subjectId() {
-        return sourced(ZenithTooltipValueSources.SUBJECT_ID);
+        return sourced(ZenithTooltipSources.SUBJECT_ID);
     }
 
     public static ZenithTooltipText controls() {
@@ -375,7 +374,7 @@ public final class ZenithTooltipBuilders {
     }
 
     public static DynamicElement dynamic(String source) {
-        return new DynamicElement(ZenithTooltipValueSources.identifier(source));
+        return new DynamicElement(ZenithTooltipSources.identifier(source));
     }
 
     public static DynamicElement dynamicSection(String source) {
@@ -390,35 +389,7 @@ public final class ZenithTooltipBuilders {
         return new DynamicElement(source, fallback, true);
     }
 
-    public static CollectionElement dynamicBadges(
-            Identifier source,
-            ZenithTooltipText header
-    ) {
-        return CollectionElement.badges(source.toString(), header);
-    }
-
-    public static CollectionElement dynamicBadges(
-            String source,
-            ZenithTooltipText header
-    ) {
-        return CollectionElement.badges(source, header);
-    }
-
-    public static CollectionElement dynamicRows(
-            Identifier source,
-            ZenithTooltipText header
-    ) {
-        return CollectionElement.rows(source.toString(), header);
-    }
-
-    public static CollectionElement dynamicRows(
-            String source,
-            ZenithTooltipText header
-    ) {
-        return CollectionElement.rows(source, header);
-    }
-
     public static BarElement durabilityBar(ZenithTooltipText label, ZenithTooltipColor color) {
-        return dynamicBar(label, ZenithTooltipValueSources.DURABILITY, color);
+        return dynamicBar(label, ZenithTooltipSources.DURABILITY, color);
     }
 }

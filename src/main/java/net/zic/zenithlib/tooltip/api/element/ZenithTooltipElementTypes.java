@@ -31,7 +31,6 @@ public final class ZenithTooltipElementTypes {
     public static final Identifier BADGE = id("badge");
     public static final Identifier BAR = id("bar");
     public static final Identifier ENTITY_PREVIEW = id("entity_preview");
-    public static final Identifier COLLECTION = id("collection");
     public static final Identifier DYNAMIC = id("dynamic");
 
     private static final Map<String, Entry<?>> BY_NAME = new ConcurrentHashMap<>();
@@ -50,7 +49,6 @@ public final class ZenithTooltipElementTypes {
         registerBuiltIn("badge", BADGE, BadgeElement.CODEC);
         registerBuiltIn("bar", BAR, BarElement.CODEC);
         registerBuiltIn("entity_preview", ENTITY_PREVIEW, EntityPreviewElement.CODEC);
-        registerBuiltIn("collection", COLLECTION, CollectionElement.CODEC);
         registerBuiltIn("dynamic", DYNAMIC, DynamicElement.CODEC);
         alias("source", DYNAMIC);
     }
@@ -130,19 +128,19 @@ public final class ZenithTooltipElementTypes {
         return Map.copyOf(copy);
     }
 
-    private static <T extends ZenithTooltipElement> void registerBuiltIn(String legacyName, Identifier id, MapCodec<T> codec) {
-        registerInternal(legacyName, id, codec);
+    private static <T extends ZenithTooltipElement> void registerBuiltIn(String aliasName, Identifier id, MapCodec<T> codec) {
+        registerInternal(aliasName, id, codec);
     }
 
-    private static void alias(String legacyName, Identifier id) {
+    private static void alias(String aliasName, Identifier id) {
         Entry<?> entry = BY_ID.get(id);
-        if (entry != null && legacyName != null && !legacyName.isBlank()) {
-            BY_NAME.put(legacyName, entry);
+        if (entry != null && aliasName != null && !aliasName.isBlank()) {
+            BY_NAME.put(aliasName, entry);
         }
     }
 
     private static <T extends ZenithTooltipElement> void registerInternal(
-            String legacyName,
+            String aliasName,
             Identifier id,
             MapCodec<T> codec
     ) {
@@ -157,8 +155,8 @@ public final class ZenithTooltipElementTypes {
         }
 
         BY_NAME.put(id.toString(), entry);
-        if (legacyName != null && !legacyName.isBlank()) {
-            BY_NAME.put(legacyName, entry);
+        if (aliasName != null && !aliasName.isBlank()) {
+            BY_NAME.put(aliasName, entry);
         }
         ID_BY_CODEC.put(codec, id);
     }
