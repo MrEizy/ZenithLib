@@ -13,6 +13,8 @@ import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipRuleBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplateBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipThemeBuilder;
 
+import java.util.function.Consumer;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -49,6 +51,35 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
     /** Creates an identifier in the namespace owned by this data provider. */
     protected final Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(this.modId, path);
+    }
+
+    protected final ZenithTooltipTemplateBuilder template(String path) {
+        return template(id(path));
+    }
+
+    protected final ZenithTooltipRuleBuilder rule(String path) {
+        return rule(id(path));
+    }
+
+    protected final ZenithTooltipThemeBuilder theme(String path) {
+        return theme(id(path));
+    }
+
+    protected final void template(String path, Consumer<ZenithTooltipTemplateBuilder> action) {
+        Objects.requireNonNull(action, "action").accept(template(path));
+    }
+
+    protected final void rule(String path, Consumer<ZenithTooltipRuleBuilder> action) {
+        Objects.requireNonNull(action, "action").accept(rule(path));
+    }
+
+    protected final void theme(String path, Consumer<ZenithTooltipThemeBuilder> action) {
+        Objects.requireNonNull(action, "action").accept(theme(path));
+    }
+
+    protected final void addTemplatePages(ZenithTooltipTemplateBuilder target, ZenithTooltipTemplateBuilder source) {
+        Objects.requireNonNull(target, "target");
+        Objects.requireNonNull(source, "source").build().pages().forEach(target::page);
     }
 
     /** Creates an identifier used as a cross-namespace reference, such as a vanilla item or ZenithLib theme. */

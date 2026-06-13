@@ -6,23 +6,23 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "color": "warning",
           "text": {
             "literal": "Bars"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Segmented motion, scan lines, and edge sparks sit on top of the real bar value."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "positive",
           "label": {
             "literal": "Integrity"
@@ -34,7 +34,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "label": {
             "literal": "Stored Qi"
           },
@@ -42,7 +42,7 @@
           "value": 42
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "negative",
           "label": {
             "literal": "Impurities"
@@ -58,13 +58,13 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Low / High Checks"
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "negative",
           "label": {
             "literal": "Almost Empty"
@@ -76,7 +76,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "warning",
           "label": {
             "literal": "Half Charge"
@@ -88,7 +88,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "positive",
           "label": {
             "literal": "Overflow Test"

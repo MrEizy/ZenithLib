@@ -6,13 +6,13 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Entry Conditions"
           }
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Void Clearance"
           },
@@ -28,14 +28,14 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "color": "warning",
           "text": {
             "literal": "Expanded Check List"
           }
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Rank"
           },
@@ -45,7 +45,7 @@
           "right_color": "positive"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Clearance"
           },
@@ -55,7 +55,7 @@
           "right_color": "negative"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Stability"
           },
@@ -65,7 +65,7 @@
           "right_color": "warning"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "A compact checklist for gates, ranks, attunements, and locked abilities."

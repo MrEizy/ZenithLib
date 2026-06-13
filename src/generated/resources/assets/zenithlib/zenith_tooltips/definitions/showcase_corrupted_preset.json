@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "title_icon",
+          "type": "zenithlib:title_icon",
           "subtitle": {
             "literal": "mist, pulse, and fractured glyphs"
           },
@@ -15,7 +15,7 @@
           }
         },
         {
-          "type": "badge",
+          "type": "zenithlib:badge",
           "background_color": "negative",
           "border_color": "negative",
           "text": {
@@ -24,17 +24,17 @@
           "text_color": "background"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "effect": {
-            "type": "stack",
+            "type": "zenithlib:stack",
             "effects": [
               {
-                "type": "scramble_reveal",
+                "type": "zenithlib:scramble_reveal",
                 "reveal": 0.7,
                 "speed": 28
               },
               {
-                "type": "shimmer",
+                "type": "zenithlib:shimmer",
                 "brightness": 0.45,
                 "period": 2600,
                 "width": 0.13
@@ -46,10 +46,10 @@
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Signal"
           },
@@ -59,7 +59,7 @@
           "right_color": "negative"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Containment"
           },

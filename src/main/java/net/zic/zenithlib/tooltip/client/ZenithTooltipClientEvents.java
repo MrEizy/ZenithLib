@@ -21,7 +21,6 @@ import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipData;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
-import net.zic.zenithlib.tooltip.api.ZenithTooltipProviderResult;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipProviders;
 import net.zic.zenithlib.tooltip.api.context.ZenithTooltipContext;
 import net.zic.zenithlib.tooltip.manager.ZenithTooltipRepository;
@@ -78,13 +77,13 @@ public final class ZenithTooltipClientEvents {
 
         Optional<Player> player = Optional.ofNullable((Player) Minecraft.getInstance().player);
         ZenithTooltipContext baseContext = ZenithTooltipContext.of(stack, id, registryAccess, player);
-        Optional<ZenithTooltipProviderResult> provided = ZenithTooltipProviders.create(baseContext);
+        Optional<ZenithTooltipProviders.Result> provided = ZenithTooltipProviders.create(baseContext);
 
         ZenithTooltipContext resolutionContext = provided
-                .map(ZenithTooltipProviderResult::context)
+                .map(ZenithTooltipProviders.Result::context)
                 .orElse(baseContext);
         ZenithTooltipDocument document = provided
-                .map(ZenithTooltipProviderResult::document)
+                .map(ZenithTooltipProviders.Result::document)
                 .orElseGet(() -> ZenithTooltipRepository.get(stack, id));
 
         if (document == null) {

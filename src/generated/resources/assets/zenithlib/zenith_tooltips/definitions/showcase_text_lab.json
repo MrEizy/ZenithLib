@@ -6,21 +6,21 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Living Lettering"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "effect": {
-            "type": "stack",
+            "type": "zenithlib:stack",
             "effects": [
               {
-                "type": "rainbow"
+                "type": "zenithlib:rainbow"
               },
               {
-                "type": "shimmer"
+                "type": "zenithlib:shimmer"
               }
             ]
           },
@@ -29,30 +29,30 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "accent",
           "effect": {
-            "type": "wave"
+            "type": "zenithlib:wave"
           },
           "text": {
             "literal": "Each letter takes its turn hopping through the wave."
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "effect": {
-            "type": "stack",
+            "type": "zenithlib:stack",
             "effects": [
               {
-                "type": "rainbow",
+                "type": "zenithlib:rainbow",
                 "period": 2000,
                 "spread": 0.055
               },
               {
-                "type": "shimmer"
+                "type": "zenithlib:shimmer"
               },
               {
-                "type": "wave",
+                "type": "zenithlib:wave",
                 "period": 850,
                 "wavelength": 6.0
               }
@@ -63,12 +63,12 @@
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "effect": {
-            "type": "rainbow",
+            "type": "zenithlib:rainbow",
             "max_hue": 0.82,
             "min_hue": 0.52,
             "mode": "ping_pong",
@@ -80,9 +80,9 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "effect": {
-            "type": "typewriter",
+            "type": "zenithlib:typewriter",
             "delay": 120,
             "duration": 850
           },
@@ -91,10 +91,10 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "accent",
           "effect": {
-            "type": "rune_decipher",
+            "type": "zenithlib:rune_decipher",
             "delay": 80,
             "duration": 1100,
             "speed": 42
@@ -111,29 +111,29 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Stacked Glyph Passes"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "effect": {
-            "type": "stack",
+            "type": "zenithlib:stack",
             "effects": [
               {
-                "type": "shimmer",
+                "type": "zenithlib:shimmer",
                 "period": 1800,
                 "width": 0.16
               },
               {
-                "type": "wave",
+                "type": "zenithlib:wave",
                 "amplitude": 1,
                 "period": 1200,
                 "wavelength": 8.5
               },
               {
-                "type": "rainbow",
+                "type": "zenithlib:rainbow",
                 "max_hue": 0.92,
                 "min_hue": 0.74,
                 "mode": "ping_pong",
@@ -147,10 +147,10 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "effect": {
-            "type": "rune_decipher",
+            "type": "zenithlib:rune_decipher",
             "delay": 60,
             "duration": 900,
             "speed": 36

@@ -4,12 +4,15 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.ZenithLib;
+import net.neoforged.fml.ModList;
 import net.zic.zenithlib.tooltip.api.context.ZenithTooltipContext;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,6 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * identifiers are ignored so one mod cannot silently replace another mod's binding.</p>
  */
 public final class ZenithTooltipValueSources {
+    @FunctionalInterface
+    public interface Source {
+        Optional<ZenithTooltipValue> resolve(ZenithTooltipContext context);
+    }
+
     public static final Identifier DURABILITY = id("durability");
     public static final Identifier ITEM_NAME = id("item_name");
     public static final Identifier ITEM_ID = id("item_id");
@@ -26,7 +34,7 @@ public final class ZenithTooltipValueSources {
     public static final Identifier SUBJECT_DESCRIPTION = id("subject_description");
     public static final Identifier SUBJECT_ID = id("subject_id");
 
-    private static final Map<Identifier, ZenithTooltipValueSource> SOURCES = new ConcurrentHashMap<>();
+    private static final Map<Identifier, Source> SOURCES = new ConcurrentHashMap<>();
 
     static {
         registerBuiltIns();
@@ -34,17 +42,43 @@ public final class ZenithTooltipValueSources {
 
     private ZenithTooltipValueSources() {}
 
-    public static void register(Identifier id, ZenithTooltipValueSource source) {
+    public static void register(Identifier id, Source source) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(source, "source");
 
-        ZenithTooltipValueSource existing = SOURCES.putIfAbsent(id, source);
+        Source existing = SOURCES.putIfAbsent(id, source);
         if (existing != null) {
             ZenithLib.LOGGER.debug("Skipped duplicate Zenith tooltip value source registration for {}", id);
             return;
         }
 
         ZenithLib.LOGGER.info("Registered Zenith tooltip value source {}", id);
+    }
+
+    public static void registerIfLoaded(String requiredModId, Identifier id, Source source) {
+        Objects.requireNonNull(requiredModId, "requiredModId");
+        if (ModList.get().isLoaded(requiredModId)) {
+            register(id, source);
+        }
+    }
+
+    public static void registerItemSource(
+            Identifier id,
+            Function<ZenithTooltipContext, Optional<ZenithTooltipValue>> source
+    ) {
+        Objects.requireNonNull(source, "source");
+        register(id, source::apply);
+    }
+
+    public static <T> void registerSubjectSource(
+            Identifier id,
+            Class<T> subjectType,
+            BiFunction<T, ZenithTooltipContext, Optional<ZenithTooltipValue>> source
+    ) {
+        Objects.requireNonNull(subjectType, "subjectType");
+        Objects.requireNonNull(source, "source");
+        register(id, context -> context.subject(subjectType)
+                .flatMap(subject -> source.apply(subject, context)));
     }
 
     public static Optional<ZenithTooltipValue> resolve(
@@ -54,7 +88,7 @@ public final class ZenithTooltipValueSources {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(context, "context");
 
-        ZenithTooltipValueSource source = SOURCES.get(id);
+        Source source = SOURCES.get(id);
         if (source == null) {
             return Optional.empty();
         }

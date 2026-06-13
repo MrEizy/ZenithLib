@@ -6,21 +6,21 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "translate": "tooltip.zenithlib.diamond.page_2.header"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "translate": "tooltip.zenithlib.diamond.page_2.line_1"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "effect": {
-            "type": "scramble_reveal",
+            "type": "zenithlib:scramble_reveal",
             "reveal": 0.55,
             "speed": 20
           },
@@ -29,10 +29,10 @@
           }
         },
         {
-          "type": "spacer"
+          "type": "zenithlib:spacer"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "accent",
           "text": {
             "translate": "tooltip.zenithlib.diamond.page_2.line_2"

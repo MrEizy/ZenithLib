@@ -15,6 +15,7 @@ import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.CollectionElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
+import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.IconElement;
 import net.zic.zenithlib.tooltip.api.element.RowElement;
@@ -220,6 +221,14 @@ public final class ZenithTooltipBuilders {
 
     public static IconElement icon() {
         return new IconElement();
+    }
+
+    public static EntityPreviewElement entityPreview() {
+        return EntityPreviewElement.automaticSpawnEggPreview();
+    }
+
+    public static EntityPreviewElement entityPreview(int width, int height, boolean rotate) {
+        return new EntityPreviewElement(width, height, rotate);
     }
 
     public static TitleIconElement titleIcon(ZenithTooltipText title) {

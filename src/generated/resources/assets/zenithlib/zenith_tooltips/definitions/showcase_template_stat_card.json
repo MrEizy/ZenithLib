@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Growth"
           },
@@ -15,7 +15,7 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "A compact generated page for a single stat, modifier, perk, or item trait."
@@ -29,13 +29,13 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Manual Extension"
           }
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Affinity"
           },
@@ -45,7 +45,7 @@
           "right_color": "positive"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Stability"
           },
@@ -54,7 +54,7 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "The opening card sets the shape; these rows add detail."

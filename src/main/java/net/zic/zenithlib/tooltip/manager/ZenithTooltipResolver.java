@@ -18,6 +18,7 @@ import net.zic.zenithlib.tooltip.api.element.SpacerElement;
 import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
+import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElementTypes;
 import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValue;
 import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValueSources;
 
@@ -102,7 +103,7 @@ public final class ZenithTooltipResolver {
                 || element instanceof EntityPreviewElement) {
             return List.of(element);
         }
-        return List.of(element);
+        return ZenithTooltipElementTypes.resolve(element, context);
     }
 
     private static List<ZenithTooltipElement> resolveCollection(

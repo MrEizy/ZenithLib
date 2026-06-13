@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "title_icon",
+          "type": "zenithlib:title_icon",
           "subtitle": {
             "literal": "Bloom, assembly, wash, and slide"
           },
@@ -15,16 +15,16 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Open the card and flip pages to compare bloom, assembly, wash, and slide."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Open"
           },
@@ -33,7 +33,7 @@
           }
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Page Entry"
           },
@@ -50,22 +50,22 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Fresh Page Entry"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "This page starts its own entry beat, separate from the first hover."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "Small offsets, short duration, no jitter."
@@ -79,20 +79,20 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "color": "warning",
           "text": {
             "literal": "Reduced Motion Check"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Reduced motion drops the slide and wash, leaving the static card."
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "positive",
           "label": {
             "literal": "Clarity"

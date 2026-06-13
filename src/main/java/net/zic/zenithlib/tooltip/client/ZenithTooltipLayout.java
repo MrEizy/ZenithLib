@@ -270,6 +270,13 @@ public final class ZenithTooltipLayout {
             ZenithTooltipElement element,
             long elementSeed
     ) {
+        Optional<PreparedCustom> custom = ZenithTooltipElementRenderers.prepare(
+                font, theme, stack, innerWidth, element, elementSeed
+        );
+        if (custom.isPresent()) {
+            return custom.orElseThrow();
+        }
+
         if (element instanceof TextElement text) {
             List<FormattedCharSequence> lines = split(font, text.text().component(), innerWidth);
             int animationPadding = text.effect()
@@ -478,6 +485,10 @@ public final class ZenithTooltipLayout {
             return theme.iconHolder().boxSize() + theme.iconHolder().gap() + labelWidth;
         }
 
+        if (element instanceof PreparedCustom custom) {
+            return custom.width();
+        }
+
         return 0;
     }
 
@@ -636,7 +647,7 @@ public final class ZenithTooltipLayout {
 
     public sealed interface PreparedElement
             permits PreparedText, PreparedHeader, PreparedDivider, PreparedSpacer, PreparedRow,
-            PreparedIcon, PreparedTitleIcon, PreparedBadge, PreparedBar, PreparedEntityPreview {
+            PreparedIcon, PreparedTitleIcon, PreparedBadge, PreparedBar, PreparedEntityPreview, PreparedCustom {
         int height();
     }
 
@@ -693,6 +704,13 @@ public final class ZenithTooltipLayout {
             float progress,
             int labelHeight,
             int height
+    ) implements PreparedElement {}
+
+    public record PreparedCustom(
+            int width,
+            int height,
+            Object data,
+            ZenithTooltipElementRenderers.Renderer renderer
     ) implements PreparedElement {}
 
     private record ResolvedBarValue(int value, int max) {

@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "title_icon",
+          "type": "zenithlib:title_icon",
           "subtitle": {
             "translate": "tooltip.zenithlib.diamond.header"
           },
@@ -15,7 +15,7 @@
           }
         },
         {
-          "type": "badge",
+          "type": "zenithlib:badge",
           "background_color": "accent",
           "text": {
             "literal": "RARE MATERIAL"
@@ -23,16 +23,16 @@
           "text_color": "background"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "translate": "tooltip.zenithlib.diamond.line_1"
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "translate": "tooltip.zenithlib.diamond.row.rarity"
           },
@@ -42,7 +42,7 @@
           "right_color": "positive"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "translate": "tooltip.zenithlib.diamond.row.origin"
           },
@@ -51,10 +51,10 @@
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "A compact card with a title icon, badge, rows, divider, and the mana-blue theme."
@@ -68,19 +68,19 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Quiet Motion"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Stars shimmer behind the card while the frame gathers at the edges."
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "The motion stays decorative: no extra space, no shifting rows."

@@ -26,10 +26,10 @@ import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.*;
  *      Ender Pearl - requirementsDisplay Template
  *      Iron Sword - Dynamic item tooltip
  *      Book - Lore, scramble reveal, Living Animation Preset
- *      Prismarine Crystals - Background Animation Lab
- *      Quartz - Border and Divider Animation Lab
- *      Blaze Powder - Gauge Motion Lab
- *      Clock - Page Motion Lab</p>
+ *      Prismarine Crystals - Background Animations
+ *      Quartz - Border and Divider Animations
+ *      Blaze Powder - Gauge Motions
+ *      Clock - Page Motions </p>
 */
 
 public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvider {
@@ -399,9 +399,6 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                         .add(durabilityBar(literal("Live Durability"), ZenithTooltipColor.POSITIVE)));
     }
 
-    private void addTemplatePages(ZenithTooltipTemplateBuilder target, ZenithTooltipTemplateBuilder source) {
-        source.build().pages().forEach(target::page);
-    }
 
     private void addShowcaseRules() {
         addShowcaseRule("diamond", "showcase_material", "mana_blue");

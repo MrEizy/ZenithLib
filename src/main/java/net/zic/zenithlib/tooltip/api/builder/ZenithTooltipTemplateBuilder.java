@@ -22,6 +22,18 @@ public final class ZenithTooltipTemplateBuilder {
         return this;
     }
 
+    public ZenithTooltipTemplateBuilder pages(ZenithTooltipTemplateBuilder template) {
+        Objects.requireNonNull(template, "template").build().pages().forEach(this::page);
+        return this;
+    }
+
+    public ZenithTooltipTemplateBuilder pages(ZenithTooltipPage... pages) {
+        for (ZenithTooltipPage page : pages) {
+            page(page);
+        }
+        return this;
+    }
+
     public ZenithTooltipTemplateBuilder animationPreset(Identifier preset) {
         this.animationPresets.add(Objects.requireNonNull(preset, "preset"));
         return this;

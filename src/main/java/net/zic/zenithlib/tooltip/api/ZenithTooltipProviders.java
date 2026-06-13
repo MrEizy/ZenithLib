@@ -5,27 +5,20 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.tooltip.api.context.ZenithTooltipContext;
+import net.zic.zenithlib.tooltip.api.context.ZenithTooltipSubject;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Runtime provider registry for contextual Zenith tooltips.
- *
- * <p>The original three-argument document provider remains supported. New providers
- * can use {@link #registerContextual(Identifier, ZenithContextualTooltipDocumentProvider)}
- * to enrich the context with a registry subject or other generic metadata before
- * source-backed tooltip text and bars are resolved.</p>
- */
+/** Runtime provider registry for contextual Zenith tooltips. */
 public final class ZenithTooltipProviders {
     private static final List<Entry> PROVIDERS = new CopyOnWriteArrayList<>();
 
     private ZenithTooltipProviders() {}
 
-    /** Registers the original provider shape without breaking dependent mods. */
-    public static void register(Identifier id, ZenithTooltipDocumentProvider provider) {
+    public static void register(Identifier id, Provider provider) {
         Objects.requireNonNull(provider, "provider");
         registerInternal(id, context -> {
             Optional<ZenithTooltipDocument> document = provider.create(
@@ -35,22 +28,15 @@ public final class ZenithTooltipProviders {
             );
             return document == null
                     ? Optional.empty()
-                    : document.map(value -> ZenithTooltipProviderResult.of(value, context));
+                    : document.map(value -> Result.of(value, context));
         });
     }
 
-    /** Registers a provider that may return an enriched runtime context. */
-    public static void registerContextual(
-            Identifier id,
-            ZenithContextualTooltipDocumentProvider provider
-    ) {
+    public static void registerContextual(Identifier id, ContextualProvider provider) {
         registerInternal(id, provider);
     }
 
-    private static void registerInternal(
-            Identifier id,
-            ZenithContextualTooltipDocumentProvider provider
-    ) {
+    private static void registerInternal(Identifier id, ContextualProvider provider) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(provider, "provider");
 
@@ -65,11 +51,7 @@ public final class ZenithTooltipProviders {
         ZenithLib.LOGGER.info("Registered Zenith tooltip provider {}", id);
     }
 
-    /**
-     * Resolves the first matching provider and preserves any context enrichment it
-     * supplied for the later value-source resolution pass.
-     */
-    public static Optional<ZenithTooltipProviderResult> create(ZenithTooltipContext context) {
+    public static Optional<Result> create(ZenithTooltipContext context) {
         Objects.requireNonNull(context, "context");
 
         if (context.stack().isEmpty()) {
@@ -78,7 +60,7 @@ public final class ZenithTooltipProviders {
 
         for (Entry entry : PROVIDERS) {
             try {
-                Optional<ZenithTooltipProviderResult> result = entry.provider().create(context);
+                Optional<Result> result = entry.provider().create(context);
 
                 if (result != null && result.isPresent()) {
                     return result;
@@ -96,14 +78,13 @@ public final class ZenithTooltipProviders {
         return Optional.empty();
     }
 
-    /** Preserves the original lookup API for existing callers. */
     public static Optional<ZenithTooltipDocument> create(
             ItemStack stack,
             Identifier itemId,
             Optional<RegistryAccess> registryAccess
     ) {
         return create(ZenithTooltipContext.of(stack, itemId, registryAccess))
-                .map(ZenithTooltipProviderResult::document);
+                .map(Result::document);
     }
 
     public static List<Identifier> ids() {
@@ -112,8 +93,52 @@ public final class ZenithTooltipProviders {
                 .toList();
     }
 
-    private record Entry(
-            Identifier id,
-            ZenithContextualTooltipDocumentProvider provider
-    ) {}
+    @FunctionalInterface
+    public interface Provider {
+        Optional<ZenithTooltipDocument> create(
+                ItemStack stack,
+                Identifier itemId,
+                Optional<RegistryAccess> registryAccess
+        );
+    }
+
+    @FunctionalInterface
+    public interface ContextualProvider {
+        Optional<Result> create(ZenithTooltipContext context);
+    }
+
+    public record Result(
+            ZenithTooltipDocument document,
+            ZenithTooltipContext context
+    ) {
+        public Result {
+            Objects.requireNonNull(document, "document");
+            Objects.requireNonNull(context, "context");
+        }
+
+        public static Result of(ZenithTooltipDocument document, ZenithTooltipContext context) {
+            return new Result(document, context);
+        }
+
+        public static Result withSubject(
+                ZenithTooltipDocument document,
+                ZenithTooltipContext context,
+                Identifier subjectId,
+                ZenithTooltipSubject subject
+        ) {
+            return new Result(document, context.withSubject(subjectId, subject));
+        }
+
+        public static Result withSubject(
+                ZenithTooltipDocument document,
+                ZenithTooltipContext context,
+                Identifier subjectId,
+                Object subjectValue,
+                ZenithTooltipSubject presentation
+        ) {
+            return new Result(document, context.withSubject(subjectId, subjectValue, presentation));
+        }
+    }
+
+    private record Entry(Identifier id, ContextualProvider provider) {}
 }

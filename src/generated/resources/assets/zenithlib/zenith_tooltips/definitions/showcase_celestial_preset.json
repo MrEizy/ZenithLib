@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "title_icon",
+          "type": "zenithlib:title_icon",
           "subtitle": {
             "literal": "stars, frame, and soft bloom"
           },
@@ -15,7 +15,7 @@
           }
         },
         {
-          "type": "badge",
+          "type": "zenithlib:badge",
           "background_color": "accent",
           "text": {
             "literal": "PRESET • STARS • FRAME"
@@ -23,16 +23,16 @@
           "text_color": "background"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Stars drift behind the glass while the frame draws a slow orbit of light."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "The glow is calm enough for lore pages and rare drops."

@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "title_icon",
+          "type": "zenithlib:title_icon",
           "subtitle": {
             "literal": "Border pulses, sparks, and animated dividers"
           },
@@ -15,32 +15,32 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "This preset layers pulsing inner borders, travelling perimeter energy, tiny corner sparks, divider sweeps, and embedded rune ticks."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Divider Variants"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "A plain divider turns into a tiny rune channel."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Border"
           },
@@ -50,7 +50,7 @@
           "right_color": "warning"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Corners"
           },
@@ -66,22 +66,22 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Slide + Wash"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Fresh pages slide in with a quick wash of light."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "The motion is brief, then the card settles."

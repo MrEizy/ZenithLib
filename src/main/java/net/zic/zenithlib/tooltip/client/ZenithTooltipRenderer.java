@@ -334,6 +334,16 @@ public final class ZenithTooltipRenderer {
 
         if (element instanceof ZenithTooltipLayout.PreparedTitleIcon titleIcon) {
             renderTitleIcon(font, graphics, textX, textY, stack, theme, innerWidth, titleIcon, animationFrame, presets);
+            return;
+        }
+
+        if (element instanceof ZenithTooltipLayout.PreparedCustom custom) {
+            custom.renderer().render(
+                    new ZenithTooltipElementRenderers.RenderContext(
+                            font, graphics, textX, textY, stack, theme, innerWidth, animationFrame, presets
+                    ),
+                    custom.data()
+            );
         }
     }
 

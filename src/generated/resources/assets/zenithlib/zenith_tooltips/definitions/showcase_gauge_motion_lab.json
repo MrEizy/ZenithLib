@@ -6,23 +6,23 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "color": "warning",
           "text": {
             "literal": "Mechanical Bars"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Kinetic bars combine segmented cells, a moving scanline, pulse overlays, and edge sparks."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "negative",
           "label": {
             "literal": "Ignition"
@@ -34,7 +34,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "warning",
           "label": {
             "literal": "Pressure"
@@ -46,7 +46,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "label": {
             "literal": "Charge"
           },
@@ -57,7 +57,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "positive",
           "label": {
             "literal": "Output"
@@ -76,19 +76,19 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Value Check"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "The spark rides the edge; the fill width stays locked to the value."
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "negative",
           "label": {
             "literal": "One Tick"
@@ -100,7 +100,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "warning",
           "label": {
             "literal": "Exact Half"
@@ -112,7 +112,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "positive",
           "label": {
             "literal": "Complete"

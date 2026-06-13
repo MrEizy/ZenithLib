@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "title_icon",
+          "type": "zenithlib:title_icon",
           "subtitle": {
             "literal": "Stars, mist, motes, and aurora bands"
           },
@@ -15,16 +15,16 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "This card stacks the quieter background effects so you can judge whether they feel magical without turning into visual soup."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Stars"
           },
@@ -33,7 +33,7 @@
           }
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Mist"
           },
@@ -43,7 +43,7 @@
           "right_color": "muted"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Motes"
           },
@@ -53,7 +53,7 @@
           "right_color": "positive"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Aurora"
           },
@@ -63,10 +63,10 @@
           "right_color": "warning"
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "Reduced motion pares this back to the still card."
@@ -80,19 +80,19 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Stacked With Content"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "The glow stays behind the rows and bars instead of resizing the card."
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "label": {
             "literal": "Ambient Budget"
           },
@@ -103,7 +103,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "positive",
           "label": {
             "literal": "Motion Strength"

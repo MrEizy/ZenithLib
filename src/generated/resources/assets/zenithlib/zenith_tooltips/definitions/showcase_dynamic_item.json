@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "title_icon",
+          "type": "zenithlib:title_icon",
           "subtitle": {
             "literal": "Uses built-in value sources"
           },
@@ -15,16 +15,16 @@
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Authored text mixes with values pulled from the hovered stack."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Item ID"
           },
@@ -33,7 +33,7 @@
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "positive",
           "label": {
             "literal": "Live Durability"

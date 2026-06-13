@@ -6,13 +6,13 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Long Tooltip Preview"
           }
         },
         {
-          "type": "badge",
+          "type": "zenithlib:badge",
           "background_color": "warning",
           "border_color": "warning",
           "text": {
@@ -21,23 +21,23 @@
           "text_color": "background"
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "This page exceeds the theme height. Use the mouse wheel while hovering to browse the body without losing its heading or page controls."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "color": "text",
           "text": {
             "literal": "Attunement"
           }
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "positive",
           "label": {
             "literal": "Alignment"
@@ -46,7 +46,7 @@
           "value": 91
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "label": {
             "literal": "Stored Qi"
           },
@@ -54,7 +54,7 @@
           "value": 63
         },
         {
-          "type": "bar",
+          "type": "zenithlib:bar",
           "color": "negative",
           "label": {
             "literal": "Karma"
@@ -63,17 +63,17 @@
           "value": 12
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "color": "warning",
           "text": {
             "literal": "Requirements"
           }
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Cultivation Realm"
           },
@@ -83,7 +83,7 @@
           "right_color": "positive"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Strength"
           },
@@ -93,7 +93,7 @@
           "right_color": "positive"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Agility"
           },
@@ -103,7 +103,7 @@
           "right_color": "positive"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Intelligence"
           },
@@ -113,22 +113,22 @@
           "right_color": "negative"
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Stress Notes"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Clipped pages, controls, rows, bars, and staged entry share one long scroll."
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "color": "muted",
           "text": {
             "literal": "Converted damageable items use live durability; authored cards can reuse bars for lore, charge, or progress."

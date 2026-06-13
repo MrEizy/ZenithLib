@@ -6,7 +6,7 @@
     {
       "elements": [
         {
-          "type": "title_icon",
+          "type": "zenithlib:title_icon",
           "subtitle": {
             "literal": "Icon, title, and summary"
           },
@@ -15,11 +15,11 @@
           }
         },
         {
-          "type": "spacer",
+          "type": "zenithlib:spacer",
           "height": 2
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "The helper creates the opening page; the rule supplies the theme and preset."
           }
@@ -32,22 +32,22 @@
     {
       "elements": [
         {
-          "type": "header",
+          "type": "zenithlib:header",
           "text": {
             "literal": "Still Just Normal Pages"
           }
         },
         {
-          "type": "text",
+          "type": "zenithlib:text",
           "text": {
             "literal": "Template pages are normal pages, so extra sections can be added after them."
           }
         },
         {
-          "type": "divider"
+          "type": "zenithlib:divider"
         },
         {
-          "type": "row",
+          "type": "zenithlib:row",
           "left": {
             "literal": "Template"
           },
