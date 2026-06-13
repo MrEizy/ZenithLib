@@ -37,14 +37,6 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Client event integration layer for custom Zenith tooltips.
- *
- * <p>The subscriber registers the client-side component factory, intercepts tooltip
- * component gathering, and replaces normal tooltip output with one
- * {@link ZenithTooltipData} component. Contextual provider documents are checked
- * first, configured items obtain documents from {@link ZenithTooltipRepository},
- * and unmatched items are converted from their vanilla tooltip content by
- * {@link ZenithVanillaTooltipConverter}. It also selects a transparent vanilla
- * tooltip texture so only the Zenith renderer's themed frame is visible.</p>
  */
 
 @EventBusSubscriber(
@@ -112,11 +104,7 @@ public final class ZenithTooltipClientEvents {
         }
     }
 
-    /**
-     * Handles keyboard page-navigation bindings while an inventory-like screen is open.
-     * NeoForge recommends screen events for mappings used inside GUIs rather than
-     * polling ordinary gameplay input ticks.
-     */
+
     @SubscribeEvent
     public static void navigateTooltipPage(ScreenEvent.KeyPressed.Pre event) {
         if (!Config.ENABLE_ZENITH_TOOLTIPS.get()) {
@@ -134,11 +122,6 @@ public final class ZenithTooltipClientEvents {
         }
     }
 
-    /**
-     * Scrolls long tooltip bodies while preserving their fixed title and footer.
-     * The event is consumed only while the recently rendered tooltip has overflowing
-     * content, preventing accidental interaction with the underlying screen.
-     */
     @SubscribeEvent
     public static void scrollTooltipPage(ScreenEvent.MouseScrolled.Pre event) {
         if (!Config.ENABLE_ZENITH_TOOLTIPS.get()) {
@@ -150,9 +133,7 @@ public final class ZenithTooltipClientEvents {
         }
     }
 
-    /**
-     * Allows the Controls menu to remap tooltip page navigation to mouse buttons too.
-     */
+
     @SubscribeEvent
     public static void navigateTooltipPage(ScreenEvent.MouseButtonPressed.Pre event) {
         if (!Config.ENABLE_ZENITH_TOOLTIPS.get()) {

@@ -34,10 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Client-side registry for element measurement and rendering hooks.
- *
- * <p>The layout pass asks this registry to prepare every element, including built-ins.
- * Dependent mods only register their own element type here; they do not need to edit
- * the core layout class or add another renderer switch case.</p>
  */
 public final class ZenithTooltipElementRenderers {
     private static final Map<Identifier, Entry<?>> ENTRIES = new ConcurrentHashMap<>();

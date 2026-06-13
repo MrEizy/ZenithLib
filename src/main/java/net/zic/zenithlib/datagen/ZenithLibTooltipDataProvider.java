@@ -32,7 +32,8 @@ import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.*;
  *      Clock - Page Motions </p>
  *
  *      I will be so for real, I couldn't be bothered to make updated tooltips after refactoring everything,
- *      so I had AI make these showcase tooltips for me...
+ *      so I had AI make these showcase tooltips for me... these will be removed after
+ *      I make a guide/documentation for the tooltips.
 */
 
 public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvider {

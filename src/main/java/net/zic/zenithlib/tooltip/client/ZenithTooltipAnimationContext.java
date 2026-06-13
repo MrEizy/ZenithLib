@@ -59,7 +59,6 @@ public record ZenithTooltipAnimationContext(
         return settings.scaledAlpha(authoredAlpha);
     }
 
-    /** Captured client animation/accessibility options for one tooltip render pass. */
     public record Settings(
             boolean animationsEnabled,
             boolean reduceMotion,

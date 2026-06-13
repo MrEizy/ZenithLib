@@ -27,11 +27,6 @@ import java.util.Optional;
 
 /**
  * Resolves source-backed authored data into an ordinary draw-ready tooltip document.
- *
- * <p>The layout and renderer never need to know which mod supplied a value. Dynamic
- * text becomes runtime component-backed text, dynamic bars become fixed bars, and
- * dynamic sections expand into ordinary elements before the document enters the
- * rendering pipeline.</p>
  */
 public final class ZenithTooltipResolver {
     private ZenithTooltipResolver() {}

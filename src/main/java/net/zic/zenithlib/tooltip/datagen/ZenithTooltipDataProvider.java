@@ -24,11 +24,6 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Base data provider for generated Zenith tooltip definitions and themes.
- *
- * <p>Generated resources are written into the same client resource folders used by
- * {@code ZenithTooltipRepository}; the repository and its reload behaviour remain
- * the runtime contract. Builders only construct values that are encoded by the
- * existing runtime codecs.</p>
  */
 public abstract class ZenithTooltipDataProvider implements DataProvider {
     private static final Codec<Either<ZenithTooltipRule, ZenithTooltipTemplate>> DEFINITION_CODEC =
@@ -47,10 +42,8 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
         this.themePaths = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "zenith_tooltips/themes");
     }
 
-    /** Adds generated templates, selector rules, and themes for this provider. */
     protected abstract void addTooltips();
 
-    /** Creates an identifier in the namespace owned by this data provider. */
     protected final Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(this.modId, path);
     }
@@ -102,7 +95,6 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
         Objects.requireNonNull(source, "source").build().pages().forEach(target::page);
     }
 
-    /** Creates an identifier used as a cross-namespace reference, such as a vanilla item or ZenithLib theme. */
     protected final Identifier external(String namespace, String path) {
         return Identifier.fromNamespaceAndPath(namespace, path);
     }

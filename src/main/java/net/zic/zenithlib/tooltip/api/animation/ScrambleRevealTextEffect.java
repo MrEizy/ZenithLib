@@ -10,9 +10,6 @@ import java.util.Locale;
 /**
  * Replaces unrevealed letters and digits with rapidly changing glyphs while leaving
  * the configured portion of the final text stable and readable.
- *
- * <p>The reveal value is clamped to {@code 0..1}. A scattered reveal is deterministic,
- * so increasing the reveal later never hides characters that were already readable.</p>
  */
 public record ScrambleRevealTextEffect(
         float reveal,

@@ -12,12 +12,6 @@ import java.util.Optional;
 /**
  * Immutable runtime context used by contextual document providers and tooltip value
  * sources.
- *
- * <p>A context always describes the hovered stack and may additionally expose client
- * registry access, the viewing player, and a registry-backed or otherwise meaningful
- * subject. The subject reference keeps the original typed object beside a generic
- * presentation adapter, allowing ZenithLib and dependent mods to consume the same
- * context at different levels of specificity.</p>
  */
 public final class ZenithTooltipContext {
     private final ItemStack stack;

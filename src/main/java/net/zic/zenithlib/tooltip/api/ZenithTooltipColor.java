@@ -6,14 +6,6 @@ import java.util.Set;
 
 /**
  * Describes a colour reference used by tooltip document content.
- * A colour may be a semantic palette token, such as {@code accent}, {@code muted},
- * or {@code warning}, or an explicit hexadecimal RGBA colour. Semantic tokens are the
- * preferred form for reusable tooltip documents because they resolve through the
- * selected {@link ZenithTooltipTheme} and therefore adapt automatically to custom
- * themes provided by ZenithLib users or resource packs.
- * The record validates accepted tokens and hex values when created, exposes common
- * palette constants for programmatic document construction, and resolves its value to
- * the final ARGB render colour only when a theme is available.
  */
 public record ZenithTooltipColor(String value) {
     private static final Set<String> PALETTE_KEYS = Set.of(

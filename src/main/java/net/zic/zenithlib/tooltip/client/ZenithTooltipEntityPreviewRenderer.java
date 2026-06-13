@@ -20,15 +20,6 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Draws the entity represented by a spawn egg as a client-only tooltip preview.
- *
- * <p>The entity renderer state is extracted with neutral head/body pose values and
- * then the picture-in-picture render is yawed as one object. This deliberately avoids
- * the inventory-screen look-at helper, where animated viewing angles can make a living
- * entity's head and body appear to move independently.</p>
- *
- * <p>Only one transient entity instance is cached for the currently inspected stack.
- * The instance is created against the client level for renderer context and is never
- * inserted into that level.</p>
  */
 final class ZenithTooltipEntityPreviewRenderer {
     private static final int CHAMBER_INSET = 3;

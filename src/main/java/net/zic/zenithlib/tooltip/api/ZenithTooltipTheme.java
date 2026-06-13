@@ -9,17 +9,6 @@ import java.util.Locale;
 
 /**
  * Defines the visual palette and sizing metrics used to render a Zenith tooltip.
- *
- * <p>The palette contains semantic colours for the background, border edges, text,
- * accents, and status-like content. Documents can therefore refer to palette meanings
- * instead of fixed colours and remain visually coherent under themes created by other
- * mods or resource packs. The layout metrics control padding and maximum tooltip width,
- * while {@link IconHolder} controls the decorative item holder used by icon elements
- * and title-icon headers.</p>
- *
- * <p>This type also owns RGBA string conversion and semantic colour resolution. Its
- * built-in fallback is the ZIC mana-blue theme used whenever a requested theme is not
- * available.</p>
  */
 public record ZenithTooltipTheme(
         Palette colors,
@@ -226,7 +215,6 @@ public record ZenithTooltipTheme(
         }
     }
 
-    /** Theme-controlled presentation of labelled progress bars. */
     public record BarStyle(
             int height,
             int labelGap,
@@ -273,7 +261,6 @@ public record ZenithTooltipTheme(
         }
     }
 
-    /** Theme-controlled sizing and opacity for compact badge labels. */
     public record BadgeStyle(
             int horizontalPadding,
             int verticalPadding,
@@ -303,7 +290,6 @@ public record ZenithTooltipTheme(
         }
     }
 
-    /** Theme-controlled divider line geometry and optional centre ornament. */
     public record DividerStyle(
             int thickness,
             int gapAbove,
@@ -377,7 +363,6 @@ public record ZenithTooltipTheme(
         }
     }
 
-    /** Theme-controlled styling for decorative frame accents. */
     public record FrameStyle(
             CornerDecoration cornerDecoration,
             int cornerSize,
@@ -461,7 +446,6 @@ public record ZenithTooltipTheme(
         }
     }
 
-    /** Theme-controlled styling for ornamental title and header flourishes. */
     public record HeaderStyle(
             Ornament ornament,
             String color
@@ -514,7 +498,6 @@ public record ZenithTooltipTheme(
         }
     }
 
-    /** Theme-controlled low-alpha surface decoration beneath tooltip content. */
     public record BackgroundStyle(
             Pattern pattern,
             String color,
@@ -574,16 +557,6 @@ public record ZenithTooltipTheme(
         }
     }
 
-    /**
-     * Theme-controlled styling for item icons rendered by {@code icon} and
-     * {@code title_icon} document elements.
-     *
-     * <p>Border and fill accept either semantic palette keys such as {@code accent}
-     * and {@code background}, or literal RGBA hex strings. {@code fill_alpha} is
-     * applied after colour resolution so a holder can reuse a theme's background hue
-     * while remaining translucent. Item stacks themselves retain Minecraft's native
-     * sixteen-pixel rendering size; this record styles their surrounding holder.</p>
-     */
     public record IconHolder(
             Shape shape,
             int boxSize,
@@ -619,7 +592,6 @@ public record ZenithTooltipTheme(
             shape = shape == null ? Shape.DIAMOND : shape;
             boxSize = Math.max(16, boxSize);
 
-            // Pixel diamonds and circles are cleaner when they can centre symmetrically.
             if ((shape == Shape.DIAMOND || shape == Shape.CIRCLE || shape == Shape.GEM) && boxSize % 2 == 0) {
                 boxSize++;
             }

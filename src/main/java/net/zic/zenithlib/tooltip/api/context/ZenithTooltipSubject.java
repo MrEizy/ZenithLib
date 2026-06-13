@@ -7,11 +7,6 @@ import java.util.Optional;
 
 /**
  * Presentation adapter for an object being described by a contextual tooltip.
- *
- * <p>The actual registry object remains available separately through
- * {@link ZenithTooltipContext#subject(Class)}. This adapter only supplies generic
- * metadata that ZenithLib can expose through built-in value sources without learning
- * about a dependent mod's registry types.</p>
  */
 public interface ZenithTooltipSubject {
     Component tooltipName(ZenithTooltipContext context);

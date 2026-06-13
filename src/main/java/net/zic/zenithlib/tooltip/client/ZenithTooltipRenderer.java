@@ -12,10 +12,6 @@ import java.util.List;
 
 /**
  * Draws a prepared Zenith tooltip layout through Minecraft's client graphics extractor.
- *
- * <p>The renderer is intentionally free of resource lookup and text wrapping. Long
- * tooltip pages are drawn inside a scissored body viewport while their header and hint
- * remain stationary; ordinary pages follow the same draw path without clipping.</p>
  */
 public final class ZenithTooltipRenderer {
     private static final int INNER_HIGHLIGHT = 0x33FFFFFF;

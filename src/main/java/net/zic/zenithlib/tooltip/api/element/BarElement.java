@@ -10,10 +10,6 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 /**
  * Labelled horizontal progress/value bar for durability, charge, mana, affinity,
  * upgrade progress, or other bounded numerical values.
- *
- * <p>Bars may be authored with fixed {@code value}/{@code max} data or bind to a
- * registered runtime value through {@code source}. Source-backed bars are converted to
- * fixed bars by the tooltip resolution pass before layout.</p>
  */
 public record BarElement(
         ZenithTooltipText label,
@@ -40,7 +36,6 @@ public record BarElement(
         value = Math.max(0, Math.min(value, max));
     }
 
-    /** Keeps the programmatic fixed-value constructor convenient for dependent mods. */
     public BarElement(
             ZenithTooltipText label,
             int value,

@@ -9,11 +9,6 @@ import java.util.Locale;
 /**
  * Renders the living entity represented by the hovered spawn egg inside a
  * compact tooltip display chamber.
- *
- * <p>When {@code adaptive_width} is enabled, the chamber may widen to suit
- * broad entities while remaining constrained by the tooltip theme width.
- * {@code placement} selects where the chamber is positioned within the
- * available tooltip row.</p>
  */
 public record EntityPreviewElement(
         int width,

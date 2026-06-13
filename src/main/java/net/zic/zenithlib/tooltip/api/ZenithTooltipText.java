@@ -12,11 +12,6 @@ import java.util.Optional;
 /**
  * Represents authored or runtime-resolved display text used by tooltip pages and
  * elements.
- *
- * <p>Resource JSON may provide a translation key, a literal string, or a namespaced
- * runtime {@code source}. Source-backed text is resolved before layout through
- * {@code ZenithTooltipSources}, allowing the same binding to be used in page
- * titles, headers, badges, rows, bar labels, and ordinary text elements.</p>
  */
 public final class ZenithTooltipText {
     private static final Codec<ZenithTooltipText> SOURCE_CODEC = RecordCodecBuilder.create(instance ->
@@ -61,7 +56,6 @@ public final class ZenithTooltipText {
     private final Optional<Identifier> source;
     private final Optional<Component> resolvedComponent;
 
-    /** Preserves the original programmatic constructor used by dependent mods. */
     public ZenithTooltipText(String value, boolean translatable) {
         this(value, translatable, Optional.empty(), Optional.empty());
     }
@@ -105,7 +99,6 @@ public final class ZenithTooltipText {
         return source(id);
     }
 
-    /** Creates runtime text while preserving the supplied component's styling. */
     public static ZenithTooltipText resolved(Component component) {
         Component copy = Objects.requireNonNull(component, "component").copy();
         return new ZenithTooltipText(copy.getString(), false, Optional.empty(), Optional.of(copy));

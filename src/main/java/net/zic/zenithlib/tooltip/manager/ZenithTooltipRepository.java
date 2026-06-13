@@ -29,18 +29,6 @@ import java.util.Set;
 /**
  * Central client-side resource repository and runtime matcher for data-driven Zenith
  * tooltips.
- *
- * <p>The repository loads reusable document templates and selector rules from
- * {@code zenith_tooltips/definitions}, and visual themes from
- * {@code zenith_tooltips/themes}. Whenever resources reload, it resolves rule-to-
- * document and rule-to-theme relationships into one immutable snapshot. Selectors,
- * tag keys, and themed documents are therefore compiled once rather than rebuilt on
- * every hover.</p>
- *
- * <p>Exact-item-only rules are indexed directly for efficient lookup, while tag,
- * namespace, and catch-all rules remain priority-sorted dynamic matches. The nested
- * reload listeners are the bootstrap-facing adapters registered by
- * {@code ZenithLibClient}.</p>
  */
 
 public final class ZenithTooltipRepository {
@@ -228,10 +216,6 @@ public final class ZenithTooltipRepository {
         }
     }
 
-    /**
-     * Kept under the existing nested type name so the current client bootstrap
-     * registration remains valid while the loaded folder is now definitions.
-     */
     public static final class RulesReloadListener extends SimpleJsonResourceReloadListener<Either<ZenithTooltipRule, ZenithTooltipTemplate>> {
         public RulesReloadListener() {
             super(

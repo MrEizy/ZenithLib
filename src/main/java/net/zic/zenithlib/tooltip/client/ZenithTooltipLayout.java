@@ -21,16 +21,6 @@ import java.util.Optional;
 
 /**
  * Prepares complete, draw-ready layouts for resolved Zenith tooltip documents.
- *
- * <p>The layout pass selects the current page, wraps its content, prepares compact
- * elements such as bars and badges, and constrains oversized bodies to a themed
- * scrolling viewport. Page headers and the footer hint remain fixed while scrolling,
- * so long tooltip pages behave like readable information cards instead of wandering
- * off screen.</p>
- *
- * <p>A theme's maximum width is a wrapping ceiling rather than a forced box width.
- * Its maximum height is likewise a ceiling for ordinary body content; pages exceeding
- * it become scrollable through the screen mouse-wheel handler.</p>
  */
 public final class ZenithTooltipLayout {
     public static final int MIN_WRAP_WIDTH = ZenithTooltipTheme.MIN_INNER_WIDTH;
@@ -348,11 +338,7 @@ public final class ZenithTooltipLayout {
         return true;
     }
 
-    /**
-     * Scrolls the body of the recently rendered tooltip. The input is consumed whenever
-     * the active page has overflowing content, including at either limit, so scrolling
-     * over a tooltip does not also operate the underlying inventory screen.
-     */
+
     public static boolean scrollBody(double deltaY) {
         if (!hasRecentlyRenderedTooltip() || lastMaxScrollOffset <= 0 || deltaY == 0.0D) {
             return false;

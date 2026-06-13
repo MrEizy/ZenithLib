@@ -10,15 +10,6 @@ import java.util.List;
 /**
  * Resource-defined rule that connects matching items to a reusable tooltip document
  * and visual theme.
- *
- * <p>Rules are loaded from tooltip definition JSON files and compiled by
- * {@code ZenithTooltipRepository} during resource reload. The priority controls which
- * matching rule wins; the nested {@code Selector} supports exact item identifiers,
- * item tags, namespaces, or a catch-all match. A missing theme field selects the
- * library's mana-blue default theme.</p>
- *
- * <p>Selectors intentionally use structured fields rather than encoded matcher
- * strings, making the public resource format clear and extensible for other mods.</p>
  */
 
 public record ZenithTooltipRule(

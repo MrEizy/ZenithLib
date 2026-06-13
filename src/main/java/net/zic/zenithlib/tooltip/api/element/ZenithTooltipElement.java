@@ -6,9 +6,6 @@ import net.minecraft.resources.Identifier;
 
 /**
  * Base type for serialisable tooltip elements.
- *
- * <p>Element codecs are registered through {@link ZenithTooltipElementTypes}; this keeps
- * dependent-mod elements out of ZenithLib's core codec and renderer switches.</p>
  */
 public interface ZenithTooltipElement {
     MapCodec<? extends ZenithTooltipElement> codec();

@@ -29,18 +29,6 @@ import java.util.Map;
 /**
  * Converts an item's ordinary Minecraft tooltip data into the Zenith document model
  * when no explicit data-driven rule matches that item.
- *
- * <p>The converter builds an overview page from the item name and remaining vanilla
- * lines, adds a live durability bar for damageable stacks, and creates an additional
- * enchantment page when enchantments are present. Attribute lines are preserved from
- * Minecraft's normal tooltip so effective equipment values and modded calculations are
- * not replaced with raw modifier amounts. Generated
- * content uses the default mana-blue theme and semantic colours so fallback tooltips
- * retain the same visual language as configured documents.</p>
- *
- * <p>Its line classification is intentionally best-effort because vanilla or modded
- * tooltip strings may vary; authored JSON documents remain the precise route for
- * custom item presentation.</p>
  */
 
 

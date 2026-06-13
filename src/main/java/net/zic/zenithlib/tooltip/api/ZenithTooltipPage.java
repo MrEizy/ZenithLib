@@ -8,11 +8,6 @@ import java.util.List;
 
 /**
  * Defines one page of a Zenith tooltip document.
- *
- * <p>Each page contains a display title and an ordered list of polymorphic tooltip
- * elements such as text, dividers, rows, or item-icon headers. The codec is used by
- * reusable JSON document definitions, while the immutable element list makes loaded
- * page content safe to share across multiple themed rules and repeated renders.</p>
  */
 
 public record ZenithTooltipPage(
