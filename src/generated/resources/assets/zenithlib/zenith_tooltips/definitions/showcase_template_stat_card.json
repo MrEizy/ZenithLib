@@ -1,0 +1,69 @@
+{
+  "animation_presets": [
+    "zenithlib:living"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "row",
+          "left": {
+            "literal": "Growth"
+          },
+          "right": {
+            "literal": "+12%"
+          }
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "A compact generated page for a single stat, modifier, perk, or item trait."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Template: Stat Card"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Manual Extension"
+          }
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Affinity"
+          },
+          "right": {
+            "literal": "Verdant"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Stability"
+          },
+          "right": {
+            "literal": "Breathing"
+          }
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "The template helper handled the basic shape; authored rows add the flavour."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Inserted Rows"
+      }
+    }
+  ]
+}

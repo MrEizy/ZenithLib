@@ -5,9 +5,13 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
+import net.zic.zenithlib.Config;
 import net.zic.zenithlib.tooltip.api.animation.RainbowTextEffect;
+import net.zic.zenithlib.tooltip.api.animation.RuneDecipherTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ScrambleRevealTextEffect;
+import net.zic.zenithlib.tooltip.api.animation.ShimmerTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.TextEffectStack;
+import net.zic.zenithlib.tooltip.api.animation.TypewriterTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.WaveTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 
@@ -21,7 +25,7 @@ final class ZenithTooltipTextAnimator {
     private ZenithTooltipTextAnimator() {}
 
     static int verticalPadding(ZenithTooltipTextEffect effect) {
-        if (effect instanceof WaveTextEffect wave) {
+        if (effect instanceof WaveTextEffect wave && animationsEnabled()) {
             return wave.amplitude();
         }
         if (effect instanceof TextEffectStack stack) {
@@ -46,7 +50,13 @@ final class ZenithTooltipTextAnimator {
             ZenithTooltipAnimationState.Frame frame,
             long elementSeed
     ) {
+        if (!animationsEnabled()) {
+            renderPlain(font, graphics, x, y, lines, baseColor, lineGap);
+            return;
+        }
+
         List<ZenithTooltipTextEffect> effects = flatten(effect);
+        int glyphCount = glyphCount(lines);
         int mutableCharacterCount = mutableCharacterCount(lines);
         int glyphIndex = 0;
         int mutableIndex = 0;
@@ -59,9 +69,26 @@ final class ZenithTooltipTextAnimator {
                 int renderedCodePoint = glyph.codePoint();
                 Style renderedStyle = glyph.style();
                 int yOffset = 0;
+                boolean visible = true;
+                boolean drawCursorAfterGlyph = false;
 
                 for (ZenithTooltipTextEffect current : effects) {
-                    if (current instanceof ScrambleRevealTextEffect scramble) {
+                    if (current instanceof TypewriterTextEffect typewriter) {
+                        TypewriterResult result = typewriterVisibility(typewriter, frame, glyphIndex, glyphCount, glyph.codePoint());
+                        visible &= result.visible();
+                        drawCursorAfterGlyph |= result.cursorAfter();
+                    } else if (current instanceof RuneDecipherTextEffect rune) {
+                        renderedCodePoint = runeCodePoint(
+                                font,
+                                glyph,
+                                renderedCodePoint,
+                                rune,
+                                frame,
+                                elementSeed,
+                                mutableIndex,
+                                mutableCharacterCount
+                        );
+                    } else if (current instanceof ScrambleRevealTextEffect scramble) {
                         renderedCodePoint = scrambleCodePoint(
                                 font,
                                 glyph,
@@ -75,12 +102,15 @@ final class ZenithTooltipTextAnimator {
                     } else if (current instanceof RainbowTextEffect rainbow) {
                         int rgb = rainbowColor(rainbow, frame, elementSeed, glyphIndex);
                         renderedStyle = renderedStyle.withColor(TextColor.fromRgb(rgb));
-                    } else if (current instanceof WaveTextEffect wave) {
+                    } else if (current instanceof ShimmerTextEffect shimmer) {
+                        int rgb = shimmerColor(shimmer, frame, glyphIndex, glyphCount, effectiveRgb(renderedStyle, baseColor));
+                        renderedStyle = renderedStyle.withColor(TextColor.fromRgb(rgb));
+                    } else if (current instanceof WaveTextEffect wave && !reduceMotion()) {
                         yOffset += waveOffset(wave, frame, glyphIndex);
                     }
                 }
 
-                if (!Character.isWhitespace(renderedCodePoint)) {
+                if (visible && !Character.isWhitespace(renderedCodePoint)) {
                     graphics.text(
                             font,
                             singleGlyph(renderedStyle, renderedCodePoint),
@@ -89,6 +119,11 @@ final class ZenithTooltipTextAnimator {
                             baseColor,
                             false
                     );
+                }
+
+                if (drawCursorAfterGlyph) {
+                    int cursorColor = effectiveRgb(renderedStyle, baseColor) | 0xFF000000;
+                    graphics.fill(cursorX + glyph.width(), y + 1, cursorX + glyph.width() + 1, y + font.lineHeight - 1, cursorColor);
                 }
 
                 cursorX += glyph.width();
@@ -100,6 +135,68 @@ final class ZenithTooltipTextAnimator {
 
             y += font.lineHeight + lineGap;
         }
+    }
+
+    private static void renderPlain(
+            Font font,
+            GuiGraphicsExtractor graphics,
+            int x,
+            int y,
+            List<FormattedCharSequence> lines,
+            int color,
+            int gap
+    ) {
+        for (FormattedCharSequence line : lines) {
+            graphics.text(font, line, x, y, color, false);
+            y += font.lineHeight + gap;
+        }
+    }
+
+    private static TypewriterResult typewriterVisibility(
+            TypewriterTextEffect effect,
+            ZenithTooltipAnimationState.Frame frame,
+            int glyphIndex,
+            int glyphCount,
+            int codePoint
+    ) {
+        if (glyphCount == 0) {
+            return new TypewriterResult(true, false);
+        }
+
+        long elapsed = Math.max(0L, frame.pageElapsedMillis() - effect.delay());
+        float progress = Math.min(1.0F, elapsed / (float) effect.duration());
+        int visibleGlyphs = Math.round(glyphCount * progress);
+        boolean whitespace = Character.isWhitespace(codePoint);
+        boolean visible = glyphIndex < visibleGlyphs || (whitespace && !effect.revealWhitespace());
+        boolean cursorAfter = effect.cursor()
+                && progress < 1.0F
+                && glyphIndex == Math.max(0, visibleGlyphs - 1);
+        return new TypewriterResult(visible, cursorAfter);
+    }
+
+    private static int runeCodePoint(
+            Font font,
+            Glyph glyph,
+            int currentCodePoint,
+            RuneDecipherTextEffect effect,
+            ZenithTooltipAnimationState.Frame frame,
+            long elementSeed,
+            int mutableIndex,
+            int mutableCharacterCount
+    ) {
+        if (!isMutable(glyph.codePoint()) || mutableCharacterCount == 0) {
+            return currentCodePoint;
+        }
+
+        long elapsed = Math.max(0L, frame.pageElapsedMillis() - effect.delay());
+        float reveal = Math.min(1.0F, elapsed / (float) effect.duration());
+        ScrambleRevealTextEffect proxy = new ScrambleRevealTextEffect(
+                reveal,
+                effect.speed(),
+                effect.mode(),
+                effect.glyphs()
+        );
+        return scrambleCodePoint(font, glyph, currentCodePoint, proxy, frame, elementSeed, mutableIndex, mutableCharacterCount);
     }
 
     private static int scrambleCodePoint(
@@ -153,6 +250,26 @@ final class ZenithTooltipTextAnimator {
         return hsvToRgb(hue, effect.saturation(), effect.brightness());
     }
 
+    private static int shimmerColor(
+            ShimmerTextEffect effect,
+            ZenithTooltipAnimationState.Frame frame,
+            int glyphIndex,
+            int glyphCount,
+            int baseRgb
+    ) {
+        if (glyphCount <= 0) {
+            return baseRgb;
+        }
+
+        float direction = effect.reverse() ? -1.0F : 1.0F;
+        float phase = wrap01(direction * frame.elapsedMillis() / (float) effect.period());
+        float position = glyphIndex / (float) Math.max(1, glyphCount - 1);
+        float distance = Math.abs(position - phase);
+        distance = Math.min(distance, 1.0F - distance);
+        float shine = Math.max(0.0F, 1.0F - distance / effect.width()) * effect.brightness();
+        return blendTowardsWhite(baseRgb, shine);
+    }
+
     private static int waveOffset(
             WaveTextEffect effect,
             ZenithTooltipAnimationState.Frame frame,
@@ -179,10 +296,7 @@ final class ZenithTooltipTextAnimator {
         return List.copyOf(flattened);
     }
 
-    private static void flattenInto(
-            ZenithTooltipTextEffect effect,
-            List<ZenithTooltipTextEffect> destination
-    ) {
+    private static void flattenInto(ZenithTooltipTextEffect effect, List<ZenithTooltipTextEffect> destination) {
         if (effect instanceof TextEffectStack stack) {
             for (ZenithTooltipTextEffect child : stack.effects()) {
                 flattenInto(child, destination);
@@ -195,14 +309,21 @@ final class ZenithTooltipTextAnimator {
     private static List<Glyph> glyphs(Font font, FormattedCharSequence line) {
         List<Glyph> glyphs = new ArrayList<>();
         line.accept((index, style, codePoint) -> {
-            glyphs.add(new Glyph(
-                    style,
-                    codePoint,
-                    font.width(singleGlyph(style, codePoint))
-            ));
+            glyphs.add(new Glyph(style, codePoint, font.width(singleGlyph(style, codePoint))));
             return true;
         });
         return glyphs;
+    }
+
+    private static int glyphCount(List<FormattedCharSequence> lines) {
+        int[] count = {0};
+        for (FormattedCharSequence line : lines) {
+            line.accept((index, style, codePoint) -> {
+                count[0]++;
+                return true;
+            });
+        }
+        return count[0];
     }
 
     private static int mutableCharacterCount(List<FormattedCharSequence> lines) {
@@ -218,12 +339,7 @@ final class ZenithTooltipTextAnimator {
         return count[0];
     }
 
-    private static int replacementGlyph(
-            Font font,
-            Glyph original,
-            int[] glyphs,
-            long hash
-    ) {
+    private static int replacementGlyph(Font font, Glyph original, int[] glyphs, long hash) {
         if (glyphs.length == 0) {
             return original.codePoint();
         }
@@ -260,6 +376,22 @@ final class ZenithTooltipTextAnimator {
         return Character.isLetterOrDigit(codePoint);
     }
 
+    private static int effectiveRgb(Style style, int baseColor) {
+        TextColor styleColor = style.getColor();
+        return styleColor == null ? baseColor & 0xFFFFFF : styleColor.getValue() & 0xFFFFFF;
+    }
+
+    private static int blendTowardsWhite(int rgb, float amount) {
+        float t = Math.max(0.0F, Math.min(1.0F, amount));
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
+        r += Math.round((255 - r) * t);
+        g += Math.round((255 - g) * t);
+        b += Math.round((255 - b) * t);
+        return r << 16 | g << 8 | b;
+    }
+
     private static float pingPong(float value, float min, float max) {
         float triangle = Math.abs(2.0F * wrap01(value) - 1.0F);
         return min + triangle * (max - min);
@@ -281,42 +413,26 @@ final class ZenithTooltipTextAnimator {
         float green;
         float blue;
         switch (sector % 6) {
-            case 0 -> {
-                red = brightness;
-                green = t;
-                blue = p;
-            }
-            case 1 -> {
-                red = q;
-                green = brightness;
-                blue = p;
-            }
-            case 2 -> {
-                red = p;
-                green = brightness;
-                blue = t;
-            }
-            case 3 -> {
-                red = p;
-                green = q;
-                blue = brightness;
-            }
-            case 4 -> {
-                red = t;
-                green = p;
-                blue = brightness;
-            }
-            default -> {
-                red = brightness;
-                green = p;
-                blue = q;
-            }
+            case 0 -> { red = brightness; green = t; blue = p; }
+            case 1 -> { red = q; green = brightness; blue = p; }
+            case 2 -> { red = p; green = brightness; blue = t; }
+            case 3 -> { red = p; green = q; blue = brightness; }
+            case 4 -> { red = t; green = p; blue = brightness; }
+            default -> { red = brightness; green = p; blue = q; }
         }
 
         int r = Math.round(red * 255.0F);
         int g = Math.round(green * 255.0F);
         int b = Math.round(blue * 255.0F);
         return r << 16 | g << 8 | b;
+    }
+
+    private static boolean animationsEnabled() {
+        return Config.TOOLTIP_ANIMATIONS_ENABLED.get() && Config.TOOLTIP_ANIMATION_INTENSITY.get() > 0;
+    }
+
+    private static boolean reduceMotion() {
+        return Config.TOOLTIP_REDUCE_MOTION.get();
     }
 
     private static double unitHash(long value) {
@@ -332,4 +448,6 @@ final class ZenithTooltipTextAnimator {
     }
 
     private record Glyph(Style style, int codePoint, int width) {}
+
+    private record TypewriterResult(boolean visible, boolean cursorAfter) {}
 }

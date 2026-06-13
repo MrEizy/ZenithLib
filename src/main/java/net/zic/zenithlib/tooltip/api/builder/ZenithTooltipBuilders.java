@@ -4,8 +4,11 @@ import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.animation.RainbowTextEffect;
+import net.zic.zenithlib.tooltip.api.animation.RuneDecipherTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ScrambleRevealTextEffect;
+import net.zic.zenithlib.tooltip.api.animation.ShimmerTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.TextEffectStack;
+import net.zic.zenithlib.tooltip.api.animation.TypewriterTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.WaveTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
@@ -102,6 +105,31 @@ public final class ZenithTooltipBuilders {
                 mode,
                 ScrambleRevealTextEffect.DEFAULT_GLYPHS
         );
+    }
+
+
+    public static TypewriterTextEffect typewriter() {
+        return new TypewriterTextEffect(700, 0, true, false);
+    }
+
+    public static TypewriterTextEffect typewriter(int duration, int delay) {
+        return new TypewriterTextEffect(duration, delay, true, false);
+    }
+
+    public static RuneDecipherTextEffect runeDecipher() {
+        return new RuneDecipherTextEffect(950, 0, 45, ScrambleRevealTextEffect.Mode.PREFIX, RuneDecipherTextEffect.DEFAULT_RUNE_GLYPHS);
+    }
+
+    public static RuneDecipherTextEffect runeDecipher(int duration, int delay, int speed) {
+        return new RuneDecipherTextEffect(duration, delay, speed, ScrambleRevealTextEffect.Mode.PREFIX, RuneDecipherTextEffect.DEFAULT_RUNE_GLYPHS);
+    }
+
+    public static ShimmerTextEffect shimmer() {
+        return new ShimmerTextEffect(2200, 0.18F, 0.55F, false);
+    }
+
+    public static ShimmerTextEffect shimmer(int period, float width, float brightness) {
+        return new ShimmerTextEffect(period, width, brightness, false);
     }
 
     public static RainbowTextEffect rainbow() {

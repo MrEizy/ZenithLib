@@ -1,9 +1,9 @@
 {
-  "document": "zenithlib:showcase_scrollable_sheet",
+  "document": "zenithlib:showcase_lore",
   "priority": 100,
   "selector": {
     "items": [
-      "minecraft:lapis_lazuli"
+      "minecraft:book"
     ]
   },
   "theme": "zenithlib:cobalt_blue"

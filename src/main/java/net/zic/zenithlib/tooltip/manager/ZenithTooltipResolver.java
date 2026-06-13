@@ -44,7 +44,7 @@ public final class ZenithTooltipResolver {
         for (ZenithTooltipPage page : document.pages()) {
             pages.add(resolvePage(page, context));
         }
-        return new ZenithTooltipDocument(document.theme(), pages);
+        return new ZenithTooltipDocument(document.theme(), pages, document.animationPresets());
     }
 
     private static ZenithTooltipPage resolvePage(

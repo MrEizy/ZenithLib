@@ -1,5 +1,10 @@
 {
+  "config.zenithlib.tooltips.ambient_effects_enabled": "Enable Tooltip Ambient Effects",
+  "config.zenithlib.tooltips.animation_intensity": "Tooltip Animation Intensity",
+  "config.zenithlib.tooltips.animations_enabled": "Enable Tooltip Animations",
   "config.zenithlib.tooltips.enabled": "Enable Zenith Tooltips",
+  "config.zenithlib.tooltips.particle_budget": "Tooltip Particle Budget",
+  "config.zenithlib.tooltips.reduce_motion": "Reduce Tooltip Motion",
   "config.zenithlib.tooltips.spawn_egg_entity_previews": "Show Spawn Egg Entity Previews",
   "key.zenithlib.tooltip.next_page": "ZenithLib: Next Tooltip Page",
   "key.zenithlib.tooltip.previous_page": "ZenithLib: Previous Tooltip Page",

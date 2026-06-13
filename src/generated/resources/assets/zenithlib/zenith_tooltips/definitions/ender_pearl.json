@@ -1,9 +1,9 @@
 {
-  "document": "zenithlib:showcase_text_lab",
+  "document": "zenithlib:showcase_template_requirements",
   "priority": 100,
   "selector": {
     "items": [
-      "minecraft:emerald"
+      "minecraft:ender_pearl"
     ]
   },
   "theme": "zenithlib:arcane_purple"

@@ -1,0 +1,115 @@
+{
+  "animation_presets": [
+    "zenithlib:mechanical"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "header",
+          "color": "warning",
+          "text": {
+            "literal": "Bars"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "Bars keep their logical value separate from segmented charging, scan lines, and edge sparks. These are placeholder values."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "bar",
+          "color": "positive",
+          "label": {
+            "literal": "Integrity"
+          },
+          "max": 100,
+          "value": 78,
+          "value_text": {
+            "literal": "78%"
+          }
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Stored Qi"
+          },
+          "max": 100,
+          "value": 42
+        },
+        {
+          "type": "bar",
+          "color": "negative",
+          "label": {
+            "literal": "Impurities"
+          },
+          "max": 100,
+          "value": 16
+        }
+      ],
+      "title": {
+        "literal": "Gauge Preview"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Low / High Checks"
+          }
+        },
+        {
+          "type": "bar",
+          "color": "negative",
+          "label": {
+            "literal": "Almost Empty"
+          },
+          "max": 100,
+          "value": 1,
+          "value_text": {
+            "literal": "1 / 100"
+          }
+        },
+        {
+          "type": "bar",
+          "color": "warning",
+          "label": {
+            "literal": "Half Charge"
+          },
+          "max": 100,
+          "value": 50,
+          "value_text": {
+            "literal": "50 / 100"
+          }
+        },
+        {
+          "type": "bar",
+          "color": "positive",
+          "label": {
+            "literal": "Overflow Test"
+          },
+          "max": 100,
+          "value": 100,
+          "value_text": {
+            "literal": "Full"
+          }
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "Good quick hover tests for sparks, clipping, and bar fill bounds."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Value Extremes"
+      }
+    }
+  ]
+}

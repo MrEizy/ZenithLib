@@ -1,0 +1,56 @@
+{
+  "animation_presets": [
+    "zenithlib:mechanical"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "title_icon",
+          "subtitle": {
+            "literal": "Uses built-in value sources"
+          },
+          "title": {
+            "source": "zenithlib:item_name"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "This card demonstrates the simple dependent-mod style: authored elements mixed with data-driven values from the hovered stack."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Item ID"
+          },
+          "right": {
+            "source": "zenithlib:item_id"
+          }
+        },
+        {
+          "type": "bar",
+          "color": "positive",
+          "label": {
+            "literal": "Live Durability"
+          },
+          "source": "zenithlib:durability"
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "Try this on a damageable item. If the stack has no durability component, the dynamic bar simply has nothing useful to resolve."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Dynamic Item Tooltip"
+      }
+    }
+  ]
+}

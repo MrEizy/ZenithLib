@@ -1,0 +1,57 @@
+{
+  "animation_presets": [
+    "zenithlib:living"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.header"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.line_1"
+          }
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "scramble_reveal",
+            "reveal": 0.55,
+            "speed": 20
+          },
+          "text": {
+            "literal": "Sometimes I do not care. Sometimes I wish to tell them this world they take for truth is merely an illusion, and that they see so little of reality in their long dream."
+          }
+        },
+        {
+          "type": "spacer"
+        },
+        {
+          "type": "text",
+          "color": "accent",
+          "text": {
+            "translate": "tooltip.zenithlib.diamond.page_2.line_2"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "Living preset: calmer mist, icon breathing, edge sparks, and staggered element entry."
+          }
+        }
+      ],
+      "title": {
+        "translate": "tooltip.zenithlib.diamond.page_2.title"
+      }
+    }
+  ]
+}

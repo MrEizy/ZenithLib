@@ -72,6 +72,7 @@ public final class ZenithTooltipLayout {
         int maxInnerWidth = safeInnerWidth(theme);
         int pageIndex = pageIndex(animationUpdate.changed(), document.pages().size());
         ZenithTooltipPage page = document.page(pageIndex);
+        ZenithTooltipAnimationState.Frame animationFrame = ZenithTooltipAnimationState.pageFrame(pageIndex);
 
         boolean titleProvidedByHeader = hasLeadingTitleIcon(page);
         List<FormattedCharSequence> titleLines = titleProvidedByHeader
@@ -148,6 +149,7 @@ public final class ZenithTooltipLayout {
             lastMaxScrollOffset = 0;
             return new Layout(
                     theme,
+                    document.animationPresets(),
                     titleLines,
                     titleIconHeader,
                     elements,
@@ -159,7 +161,7 @@ public final class ZenithTooltipLayout {
                     bodyContentHeight,
                     0,
                     false,
-                    animationUpdate.frame()
+                    animationFrame
             );
         }
 
@@ -181,6 +183,7 @@ public final class ZenithTooltipLayout {
 
         return new Layout(
                 theme,
+                document.animationPresets(),
                 titleLines,
                 titleIconHeader,
                 elements,
@@ -192,7 +195,7 @@ public final class ZenithTooltipLayout {
                 bodyContentHeight,
                 scrollOffset,
                 lastMaxScrollOffset > 0,
-                animationUpdate.frame()
+                animationFrame
         );
     }
 
@@ -616,6 +619,7 @@ public final class ZenithTooltipLayout {
 
     public record Layout(
             ZenithTooltipTheme theme,
+            List<Identifier> animationPresets,
             List<FormattedCharSequence> titleLines,
             @Nullable PreparedTitleIcon titleIconHeader,
             List<PreparedElement> elements,

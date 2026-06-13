@@ -1,0 +1,65 @@
+{
+  "animation_presets": [
+    "zenithlib:celestial"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "title_icon",
+          "subtitle": {
+            "literal": "Built with ZenithTooltipTemplates.iconTitleSummary"
+          },
+          "title": {
+            "literal": "Template: Icon Summary"
+          }
+        },
+        {
+          "type": "spacer",
+          "height": 2
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "This document was generated through a beginner-friendly template helper, then assigned a normal animation preset and theme by the rule."
+          }
+        }
+      ],
+      "title": {
+        "literal": ""
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Still Just Normal Pages"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "Template builders do not create a parallel system. They simply emit regular pages and elements that can be extended afterwards."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Template"
+          },
+          "right": {
+            "literal": "iconTitleSummary"
+          },
+          "right_color": "positive"
+        }
+      ],
+      "title": {
+        "literal": "Custom Page Added After Template"
+      }
+    }
+  ]
+}

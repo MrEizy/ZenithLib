@@ -1,9 +1,9 @@
 {
-  "document": "zenithlib:showcase_corrupted_preset",
+  "document": "zenithlib:showcase_template_progress",
   "priority": 100,
   "selector": {
     "items": [
-      "minecraft:echo_shard"
+      "minecraft:gold_ingot"
     ]
   },
   "theme": "zenithlib:ember_orange"

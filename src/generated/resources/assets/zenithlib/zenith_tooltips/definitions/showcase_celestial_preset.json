@@ -1,0 +1,47 @@
+{
+  "animation_presets": [
+    "zenithlib:celestial"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "title_icon",
+          "subtitle": {
+            "literal": "Preset composition demo"
+          },
+          "title": {
+            "literal": "Celestial"
+          }
+        },
+        {
+          "type": "badge",
+          "background_color": "accent",
+          "text": {
+            "literal": "PRESET • STARS • FRAME"
+          },
+          "text_color": "background"
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "A theme can stay visual, while a preset adds motion identity: faint stars, calm border energy, title shimmer, divider sweeps, icon float, and a restrained opening."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "Preset effects are ordinary reusable pieces. Dependent mods can register their own namespaced presets later."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Celestial Preset"
+      }
+    }
+  ]
+}

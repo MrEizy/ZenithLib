@@ -1,0 +1,80 @@
+{
+  "animation_presets": [
+    "zenithlib:corrupted"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Entry Conditions"
+          }
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Void Clearance"
+          },
+          "right": {
+            "literal": "Missing"
+          }
+        }
+      ],
+      "title": {
+        "literal": "Template: Requirements"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "color": "warning",
+          "text": {
+            "literal": "Expanded Check List"
+          }
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Rank"
+          },
+          "right": {
+            "literal": "Adept"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Clearance"
+          },
+          "right": {
+            "literal": "Denied"
+          },
+          "right_color": "negative"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Stability"
+          },
+          "right": {
+            "literal": "Uncertain"
+          },
+          "right_color": "warning"
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "text": {
+            "literal": "A useful pattern for dependent mods that need conditional sections later."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Extra Requirements"
+      }
+    }
+  ]
+}

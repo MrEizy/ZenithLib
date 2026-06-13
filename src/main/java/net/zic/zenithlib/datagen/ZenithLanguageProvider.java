@@ -46,6 +46,11 @@ public class ZenithLanguageProvider extends LanguageProvider {
         add("key.zenithlib.tooltip.next_page", "ZenithLib: Next Tooltip Page");
         add("config.zenithlib.tooltips.enabled", "Enable Zenith Tooltips");
         add("config.zenithlib.tooltips.spawn_egg_entity_previews", "Show Spawn Egg Entity Previews");
+        add("config.zenithlib.tooltips.animations_enabled", "Enable Tooltip Animations");
+        add("config.zenithlib.tooltips.reduce_motion", "Reduce Tooltip Motion");
+        add("config.zenithlib.tooltips.ambient_effects_enabled", "Enable Tooltip Ambient Effects");
+        add("config.zenithlib.tooltips.animation_intensity", "Tooltip Animation Intensity");
+        add("config.zenithlib.tooltips.particle_budget", "Tooltip Particle Budget");
 
     }
 }

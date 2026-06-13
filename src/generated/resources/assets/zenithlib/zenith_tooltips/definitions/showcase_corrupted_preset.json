@@ -1,0 +1,77 @@
+{
+  "animation_presets": [
+    "zenithlib:corrupted"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "title_icon",
+          "subtitle": {
+            "literal": "Restrained instability demo"
+          },
+          "title": {
+            "literal": "Corrupted Signal"
+          }
+        },
+        {
+          "type": "badge",
+          "background_color": "negative",
+          "border_color": "negative",
+          "text": {
+            "literal": "UNSTABLE"
+          },
+          "text_color": "background"
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "stack",
+            "effects": [
+              {
+                "type": "scramble_reveal",
+                "reveal": 0.7,
+                "speed": 28
+              },
+              {
+                "type": "shimmer",
+                "brightness": 0.45,
+                "period": 2600,
+                "width": 0.13
+              }
+            ]
+          },
+          "text": {
+            "literal": "The frame hums, mist drifts, and text can glitch without forcing the whole tooltip to become unreadable."
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Signal"
+          },
+          "right": {
+            "literal": "Fractured"
+          },
+          "right_color": "negative"
+        },
+        {
+          "type": "row",
+          "left": {
+            "literal": "Containment"
+          },
+          "right": {
+            "literal": "Partial"
+          },
+          "right_color": "warning"
+        }
+      ],
+      "title": {
+        "literal": "Corrupted Preset"
+      }
+    }
+  ]
+}

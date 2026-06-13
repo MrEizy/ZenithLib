@@ -4,13 +4,29 @@ import net.minecraft.data.PackOutput;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
+import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
+import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplateBuilder;
+import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplates;
 import net.zic.zenithlib.tooltip.datagen.ZenithTooltipDataProvider;
 
 import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.*;
 
-/*
-A temporary setup that just generates the showcase tooltips I made, and the themes.
-I will add actual tooltips to items later, but this is a layout guide for you guys :)
+/**
+ * A temporary setup that just generates the showcase tooltips I made, and the themes.
+ * I will add actual tooltips to items later, but this is a layout guide for you guys :)
+ *
+ * <p>Current Showcase Items:
+ *      Diamond - A basic custom tooltip
+ *      Emerald - Text Animation Effects
+ *      Amethyst Shard - The Corrupted Animation Preset
+ *      Echo Shard - iconTitleSummary Template
+ *      Nether Star - Celestial Animation Preset
+ *      Slime Ball - statCard Template
+ *      Redstone Dust - Segmented Bars/ Gauge Extremes
+ *      Lapis Lazuli - Scrolling long page
+ *      Gold Ingot - progressDisplay Template
+ *      Iron Sword - Dynamic item tooltip
+ *      Book - Lore, scramble reveal, Living Animation Preset</p>
 */
 
 public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvider {
@@ -20,13 +36,26 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
 
     @Override
     protected void addTooltips() {
-        addShowcaseTemplate();
+        addShowcaseTemplates();
         addShowcaseRules();
         addThemes();
     }
 
-    private void addShowcaseTemplate() {
-        template(id("showcase"))
+    private void addShowcaseTemplates() {
+        addMaterialShowcaseTemplate();
+        addLoreShowcaseTemplate();
+        addTextAnimationLabTemplate();
+        addCelestialPresetTemplate();
+        addCorruptedPresetTemplate();
+        addMechanicalGaugeTemplate();
+        addScrollableSheetTemplate();
+        addTemplateBuilderShowcases();
+        addDynamicItemTemplate();
+    }
+
+    private void addMaterialShowcaseTemplate() {
+        template(id("showcase_material"))
+                .animationPreset(ZenithTooltipPresets.CELESTIAL)
                 .page(page(translated("tooltip.zenithlib.diamond.title"))
                         .add(titleIcon(
                                 translated("tooltip.zenithlib.diamond.title"),
@@ -46,20 +75,45 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                                 translated("tooltip.zenithlib.diamond.row.origin_value"),
                                 ZenithTooltipColor.TEXT,
                                 ZenithTooltipColor.ACCENT
+                        ))
+                        .add(divider())
+                        .add(text(
+                                literal("This compact card shows the default authored layout: title icon, badge, rows, divider, and theme colours."),
+                                ZenithTooltipColor.MUTED
                         )))
+                .page(page(literal("Authoring Notes"))
+                        .add(header(literal("Stable Layout"), ZenithTooltipColor.ACCENT))
+                        .add(text(literal("The celestial preset adds stars, border energy, frame assembly, icon float, and divider sweeps without changing measured layout bounds.")))
+                        .add(text(
+                                literal("Good for dependent mods that want a polished tooltip without hand-authoring every animation."),
+                                ZenithTooltipColor.MUTED
+                        )));
+    }
+
+    private void addLoreShowcaseTemplate() {
+        template(id("showcase_lore"))
+                .animationPreset(ZenithTooltipPresets.LIVING)
                 .page(page(translated("tooltip.zenithlib.diamond.page_2.title"))
                         .add(header(translated("tooltip.zenithlib.diamond.page_2.header"), ZenithTooltipColor.ACCENT))
                         .add(text(translated("tooltip.zenithlib.diamond.page_2.line_1")))
-                        .add(text(literal("Sometimes I do not care. Sometimes I wish to tell them this world they take for truth is merely an illusion, and that they see so little of reality in their long dream."),
-                                ZenithTooltipColor.TEXT, scrambleReveal(0.55F, 20)))
+                        .add(text(
+                                literal("Sometimes I do not care. Sometimes I wish to tell them this world they take for truth is merely an illusion, and that they see so little of reality in their long dream."),
+                                ZenithTooltipColor.TEXT,
+                                scrambleReveal(0.55F, 20)
+                        ))
                         .add(spacer(4))
-                        .add(text(translated("tooltip.zenithlib.diamond.page_2.line_2"), ZenithTooltipColor.ACCENT)))
+                        .add(text(translated("tooltip.zenithlib.diamond.page_2.line_2"), ZenithTooltipColor.ACCENT)));
+    }
+
+    private void addTextAnimationLabTemplate() {
+        template(id("showcase_text_lab"))
+                .animationPreset(ZenithTooltipPresets.CORRUPTED)
                 .page(page(literal("Text Animation Lab"))
                         .add(header(literal("Living Lettering"), ZenithTooltipColor.ACCENT))
                         .add(text(
                                 literal("A full-spectrum gradient travels through every glyph."),
                                 ZenithTooltipColor.TEXT,
-                                rainbow()
+                                combine(rainbow(), shimmer())
                         ))
                         .add(text(
                                 literal("Each letter takes its turn hopping through the wave."),
@@ -69,21 +123,93 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                         .add(text(
                                 literal("Prismatic resonance"),
                                 ZenithTooltipColor.TEXT,
-                                combine(rainbow(2000, 0.055F), wave(850, 6.0F, 2))
+                                combine(rainbow(2000, 0.055F), shimmer(), wave(850, 6.0F, 2))
                         ))
                         .add(divider())
                         .add(text(
                                 literal("A bounded hue range recreates the old ping-pong gradient."),
                                 ZenithTooltipColor.TEXT,
                                 gradient(2600, 0.035F, 0.52F, 0.82F)
+                        ))
+                        .add(text(
+                                literal("Typed once per page entry, with layout width held steady."),
+                                ZenithTooltipColor.TEXT,
+                                typewriter(850, 120)
+                        ))
+                        .add(text(
+                                literal("ᚱ Rune deciphering settles into readable text."),
+                                ZenithTooltipColor.ACCENT,
+                                runeDecipher(1100, 80, 42)
                         )))
+                .page(page(literal("Composed Effects"))
+                        .add(header(literal("Stacked Glyph Passes"), ZenithTooltipColor.ACCENT))
+                        .add(text(
+                                literal("Shimmer, wave, and gradient can be layered without changing the wrapped width."),
+                                ZenithTooltipColor.TEXT,
+                                combine(shimmer(1800, 0.16F, 0.55F), wave(1200, 8.5F, 1), gradient(3200, 0.03F, 0.74F, 0.92F))
+                        ))
+                        .add(text(
+                                literal("Rune and typewriter effects restart when this page is entered."),
+                                ZenithTooltipColor.MUTED,
+                                runeDecipher(900, 60, 36)
+                        )));
+    }
+
+    private void addCelestialPresetTemplate() {
+        template(id("showcase_celestial_preset"))
+                .animationPreset(ZenithTooltipPresets.CELESTIAL)
+                .page(page(literal("Celestial Preset"))
+                        .add(titleIcon(literal("Celestial"), literal("Preset composition demo")))
+                        .add(badge(literal("PRESET • STARS • FRAME"), ZenithTooltipColor.ACCENT))
+                        .add(text(literal("A theme can stay visual, while a preset adds motion identity: faint stars, calm border energy, title shimmer, divider sweeps, icon float, and a restrained opening.")))
+                        .add(divider())
+                        .add(text(
+                                literal("Preset effects are ordinary reusable pieces. Dependent mods can register their own namespaced presets later."),
+                                ZenithTooltipColor.MUTED
+                        )));
+    }
+
+    private void addCorruptedPresetTemplate() {
+        template(id("showcase_corrupted_preset"))
+                .animationPreset(ZenithTooltipPresets.CORRUPTED)
+                .page(page(literal("Corrupted Preset"))
+                        .add(titleIcon(literal("Corrupted Signal"), literal("Restrained instability demo")))
+                        .add(badge(
+                                literal("UNSTABLE"),
+                                ZenithTooltipColor.BACKGROUND,
+                                ZenithTooltipColor.NEGATIVE,
+                                ZenithTooltipColor.NEGATIVE
+                        ))
+                        .add(text(
+                                literal("The frame hums, mist drifts, and text can glitch without forcing the whole tooltip to become unreadable."),
+                                ZenithTooltipColor.TEXT,
+                                combine(scrambleReveal(0.7F, 28), shimmer(2600, 0.13F, 0.45F))
+                        ))
+                        .add(divider())
+                        .add(row(literal("Signal"), literal("Fractured"), ZenithTooltipColor.TEXT, ZenithTooltipColor.NEGATIVE))
+                        .add(row(literal("Containment"), literal("Partial"), ZenithTooltipColor.TEXT, ZenithTooltipColor.WARNING)));
+    }
+
+    private void addMechanicalGaugeTemplate() {
+        template(id("showcase_mechanical_gauges"))
+                .animationPreset(ZenithTooltipPresets.MECHANICAL)
                 .page(page(literal("Gauge Preview"))
                         .add(header(literal("Bars"), ZenithTooltipColor.WARNING))
-                        .add(text(literal("Bars support bounded values with optional custom display text. These are Placeholders")))
+                        .add(text(literal("Bars keep their logical value separate from segmented charging, scan lines, and edge sparks. These are placeholder values.")))
                         .add(divider())
                         .add(bar(literal("Integrity"), 78, 100, literal("78%"), ZenithTooltipColor.POSITIVE))
                         .add(bar(literal("Stored Qi"), 42, 100, ZenithTooltipColor.ACCENT))
                         .add(bar(literal("Impurities"), 16, 100, ZenithTooltipColor.NEGATIVE)))
+                .page(page(literal("Value Extremes"))
+                        .add(header(literal("Low / High Checks"), ZenithTooltipColor.ACCENT))
+                        .add(bar(literal("Almost Empty"), 1, 100, literal("1 / 100"), ZenithTooltipColor.NEGATIVE))
+                        .add(bar(literal("Half Charge"), 50, 100, literal("50 / 100"), ZenithTooltipColor.WARNING))
+                        .add(bar(literal("Overflow Test"), 100, 100, literal("Full"), ZenithTooltipColor.POSITIVE)));
+    }
+
+    private void addScrollableSheetTemplate() {
+        template(id("showcase_scrollable_sheet"))
+                .animationPreset(ZenithTooltipPresets.CELESTIAL)
                 .page(page(literal("Scrollable Detail Sheet"))
                         .add(header(literal("Long Tooltip Preview"), ZenithTooltipColor.ACCENT))
                         .add(badge(
@@ -105,28 +231,108 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                         .add(row(literal("Agility"), literal("8"), ZenithTooltipColor.TEXT, ZenithTooltipColor.POSITIVE))
                         .add(row(literal("Intelligence"), literal("92"), ZenithTooltipColor.TEXT, ZenithTooltipColor.NEGATIVE))
                         .add(divider())
+                        .add(header(literal("Renderer Notes"), ZenithTooltipColor.ACCENT))
+                        .add(text(literal("This is mostly here to test clipped pages, page controls, wheel scrolling, dividers, rows, bars, and staged entry in one place.")))
                         .add(text(
                                 literal("Damageable converted items can display live durability bars, while authored documents can use bars for any lore or resource value."),
                                 ZenithTooltipColor.MUTED
                         )));
     }
 
-    private void addShowcaseRules() {
-        addShowcaseRule("diamond", "mana_blue");
-        addShowcaseRule("emerald", "arcane_purple");
-        addShowcaseRule("echo_shard", "ember_orange");
-        addShowcaseRule("amethyst_shard", "moonlit_white");
-        addShowcaseRule("nether_star", "glass_clear");
-        addShowcaseRule("slime_ball", "verdant_green");
-        addShowcaseRule("redstone", "crimson_red");
-        addShowcaseRule("lapis_lazuli", "cobalt_blue");
+    private void addTemplateBuilderShowcases() {
+        ZenithTooltipTemplateBuilder iconSummary = template(id("showcase_template_icon_summary"))
+                .animationPreset(ZenithTooltipPresets.CELESTIAL);
+        addTemplatePages(iconSummary, ZenithTooltipTemplates.iconTitleSummary(
+                literal("Template: Icon Summary"),
+                literal("Built with ZenithTooltipTemplates.iconTitleSummary"),
+                literal("This document was generated through a beginner-friendly template helper, then assigned a normal animation preset and theme by the rule.")
+        ));
+        iconSummary.page(page(literal("Custom Page Added After Template"))
+                .add(header(literal("Still Just Normal Pages"), ZenithTooltipColor.ACCENT))
+                .add(text(literal("Template builders do not create a parallel system. They simply emit regular pages and elements that can be extended afterwards.")))
+                .add(divider())
+                .add(row(literal("Template"), literal("iconTitleSummary"), ZenithTooltipColor.TEXT, ZenithTooltipColor.POSITIVE)));
+
+        ZenithTooltipTemplateBuilder statCard = template(id("showcase_template_stat_card"))
+                .animationPreset(ZenithTooltipPresets.LIVING);
+        addTemplatePages(statCard, ZenithTooltipTemplates.statCard(
+                literal("Template: Stat Card"),
+                literal("Growth"),
+                literal("+12%"),
+                literal("A compact generated page for a single stat, modifier, perk, or item trait.")
+        ));
+        statCard.page(page(literal("Inserted Rows"))
+                .add(header(literal("Manual Extension"), ZenithTooltipColor.ACCENT))
+                .add(row(literal("Affinity"), literal("Verdant"), ZenithTooltipColor.TEXT, ZenithTooltipColor.POSITIVE))
+                .add(row(literal("Stability"), literal("Breathing"), ZenithTooltipColor.TEXT, ZenithTooltipColor.ACCENT))
+                .add(text(literal("The template helper handled the basic shape; authored rows add the flavour."), ZenithTooltipColor.MUTED)));
+
+        ZenithTooltipTemplateBuilder progress = template(id("showcase_template_progress"))
+                .animationPreset(ZenithTooltipPresets.MECHANICAL);
+        addTemplatePages(progress, ZenithTooltipTemplates.progressDisplay(
+                literal("Template: Progress"),
+                literal("Assembly"),
+                64,
+                100,
+                literal("64%"),
+                ZenithTooltipColor.WARNING
+        ));
+        progress.page(page(literal("Mechanical Additions"))
+                .add(header(literal("Segmented Motion"), ZenithTooltipColor.WARNING))
+                .add(text(literal("The mechanical preset can add segmented bar animation and border scans while the bar value remains exactly 64%.")))
+                .add(bar(literal("Calibration"), 33, 100, literal("33 / 100"), ZenithTooltipColor.ACCENT)));
+
+        ZenithTooltipTemplateBuilder requirements = template(id("showcase_template_requirements"))
+                .animationPreset(ZenithTooltipPresets.CORRUPTED);
+        addTemplatePages(requirements, ZenithTooltipTemplates.requirementsDisplay(
+                literal("Template: Requirements"),
+                literal("Entry Conditions"),
+                literal("Void Clearance"),
+                literal("Missing")
+        ));
+        requirements.page(page(literal("Extra Requirements"))
+                .add(header(literal("Expanded Check List"), ZenithTooltipColor.WARNING))
+                .add(row(literal("Rank"), literal("Adept"), ZenithTooltipColor.TEXT, ZenithTooltipColor.POSITIVE))
+                .add(row(literal("Clearance"), literal("Denied"), ZenithTooltipColor.TEXT, ZenithTooltipColor.NEGATIVE))
+                .add(row(literal("Stability"), literal("Uncertain"), ZenithTooltipColor.TEXT, ZenithTooltipColor.WARNING))
+                .add(text(literal("A useful pattern for dependent mods that need conditional sections later."), ZenithTooltipColor.MUTED)));
     }
 
-    private void addShowcaseRule(String itemPath, String themePath) {
+    private void addDynamicItemTemplate() {
+        template(id("showcase_dynamic_item"))
+                .animationPreset(ZenithTooltipPresets.MECHANICAL)
+                .page(page(literal("Dynamic Item Tooltip"))
+                        .add(titleIcon(sourced("item_name"), literal("Uses built-in value sources")))
+                        .add(text(literal("This card demonstrates the simple dependent-mod style: authored elements mixed with data-driven values from the hovered stack.")))
+                        .add(divider())
+                        .add(row(literal("Item ID"), sourced("item_id"), ZenithTooltipColor.TEXT, ZenithTooltipColor.ACCENT))
+                        .add(durabilityBar(literal("Live Durability"), ZenithTooltipColor.POSITIVE)));
+    }
+
+    private void addTemplatePages(ZenithTooltipTemplateBuilder target, ZenithTooltipTemplateBuilder source) {
+        source.build().pages().forEach(target::page);
+    }
+
+    private void addShowcaseRules() {
+        addShowcaseRule("diamond", "showcase_material", "mana_blue");
+        addShowcaseRule("emerald", "showcase_text_lab", "arcane_purple");
+        addShowcaseRule("echo_shard", "showcase_corrupted_preset", "ember_orange");
+        addShowcaseRule("amethyst_shard", "showcase_template_icon_summary", "moonlit_white");
+        addShowcaseRule("nether_star", "showcase_celestial_preset", "glass_clear");
+        addShowcaseRule("slime_ball", "showcase_template_stat_card", "verdant_green");
+        addShowcaseRule("redstone", "showcase_mechanical_gauges", "crimson_red");
+        addShowcaseRule("lapis_lazuli", "showcase_scrollable_sheet", "cobalt_blue");
+        addShowcaseRule("gold_ingot", "showcase_template_progress", "ember_orange");
+        addShowcaseRule("ender_pearl", "showcase_template_requirements", "arcane_purple");
+        addShowcaseRule("iron_sword", "showcase_dynamic_item", "mana_blue");
+        addShowcaseRule("book", "showcase_lore", "cobalt_blue");
+    }
+
+    private void addShowcaseRule(String itemPath, String documentPath, String themePath) {
         rule(id(itemPath))
                 .priority(100)
                 .items(minecraft(itemPath))
-                .document(id("showcase"))
+                .document(id(documentPath))
                 .theme(id(themePath));
     }
 

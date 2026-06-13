@@ -1,0 +1,57 @@
+{
+  "animation_presets": [
+    "zenithlib:mechanical"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "bar",
+          "color": "warning",
+          "label": {
+            "literal": "Assembly"
+          },
+          "max": 100,
+          "value": 64,
+          "value_text": {
+            "literal": "64%"
+          }
+        }
+      ],
+      "title": {
+        "literal": "Template: Progress"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "color": "warning",
+          "text": {
+            "literal": "Segmented Motion"
+          }
+        },
+        {
+          "type": "text",
+          "text": {
+            "literal": "The mechanical preset can add segmented bar animation and border scans while the bar value remains exactly 64%."
+          }
+        },
+        {
+          "type": "bar",
+          "label": {
+            "literal": "Calibration"
+          },
+          "max": 100,
+          "value": 33,
+          "value_text": {
+            "literal": "33 / 100"
+          }
+        }
+      ],
+      "title": {
+        "literal": "Mechanical Additions"
+      }
+    }
+  ]
+}

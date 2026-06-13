@@ -1,0 +1,168 @@
+{
+  "animation_presets": [
+    "zenithlib:corrupted"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Living Lettering"
+          }
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "stack",
+            "effects": [
+              {
+                "type": "rainbow"
+              },
+              {
+                "type": "shimmer"
+              }
+            ]
+          },
+          "text": {
+            "literal": "A full-spectrum gradient travels through every glyph."
+          }
+        },
+        {
+          "type": "text",
+          "color": "accent",
+          "effect": {
+            "type": "wave"
+          },
+          "text": {
+            "literal": "Each letter takes its turn hopping through the wave."
+          }
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "stack",
+            "effects": [
+              {
+                "type": "rainbow",
+                "period": 2000,
+                "spread": 0.055
+              },
+              {
+                "type": "shimmer"
+              },
+              {
+                "type": "wave",
+                "period": 850,
+                "wavelength": 6.0
+              }
+            ]
+          },
+          "text": {
+            "literal": "Prismatic resonance"
+          }
+        },
+        {
+          "type": "divider"
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "rainbow",
+            "max_hue": 0.82,
+            "min_hue": 0.52,
+            "mode": "ping_pong",
+            "period": 2600,
+            "spread": 0.035
+          },
+          "text": {
+            "literal": "A bounded hue range recreates the old ping-pong gradient."
+          }
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "typewriter",
+            "delay": 120,
+            "duration": 850
+          },
+          "text": {
+            "literal": "Typed once per page entry, with layout width held steady."
+          }
+        },
+        {
+          "type": "text",
+          "color": "accent",
+          "effect": {
+            "type": "rune_decipher",
+            "delay": 80,
+            "duration": 1100,
+            "speed": 42
+          },
+          "text": {
+            "literal": "ᚱ Rune deciphering settles into readable text."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Text Animation Lab"
+      }
+    },
+    {
+      "elements": [
+        {
+          "type": "header",
+          "text": {
+            "literal": "Stacked Glyph Passes"
+          }
+        },
+        {
+          "type": "text",
+          "effect": {
+            "type": "stack",
+            "effects": [
+              {
+                "type": "shimmer",
+                "period": 1800,
+                "width": 0.16
+              },
+              {
+                "type": "wave",
+                "amplitude": 1,
+                "period": 1200,
+                "wavelength": 8.5
+              },
+              {
+                "type": "rainbow",
+                "max_hue": 0.92,
+                "min_hue": 0.74,
+                "mode": "ping_pong",
+                "period": 3200,
+                "spread": 0.03
+              }
+            ]
+          },
+          "text": {
+            "literal": "Shimmer, wave, and gradient can be layered without changing the wrapped width."
+          }
+        },
+        {
+          "type": "text",
+          "color": "muted",
+          "effect": {
+            "type": "rune_decipher",
+            "delay": 60,
+            "duration": 900,
+            "speed": 36
+          },
+          "text": {
+            "literal": "Rune and typewriter effects restart when this page is entered."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Composed Effects"
+      }
+    }
+  ]
+}
