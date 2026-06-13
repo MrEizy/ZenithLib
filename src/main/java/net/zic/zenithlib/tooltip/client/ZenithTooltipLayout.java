@@ -61,6 +61,7 @@ public final class ZenithTooltipLayout {
         int pageIndex = pageIndex(animationUpdate.changed(), document.pages().size());
         ZenithTooltipPage page = document.page(pageIndex);
         ZenithTooltipAnimationState.Frame animationFrame = ZenithTooltipAnimationState.pageFrame(pageIndex);
+        ZenithTooltipAnimationSettings animationSettings = ZenithTooltipAnimationSettings.capture();
 
         boolean titleProvidedByHeader = hasLeadingTitleIcon(page);
         List<FormattedCharSequence> titleLines = titleProvidedByHeader
@@ -75,7 +76,7 @@ public final class ZenithTooltipLayout {
         for (int elementIndex = 0; elementIndex < page.elements().size(); elementIndex++) {
             ZenithTooltipElement element = page.elements().get(elementIndex);
             long elementSeed = ((long) elementIndex << 32) ^ element.hashCode();
-            prepareElement(font, theme, stack, maxInnerWidth, element, elementSeed).ifPresent(prepared::add);
+            prepareElement(font, theme, stack, maxInnerWidth, element, elementSeed, animationSettings).ifPresent(prepared::add);
         }
 
         PreparedTitleIcon titleIconHeader = null;
@@ -251,7 +252,8 @@ public final class ZenithTooltipLayout {
             ItemStack stack,
             int innerWidth,
             ZenithTooltipElement element,
-            long elementSeed
+            long elementSeed,
+            ZenithTooltipAnimationSettings animationSettings
     ) {
         return ZenithTooltipElementRenderers.prepare(
                 font,
@@ -259,7 +261,8 @@ public final class ZenithTooltipLayout {
                 stack,
                 innerWidth,
                 element,
-                elementSeed
+                elementSeed,
+                animationSettings
         );
     }
 

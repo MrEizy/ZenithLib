@@ -35,5 +35,7 @@
   "tooltip.zenithlib.vanilla.details": "Details",
   "tooltip.zenithlib.vanilla.durability": "Durability",
   "tooltip.zenithlib.vanilla.enchantments": "Enchantments",
-  "tooltip.zenithlib.vanilla.stats": "Stats"
+  "tooltip.zenithlib.vanilla.stats": "Stats",
+  "zenithlib.configuration.animations": "Tooltip Animation Controls",
+  "zenithlib.configuration.tooltips": "ZenithLib Tooltip Configs"
 }

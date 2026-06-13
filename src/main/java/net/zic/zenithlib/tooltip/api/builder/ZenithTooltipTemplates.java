@@ -5,6 +5,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +33,35 @@ public final class ZenithTooltipTemplates {
             return Optional.empty();
         }
         return Optional.of(template.factory().create(config));
+    }
+
+
+    public static LoreTooltipBuilder loreTooltip() {
+        return new LoreTooltipBuilder();
+    }
+
+    public static ZenithTooltipTemplateBuilder loreTooltip(
+            ZenithTooltipText title,
+            ZenithTooltipText summary,
+            ZenithTooltipText lore
+    ) {
+        return loreTooltip()
+                .title(title)
+                .summary(summary)
+                .lore(lore)
+                .build();
+    }
+
+    public static ProgressTooltipBuilder progressTooltip() {
+        return new ProgressTooltipBuilder();
+    }
+
+    public static ZenithTooltipTemplateBuilder itemNameSummary(ZenithTooltipText summary) {
+        return loreTooltip()
+                .title(itemName())
+                .icon(true)
+                .summary(summary)
+                .build();
     }
 
     public static ZenithTooltipTemplateBuilder simpleTitleBody(ZenithTooltipText title, ZenithTooltipText body) {
@@ -191,6 +221,93 @@ public final class ZenithTooltipTemplates {
                 .page(page(title)
                         .add(badge(rarity, rarityColor))
                         .add(text(body)));
+    }
+
+
+    public static final class LoreTooltipBuilder {
+        private ZenithTooltipText title = itemName();
+        private ZenithTooltipText subtitle = ZenithTooltipText.literal("");
+        private ZenithTooltipText summary = ZenithTooltipText.literal("");
+        private ZenithTooltipText footer = ZenithTooltipText.literal("");
+        private boolean icon = true;
+        private boolean dividerBeforeLore = true;
+        private final List<ZenithTooltipElement> beforeBody = new ArrayList<>();
+        private final List<ZenithTooltipElement> lore = new ArrayList<>();
+        private final List<ZenithTooltipElement> afterBody = new ArrayList<>();
+
+        private LoreTooltipBuilder() {}
+
+        public LoreTooltipBuilder title(ZenithTooltipText title) { this.title = Objects.requireNonNull(title, "title"); return this; }
+        public LoreTooltipBuilder subtitle(ZenithTooltipText subtitle) { this.subtitle = Objects.requireNonNull(subtitle, "subtitle"); return this; }
+        public LoreTooltipBuilder summary(ZenithTooltipText summary) { this.summary = Objects.requireNonNull(summary, "summary"); return this; }
+        public LoreTooltipBuilder footer(ZenithTooltipText footer) { this.footer = Objects.requireNonNull(footer, "footer"); return this; }
+        public LoreTooltipBuilder icon(boolean icon) { this.icon = icon; return this; }
+        public LoreTooltipBuilder dividerBeforeLore(boolean dividerBeforeLore) { this.dividerBeforeLore = dividerBeforeLore; return this; }
+
+        public LoreTooltipBuilder beforeBody(ZenithTooltipElement element) { this.beforeBody.add(Objects.requireNonNull(element, "element")); return this; }
+        public LoreTooltipBuilder lore(ZenithTooltipText text) { this.lore.add(text(text, ZenithTooltipColor.MUTED)); return this; }
+        public LoreTooltipBuilder lore(ZenithTooltipElement element) { this.lore.add(Objects.requireNonNull(element, "element")); return this; }
+        public LoreTooltipBuilder afterBody(ZenithTooltipElement element) { this.afterBody.add(Objects.requireNonNull(element, "element")); return this; }
+
+        public ZenithTooltipTemplateBuilder build() {
+            ZenithTooltipPageBuilder page = page(title);
+            if (icon) {
+                page.add(titleIcon(title, subtitle));
+            } else {
+                page.add(header(title));
+            }
+            beforeBody.forEach(page::add);
+            if (!summary.isBlank()) {
+                page.add(text(summary));
+            }
+            if (!lore.isEmpty()) {
+                if (dividerBeforeLore) {
+                    page.add(divider());
+                }
+                lore.forEach(page::add);
+            }
+            afterBody.forEach(page::add);
+            if (!footer.isBlank()) {
+                page.add(divider());
+                page.add(text(footer, ZenithTooltipColor.MUTED));
+            }
+            return new ZenithTooltipTemplateBuilder().page(page);
+        }
+    }
+
+    public static final class ProgressTooltipBuilder {
+        private ZenithTooltipText title = itemName();
+        private ZenithTooltipText summary = ZenithTooltipText.literal("");
+        private ZenithTooltipText label = ZenithTooltipText.literal("Progress");
+        private ZenithTooltipText footer = ZenithTooltipText.literal("");
+        private ZenithTooltipColor color = ZenithTooltipColor.ACCENT;
+        private int value;
+        private int max = 1;
+        private Identifier source;
+
+        private ProgressTooltipBuilder() {}
+
+        public ProgressTooltipBuilder title(ZenithTooltipText title) { this.title = Objects.requireNonNull(title, "title"); return this; }
+        public ProgressTooltipBuilder summary(ZenithTooltipText summary) { this.summary = Objects.requireNonNull(summary, "summary"); return this; }
+        public ProgressTooltipBuilder label(ZenithTooltipText label) { this.label = Objects.requireNonNull(label, "label"); return this; }
+        public ProgressTooltipBuilder fixed(int value, int max) { this.value = value; this.max = max; this.source = null; return this; }
+        public ProgressTooltipBuilder source(Identifier source) { this.source = Objects.requireNonNull(source, "source"); return this; }
+        public ProgressTooltipBuilder source(String source) { return source(sourceId(source)); }
+        public ProgressTooltipBuilder color(ZenithTooltipColor color) { this.color = Objects.requireNonNull(color, "color"); return this; }
+        public ProgressTooltipBuilder footer(ZenithTooltipText footer) { this.footer = Objects.requireNonNull(footer, "footer"); return this; }
+
+        public ZenithTooltipTemplateBuilder build() {
+            ZenithTooltipPageBuilder page = page(title)
+                    .titleIcon(title, summary);
+            if (!summary.isBlank()) {
+                page.text(summary, ZenithTooltipColor.MUTED);
+            }
+            page.add(source == null ? bar(label, value, max, color) : dynamicBar(label, source, color));
+            if (!footer.isBlank()) {
+                page.divider().muted(footer);
+            }
+            return new ZenithTooltipTemplateBuilder().page(page);
+        }
     }
 
     @FunctionalInterface

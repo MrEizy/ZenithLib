@@ -97,13 +97,14 @@ public final class ZenithTooltipElementRenderers {
             ItemStack stack,
             int innerWidth,
             ZenithTooltipElement element,
-            long seed
+            long seed,
+            ZenithTooltipAnimationSettings animationSettings
     ) {
         Entry<?> entry = ENTRIES.get(element.type());
         if (entry == null) {
             return Optional.empty();
         }
-        return entry.prepare(new LayoutContext(font, theme, stack, innerWidth, seed), element);
+        return entry.prepare(new LayoutContext(font, theme, stack, innerWidth, seed, animationSettings), element);
     }
 
     @FunctionalInterface
@@ -132,7 +133,8 @@ public final class ZenithTooltipElementRenderers {
             ZenithTooltipTheme theme,
             ItemStack stack,
             int innerWidth,
-            long seed
+            long seed,
+            ZenithTooltipAnimationSettings animationSettings
     ) {
         public List<FormattedCharSequence> split(Component component, int width) {
             return List.copyOf(font.split(component, Math.max(1, width)));
@@ -156,7 +158,8 @@ public final class ZenithTooltipElementRenderers {
             ZenithTooltipTheme theme,
             int innerWidth,
             ZenithTooltipAnimationState.Frame animationFrame,
-            ZenithTooltipPresets.Resolved presets
+            ZenithTooltipPresets.Resolved presets,
+            ZenithTooltipAnimationSettings animationSettings
     ) {}
 
     @FunctionalInterface
@@ -202,7 +205,7 @@ public final class ZenithTooltipElementRenderers {
         List<FormattedCharSequence> lines = context.split(text.text().component(), context.innerWidth());
         int width = context.maxLineWidth(lines);
         int animationPadding = text.effect()
-                .map(ZenithTooltipTextAnimator::verticalPadding)
+                .map(effect -> ZenithTooltipTextAnimator.verticalPadding(effect, context.animationSettings()))
                 .orElse(0);
         return Optional.of(new ZenithTooltipLayout.PreparedText(
                 lines,

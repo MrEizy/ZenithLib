@@ -1,6 +1,7 @@
 package net.zic.zenithlib.tooltip.api.builder;
 
 import net.minecraft.resources.Identifier;
+import net.minecraft.network.chat.Component;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.animation.RainbowTextEffect;
@@ -26,6 +27,7 @@ import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.value.ZenithTooltipValueSources;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Compact factory helpers for Zenith tooltip resources in Java.
@@ -39,12 +41,32 @@ public final class ZenithTooltipBuilders {
         return Identifier.fromNamespaceAndPath(namespace, path);
     }
 
+    public static Identifier identifier(String id) {
+        return Identifier.parse(Objects.requireNonNull(id, "id"));
+    }
+
+    public static Identifier sourceId(String source) {
+        return ZenithTooltipValueSources.identifier(source);
+    }
+
     public static ZenithTooltipText literal(String text) {
         return ZenithTooltipText.literal(text);
     }
 
     public static ZenithTooltipText translated(String key) {
         return ZenithTooltipText.translatable(key);
+    }
+
+    public static ZenithTooltipText t(String key) {
+        return translated(key);
+    }
+
+    public static ZenithTooltipText lit(String text) {
+        return literal(text);
+    }
+
+    public static ZenithTooltipText component(Component component) {
+        return ZenithTooltipText.resolved(component);
     }
 
     public static ZenithTooltipText sourced(Identifier source) {
@@ -59,6 +81,38 @@ public final class ZenithTooltipBuilders {
         return sourced(identifier(namespace, path));
     }
 
+    public static ZenithTooltipText src(String source) {
+        return sourced(source);
+    }
+
+    public static ZenithTooltipText src(Identifier source) {
+        return sourced(source);
+    }
+
+    public static ZenithTooltipText itemName() {
+        return sourced(ZenithTooltipValueSources.ITEM_NAME);
+    }
+
+    public static ZenithTooltipText itemId() {
+        return sourced(ZenithTooltipValueSources.ITEM_ID);
+    }
+
+    public static ZenithTooltipText subjectName() {
+        return sourced(ZenithTooltipValueSources.SUBJECT_NAME);
+    }
+
+    public static ZenithTooltipText subjectDescription() {
+        return sourced(ZenithTooltipValueSources.SUBJECT_DESCRIPTION);
+    }
+
+    public static ZenithTooltipText subjectId() {
+        return sourced(ZenithTooltipValueSources.SUBJECT_ID);
+    }
+
+    public static ZenithTooltipText controls() {
+        return translated("tooltip.zenithlib.controls");
+    }
+
     public static ZenithTooltipColor color(String tokenOrHex) {
         return new ZenithTooltipColor(tokenOrHex);
     }
@@ -67,12 +121,35 @@ public final class ZenithTooltipBuilders {
         return ZenithTooltipColor.hex(argb);
     }
 
+    public static ZenithTooltipColor textColor() { return ZenithTooltipColor.TEXT; }
+    public static ZenithTooltipColor mutedColor() { return ZenithTooltipColor.MUTED; }
+    public static ZenithTooltipColor accentColor() { return ZenithTooltipColor.ACCENT; }
+    public static ZenithTooltipColor positiveColor() { return ZenithTooltipColor.POSITIVE; }
+    public static ZenithTooltipColor warningColor() { return ZenithTooltipColor.WARNING; }
+    public static ZenithTooltipColor negativeColor() { return ZenithTooltipColor.NEGATIVE; }
+
     public static ZenithTooltipPageBuilder page(ZenithTooltipText title) {
         return new ZenithTooltipPageBuilder(title);
     }
 
     public static TextElement text(ZenithTooltipText text) {
         return new TextElement(text, ZenithTooltipColor.TEXT);
+    }
+
+    public static TextElement text(String translationKey) {
+        return text(t(translationKey));
+    }
+
+    public static TextElement literalText(String text) {
+        return text(lit(text));
+    }
+
+    public static TextElement muted(ZenithTooltipText text) {
+        return text(text, ZenithTooltipColor.MUTED);
+    }
+
+    public static TextElement accent(ZenithTooltipText text) {
+        return text(text, ZenithTooltipColor.ACCENT);
     }
 
     public static TextElement text(ZenithTooltipText text, ZenithTooltipColor color) {
@@ -299,6 +376,14 @@ public final class ZenithTooltipBuilders {
 
     public static DynamicElement dynamic(String source) {
         return new DynamicElement(ZenithTooltipValueSources.identifier(source));
+    }
+
+    public static DynamicElement dynamicSection(String source) {
+        return dynamic(source);
+    }
+
+    public static DynamicElement dynamicSection(Identifier source) {
+        return dynamic(source);
     }
 
     public static DynamicElement dynamic(Identifier source, List<net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement> fallback) {

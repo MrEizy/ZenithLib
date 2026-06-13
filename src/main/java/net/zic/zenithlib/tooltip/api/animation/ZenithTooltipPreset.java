@@ -2,6 +2,8 @@ package net.zic.zenithlib.tooltip.api.animation;
 
 import net.minecraft.resources.Identifier;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -156,6 +158,18 @@ public record ZenithTooltipPreset(
 
         public Builder parent(Identifier parent) {
             this.parents = List.of(parent);
+            return this;
+        }
+
+        public Builder parents(Identifier... parents) {
+            this.parents = parents == null ? List.of() : Arrays.stream(parents).toList();
+            return this;
+        }
+
+        public Builder addParent(Identifier parent) {
+            ArrayList<Identifier> next = new ArrayList<>(this.parents);
+            next.add(parent);
+            this.parents = List.copyOf(next);
             return this;
         }
 

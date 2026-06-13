@@ -106,6 +106,12 @@ public final class ZenithTooltipPresets {
         PRESETS.put(preset.id(), preset);
     }
 
+    public static ZenithTooltipPreset compose(Identifier id, Identifier... parents) {
+        ZenithTooltipPreset preset = ZenithTooltipPreset.builder(id).parents(parents).build();
+        register(preset);
+        return preset;
+    }
+
     public static Optional<ZenithTooltipPreset> get(Identifier id) {
         return Optional.ofNullable(PRESETS.get(id));
     }

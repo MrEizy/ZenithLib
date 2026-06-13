@@ -9,6 +9,8 @@ import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipRule;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTemplate;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
+import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
+import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipPageBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipRuleBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplateBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipThemeBuilder;
@@ -51,6 +53,24 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
     /** Creates an identifier in the namespace owned by this data provider. */
     protected final Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(this.modId, path);
+    }
+
+    protected final ZenithTooltipText t(String key) {
+        return ZenithTooltipText.translatable(key);
+    }
+
+    protected final ZenithTooltipText lit(String text) {
+        return ZenithTooltipText.literal(text);
+    }
+
+    protected final ZenithTooltipText src(String source) {
+        return ZenithTooltipText.source(source);
+    }
+
+    protected final GeneratedTooltipBuilder tooltip(String path) {
+        Identifier templateId = id(path);
+        Identifier ruleId = id(path + "_rule");
+        return new GeneratedTooltipBuilder(templateId, template(templateId), rule(ruleId).document(templateId));
     }
 
     protected final ZenithTooltipTemplateBuilder template(String path) {
@@ -139,6 +159,98 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
     @Override
     public String getName() {
         return "Zenith tooltip definitions and themes: " + this.modId;
+    }
+
+
+    protected final class GeneratedTooltipBuilder {
+        private final Identifier documentId;
+        private final ZenithTooltipTemplateBuilder template;
+        private final ZenithTooltipRuleBuilder rule;
+
+        private GeneratedTooltipBuilder(
+                Identifier documentId,
+                ZenithTooltipTemplateBuilder template,
+                ZenithTooltipRuleBuilder rule
+        ) {
+            this.documentId = documentId;
+            this.template = template;
+            this.rule = rule;
+        }
+
+        public Identifier documentId() {
+            return documentId;
+        }
+
+        public ZenithTooltipTemplateBuilder template() {
+            return template;
+        }
+
+        public ZenithTooltipRuleBuilder rule() {
+            return rule;
+        }
+
+        public GeneratedTooltipBuilder priority(int priority) {
+            rule.priority(priority);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder theme(Identifier theme) {
+            rule.theme(theme);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder item(Identifier item) {
+            rule.items(item);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder item(String namespace, String path) {
+            return item(external(namespace, path));
+        }
+
+        public GeneratedTooltipBuilder minecraftItem(String path) {
+            return item(minecraft(path));
+        }
+
+        public GeneratedTooltipBuilder tag(Identifier tag) {
+            rule.tags(tag);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder namespace(String namespace) {
+            rule.namespaces(namespace);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder all() {
+            rule.all();
+            return this;
+        }
+
+        public GeneratedTooltipBuilder animationPreset(Identifier preset) {
+            template.animationPreset(preset);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder animations(Identifier... presets) {
+            template.animationPresets(presets);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder template(ZenithTooltipTemplateBuilder source) {
+            template.pages(source);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder page(ZenithTooltipPageBuilder page) {
+            template.page(page);
+            return this;
+        }
+
+        public GeneratedTooltipBuilder page(ZenithTooltipText title, Consumer<ZenithTooltipPageBuilder> action) {
+            template.page(title, action);
+            return this;
+        }
     }
 
     private void ensureDefinitionPathAvailable(Identifier id) {

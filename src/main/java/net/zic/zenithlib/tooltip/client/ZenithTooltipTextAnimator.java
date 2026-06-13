@@ -5,7 +5,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
-import net.zic.zenithlib.Config;
 import net.zic.zenithlib.tooltip.api.animation.RainbowTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.RuneDecipherTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ScrambleRevealTextEffect;
@@ -24,18 +23,22 @@ final class ZenithTooltipTextAnimator {
 
     private ZenithTooltipTextAnimator() {}
 
-    static int verticalPadding(ZenithTooltipTextEffect effect) {
-        if (effect instanceof WaveTextEffect wave && animationsEnabled()) {
+    static int verticalPadding(ZenithTooltipTextEffect effect, ZenithTooltipAnimationSettings settings) {
+        if (effect instanceof WaveTextEffect wave && settings.animationsEnabled() && !settings.reduceMotion()) {
             return wave.amplitude();
         }
         if (effect instanceof TextEffectStack stack) {
             int padding = 0;
             for (ZenithTooltipTextEffect child : stack.effects()) {
-                padding += verticalPadding(child);
+                padding += verticalPadding(child, settings);
             }
             return padding;
         }
         return 0;
+    }
+
+    static int verticalPadding(ZenithTooltipTextEffect effect) {
+        return verticalPadding(effect, ZenithTooltipAnimationSettings.capture());
     }
 
     static void render(
@@ -50,7 +53,23 @@ final class ZenithTooltipTextAnimator {
             ZenithTooltipAnimationState.Frame frame,
             long elementSeed
     ) {
-        if (!animationsEnabled()) {
+        render(font, graphics, x, y, lines, baseColor, lineGap, effect, ZenithTooltipAnimationSettings.capture(), frame, elementSeed);
+    }
+
+    static void render(
+            Font font,
+            GuiGraphicsExtractor graphics,
+            int x,
+            int y,
+            List<FormattedCharSequence> lines,
+            int baseColor,
+            int lineGap,
+            ZenithTooltipTextEffect effect,
+            ZenithTooltipAnimationSettings settings,
+            ZenithTooltipAnimationState.Frame frame,
+            long elementSeed
+    ) {
+        if (!settings.animationsEnabled()) {
             renderPlain(font, graphics, x, y, lines, baseColor, lineGap);
             return;
         }
@@ -105,7 +124,7 @@ final class ZenithTooltipTextAnimator {
                     } else if (current instanceof ShimmerTextEffect shimmer) {
                         int rgb = shimmerColor(shimmer, frame, glyphIndex, glyphCount, effectiveRgb(renderedStyle, baseColor));
                         renderedStyle = renderedStyle.withColor(TextColor.fromRgb(rgb));
-                    } else if (current instanceof WaveTextEffect wave && !reduceMotion()) {
+                    } else if (current instanceof WaveTextEffect wave && !settings.reduceMotion()) {
                         yOffset += waveOffset(wave, frame, glyphIndex);
                     }
                 }
@@ -427,13 +446,6 @@ final class ZenithTooltipTextAnimator {
         return r << 16 | g << 8 | b;
     }
 
-    private static boolean animationsEnabled() {
-        return Config.TOOLTIP_ANIMATIONS_ENABLED.get() && Config.TOOLTIP_ANIMATION_INTENSITY.get() > 0;
-    }
-
-    private static boolean reduceMotion() {
-        return Config.TOOLTIP_REDUCE_MOTION.get();
-    }
 
     private static double unitHash(long value) {
         return (mix64(value) >>> 11) * 0x1.0p-53;
