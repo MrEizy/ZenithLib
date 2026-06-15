@@ -42,12 +42,6 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
     }
 
     @Override
-    public String getName() {
-        return "ZenithLib tooltip showcase definitions";
-    }
-
-
-    @Override
     protected void addTooltips() {
         addShowcaseTemplates();
         addShowcaseRules();

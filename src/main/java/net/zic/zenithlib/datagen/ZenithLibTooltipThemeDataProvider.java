@@ -14,11 +14,6 @@ public final class ZenithLibTooltipThemeDataProvider extends ZenithTooltipDataPr
     }
 
     @Override
-    public String getName() {
-        return "ZenithLib tooltip showcase themes";
-    }
-
-    @Override
     protected void addTooltips() {
         addThemes();
     }

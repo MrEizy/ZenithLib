@@ -12,11 +12,6 @@ public final class ZenithLibClassificationDataProvider extends ZenithClassificat
     }
 
     @Override
-    public String getName() {
-        return "ZenithLib classification showcase resources";
-    }
-
-    @Override
     protected void addClassifications() {
         category("crafting_ingredient")
                 .label("classification.zenithlib.category.crafting_ingredient")
