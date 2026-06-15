@@ -1,4 +1,6 @@
 {
+  "classification.zenithlib.category.crafting_ingredient": "Crafting Ingredient",
+  "classification.zenithlib.rank.rare": "Rare",
   "config.zenithlib.tooltips.ambient_effects_enabled": "Enable Tooltip Ambient Effects",
   "config.zenithlib.tooltips.animation_intensity": "Tooltip Animation Intensity",
   "config.zenithlib.tooltips.animations_enabled": "Enable Tooltip Animations",
@@ -8,6 +10,8 @@
   "config.zenithlib.tooltips.spawn_egg_entity_previews": "Show Spawn Egg Entity Previews",
   "key.zenithlib.tooltip.next_page": "ZenithLib: Next Tooltip Page",
   "key.zenithlib.tooltip.previous_page": "ZenithLib: Previous Tooltip Page",
+  "tooltip.zenithlib.classification.category": "Category",
+  "tooltip.zenithlib.classification.rank": "Rank",
   "tooltip.zenithlib.diamond.header": "Diamond Tooltip",
   "tooltip.zenithlib.diamond.line_1": "A tooltip rendered through ZenithLib.",
   "tooltip.zenithlib.diamond.line_2": "Themes, pages, icons, and gradients come next.",

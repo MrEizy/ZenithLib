@@ -1,12 +1,15 @@
 package net.zic.zenithlib.tooltip.manager;
 
 import net.minecraft.network.chat.Component;
+import net.zic.zenithlib.classification.ZenithClassification;
+import net.zic.zenithlib.classification.ZenithClassifications;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.context.ZenithTooltipContext;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
+import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
 import net.zic.zenithlib.tooltip.api.element.DynamicElement;
 import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
@@ -82,6 +85,9 @@ public final class ZenithTooltipResolver {
                     badge.borderColor()
             ));
         }
+        if (element instanceof ClassificationElement classification) {
+            return resolveClassification(classification, context);
+        }
         if (element instanceof TitleIconElement titleIcon) {
             return List.of(new TitleIconElement(
                     resolveText(titleIcon.title(), context),
@@ -99,6 +105,80 @@ public final class ZenithTooltipResolver {
             return List.of(element);
         }
         return resolveResolvedElements(element, ZenithTooltipElementTypes.resolve(element, context), context);
+    }
+
+    private static List<ZenithTooltipElement> resolveClassification(
+            ClassificationElement element,
+            ZenithTooltipContext context
+    ) {
+        Optional<ZenithClassification> resolved = ZenithClassifications.get(context.stack(), context.itemId());
+        if (resolved.isEmpty()) {
+            return List.of();
+        }
+
+        ZenithClassification classification = resolved.orElseThrow();
+        Optional<ZenithClassification.Category> category = element.showCategory()
+                ? classification.category()
+                : Optional.empty();
+        Optional<ZenithClassification.Rank> rank = element.showRank()
+                ? classification.rank()
+                : Optional.empty();
+
+        if (category.isEmpty() && rank.isEmpty()) {
+            return List.of();
+        }
+
+        if (element.style() == ClassificationElement.Style.BADGE) {
+            return resolveClassificationBadge(category, rank, context);
+        }
+
+        List<ZenithTooltipElement> elements = new ArrayList<>();
+        category.ifPresent(value -> elements.add(new RowElement(
+                resolveText(element.categoryLabel(), context),
+                resolveText(value.label(), context),
+                element.labelColor(),
+                value.color()
+        )));
+        rank.ifPresent(value -> elements.add(new RowElement(
+                resolveText(element.rankLabel(), context),
+                resolveText(value.label(), context),
+                element.labelColor(),
+                value.color()
+        )));
+        return List.copyOf(elements);
+    }
+
+    private static List<ZenithTooltipElement> resolveClassificationBadge(
+            Optional<ZenithClassification.Category> category,
+            Optional<ZenithClassification.Rank> rank,
+            ZenithTooltipContext context
+    ) {
+        Component text = Component.empty();
+        if (category.isPresent()) {
+            text = resolveText(category.orElseThrow().label(), context).component();
+        }
+        if (rank.isPresent()) {
+            if (!text.getString().isBlank()) {
+                text = text.copy().append(Component.literal(" • "));
+            }
+            text = text.copy().append(resolveText(rank.orElseThrow().label(), context).component());
+        }
+
+        if (text.getString().isBlank()) {
+            return List.of();
+        }
+
+        net.zic.zenithlib.tooltip.api.ZenithTooltipColor accent = rank
+                .map(ZenithClassification.Rank::color)
+                .orElseGet(() -> category.map(ZenithClassification.Category::color)
+                        .orElse(net.zic.zenithlib.tooltip.api.ZenithTooltipColor.ACCENT));
+
+        return List.of(new BadgeElement(
+                ZenithTooltipText.resolved(text),
+                net.zic.zenithlib.tooltip.api.ZenithTooltipColor.BACKGROUND,
+                accent,
+                accent
+        ));
     }
 
     private static List<ZenithTooltipElement> resolveDynamic(

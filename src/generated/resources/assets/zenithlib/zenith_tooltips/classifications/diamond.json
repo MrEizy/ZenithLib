@@ -1,0 +1,10 @@
+{
+  "category": "zenithlib:crafting_ingredient",
+  "priority": 100,
+  "rank": "zenithlib:rare",
+  "selector": {
+    "items": [
+      "minecraft:diamond"
+    ]
+  }
+}

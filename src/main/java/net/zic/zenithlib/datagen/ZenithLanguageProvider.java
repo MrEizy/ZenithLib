@@ -32,6 +32,11 @@ public class ZenithLanguageProvider extends LanguageProvider {
         add("tooltip.zenithlib.diamond.page_3.row.note", "Status");
         add("tooltip.zenithlib.diamond.page_3.row.note_value", "Working");
 
+        add("tooltip.zenithlib.classification.category", "Category");
+        add("tooltip.zenithlib.classification.rank", "Rank");
+        add("classification.zenithlib.category.crafting_ingredient", "Crafting Ingredient");
+        add("classification.zenithlib.rank.rare", "Rare");
+
         add("tooltip.zenithlib.vanilla.converted", "Converted Vanilla Tooltip");
         add("tooltip.zenithlib.vanilla.enchantments", "Enchantments");
         add("tooltip.zenithlib.vanilla.stats", "Stats");

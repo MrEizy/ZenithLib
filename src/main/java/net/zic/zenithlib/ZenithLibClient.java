@@ -9,6 +9,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.zic.zenithlib.classification.ZenithClassifications;
 import net.zic.zenithlib.tooltip.manager.ZenithTooltipRepository;
 
 
@@ -55,7 +56,22 @@ public class ZenithLibClient {
                 new ZenithTooltipRepository.RulesReloadListener()
         );
 
-        ZenithLib.LOGGER.info("Registered tooltip reload listeners (themes + rules)");
+        event.addListener(
+                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "zenith_classification_categories"),
+                new ZenithClassifications.CategoriesReloadListener()
+        );
+
+        event.addListener(
+                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "zenith_classification_ranks"),
+                new ZenithClassifications.RanksReloadListener()
+        );
+
+        event.addListener(
+                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "zenith_classifications"),
+                new ZenithClassifications.RulesReloadListener()
+        );
+
+        ZenithLib.LOGGER.info("Registered tooltip reload listeners (themes + rules + classifications)");
     }
 
 

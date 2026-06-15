@@ -5,6 +5,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
+import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
 
 import java.util.Arrays;
@@ -120,6 +121,26 @@ public final class ZenithTooltipPageBuilder {
 
     public ZenithTooltipPageBuilder badge(ZenithTooltipText text, ZenithTooltipColor backgroundColor) {
         return add(ZenithTooltipBuilders.badge(text, backgroundColor));
+    }
+
+    public ZenithTooltipPageBuilder classification() {
+        return add(ZenithTooltipBuilders.classification());
+    }
+
+    public ZenithTooltipPageBuilder classificationRows() {
+        return add(ZenithTooltipBuilders.classificationRows());
+    }
+
+    public ZenithTooltipPageBuilder classificationBadge() {
+        return add(ZenithTooltipBuilders.classificationBadge());
+    }
+
+    public ZenithTooltipPageBuilder classification(
+            boolean showCategory,
+            boolean showRank,
+            ClassificationElement.Style style
+    ) {
+        return add(ZenithTooltipBuilders.classification(showCategory, showRank, style));
     }
 
     public ZenithTooltipPageBuilder bar(ZenithTooltipText label, int value, int max, ZenithTooltipColor color) {

@@ -10,7 +10,7 @@ public final class ZenithLibDataGenerators {
         // TOOLTIPS - THE SHOWCASE ONES WILL BE REMOVED AFTER I MAKE A GUIDE FOR THE TOOLTIPS
         event.createProvider(ZenithLibTooltipDataProvider::new);
         event.createProvider(ZenithLibTooltipThemeDataProvider::new);
-
+        event.createProvider(ZenithLibClassificationDataProvider::new);
 
         event.createProvider(ZenithLanguageProvider::new);
 

@@ -14,6 +14,7 @@ import net.zic.zenithlib.tooltip.api.animation.WaveTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
+import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
 import net.zic.zenithlib.tooltip.api.element.DynamicElement;
 import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
@@ -343,6 +344,33 @@ public final class ZenithTooltipBuilders {
             ZenithTooltipColor borderColor
     ) {
         return new BadgeElement(text, textColor, backgroundColor, borderColor);
+    }
+
+    public static ClassificationElement classification() {
+        return ClassificationElement.rows();
+    }
+
+    public static ClassificationElement classificationRows() {
+        return ClassificationElement.rows();
+    }
+
+    public static ClassificationElement classificationBadge() {
+        return ClassificationElement.badge();
+    }
+
+    public static ClassificationElement classification(
+            boolean showCategory,
+            boolean showRank,
+            ClassificationElement.Style style
+    ) {
+        return new ClassificationElement(
+                showCategory,
+                showRank,
+                Objects.requireNonNull(style, "style"),
+                translated("tooltip.zenithlib.classification.category"),
+                translated("tooltip.zenithlib.classification.rank"),
+                ZenithTooltipColor.MUTED
+        );
     }
 
     public static BarElement bar(
