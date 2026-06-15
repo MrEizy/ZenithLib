@@ -337,6 +337,30 @@ public final class ZenithTooltipBuilders {
         return new BadgeElement(text, ZenithTooltipColor.BACKGROUND, backgroundColor, backgroundColor);
     }
 
+    public static ClassificationElement classificationCategory() {
+        return ClassificationElement.categoryRows();
+    }
+
+    public static ClassificationElement classificationRank() {
+        return ClassificationElement.rankRows();
+    }
+
+    public static ClassificationElement classificationCategoryRows() {
+        return ClassificationElement.categoryRows();
+    }
+
+    public static ClassificationElement classificationRankRows() {
+        return ClassificationElement.rankRows();
+    }
+
+    public static ClassificationElement classificationCategoryBadge() {
+        return ClassificationElement.categoryBadge();
+    }
+
+    public static ClassificationElement classificationRankBadge() {
+        return ClassificationElement.rankBadge();
+    }
+
     public static BadgeElement badge(
             ZenithTooltipText text,
             ZenithTooltipColor textColor,

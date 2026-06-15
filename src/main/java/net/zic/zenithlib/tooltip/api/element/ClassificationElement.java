@@ -52,6 +52,22 @@ public record ClassificationElement(
         return new ClassificationElement(true, true, Style.BADGE, DEFAULT_CATEGORY_LABEL, DEFAULT_RANK_LABEL, ZenithTooltipColor.MUTED);
     }
 
+    public static ClassificationElement categoryRows() {
+        return new ClassificationElement(true, false, Style.ROWS, DEFAULT_CATEGORY_LABEL, DEFAULT_RANK_LABEL, ZenithTooltipColor.MUTED);
+    }
+
+    public static ClassificationElement rankRows() {
+        return new ClassificationElement(false, true, Style.ROWS, DEFAULT_CATEGORY_LABEL, DEFAULT_RANK_LABEL, ZenithTooltipColor.MUTED);
+    }
+
+    public static ClassificationElement categoryBadge() {
+        return new ClassificationElement(true, false, Style.BADGE, DEFAULT_CATEGORY_LABEL, DEFAULT_RANK_LABEL, ZenithTooltipColor.MUTED);
+    }
+
+    public static ClassificationElement rankBadge() {
+        return new ClassificationElement(false, true, Style.BADGE, DEFAULT_CATEGORY_LABEL, DEFAULT_RANK_LABEL, ZenithTooltipColor.MUTED);
+    }
+
     @Override
     public MapCodec<? extends ZenithTooltipElement> codec() {
         return CODEC;

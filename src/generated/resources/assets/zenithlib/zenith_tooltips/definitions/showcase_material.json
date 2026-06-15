@@ -16,8 +16,7 @@
           }
         },
         {
-          "type": "zenithlib:classification",
-          "style": "badge"
+          "type": "zenithlib:classification"
         },
         {
           "type": "zenithlib:text",
