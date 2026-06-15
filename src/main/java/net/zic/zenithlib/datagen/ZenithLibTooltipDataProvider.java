@@ -76,7 +76,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                         .add(titleIcon(
                                 translated("tooltip.zenithlib.diamond.title"),
                                 translated("tooltip.zenithlib.diamond.header")
-                        ))
+                        ).withOnAllPages(true))
                         .add(badge(literal("RARE MATERIAL"), ZenithTooltipColor.ACCENT))
                         .add(text(translated("tooltip.zenithlib.diamond.line_1")))
                         .add(divider())

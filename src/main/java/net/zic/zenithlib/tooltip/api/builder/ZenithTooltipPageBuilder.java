@@ -168,8 +168,20 @@ public final class ZenithTooltipPageBuilder {
         return add(ZenithTooltipBuilders.titleIcon(title));
     }
 
+    public ZenithTooltipPageBuilder titleIcon(ZenithTooltipText title, boolean onAllPages) {
+        return add(ZenithTooltipBuilders.titleIcon(title, onAllPages));
+    }
+
     public ZenithTooltipPageBuilder titleIcon(ZenithTooltipText title, ZenithTooltipText subtitle) {
         return add(ZenithTooltipBuilders.titleIcon(title, subtitle));
+    }
+
+    public ZenithTooltipPageBuilder titleIcon(
+            ZenithTooltipText title,
+            ZenithTooltipText subtitle,
+            boolean onAllPages
+    ) {
+        return add(ZenithTooltipBuilders.titleIcon(title, subtitle, onAllPages));
     }
 
     public ZenithTooltipPage build() {

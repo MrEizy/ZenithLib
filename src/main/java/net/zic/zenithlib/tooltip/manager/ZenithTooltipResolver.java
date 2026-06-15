@@ -85,7 +85,8 @@ public final class ZenithTooltipResolver {
         if (element instanceof TitleIconElement titleIcon) {
             return List.of(new TitleIconElement(
                     resolveText(titleIcon.title(), context),
-                    resolveText(titleIcon.subtitle(), context)
+                    resolveText(titleIcon.subtitle(), context),
+                    titleIcon.onAllPages()
             ));
         }
         if (element instanceof BarElement bar) {

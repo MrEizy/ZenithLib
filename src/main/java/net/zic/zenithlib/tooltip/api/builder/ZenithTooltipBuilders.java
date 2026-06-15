@@ -309,11 +309,23 @@ public final class ZenithTooltipBuilders {
     }
 
     public static TitleIconElement titleIcon(ZenithTooltipText title) {
-        return new TitleIconElement(title, EMPTY_TEXT);
+        return titleIcon(title, EMPTY_TEXT, false);
+    }
+
+    public static TitleIconElement titleIcon(ZenithTooltipText title, boolean onAllPages) {
+        return titleIcon(title, EMPTY_TEXT, onAllPages);
     }
 
     public static TitleIconElement titleIcon(ZenithTooltipText title, ZenithTooltipText subtitle) {
-        return new TitleIconElement(title, subtitle);
+        return titleIcon(title, subtitle, false);
+    }
+
+    public static TitleIconElement titleIcon(
+            ZenithTooltipText title,
+            ZenithTooltipText subtitle,
+            boolean onAllPages
+    ) {
+        return new TitleIconElement(title, subtitle, onAllPages);
     }
 
     public static BadgeElement badge(ZenithTooltipText text) {

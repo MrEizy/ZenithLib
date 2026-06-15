@@ -49,7 +49,7 @@ public final class ZenithTooltipLayout {
         ZenithTooltipTheme theme = document.theme();
         int maxInnerWidth = safeInnerWidth(theme);
         int pageIndex = pageIndex(animationUpdate.changed(), document.pages().size());
-        ZenithTooltipPage page = document.page(pageIndex);
+        ZenithTooltipPage page = pageWithSharedTitleIcon(document, document.page(pageIndex));
         ZenithTooltipAnimationState.Frame animationFrame = ZenithTooltipAnimationState.pageFrame(pageIndex);
         ZenithTooltipAnimationContext.Settings animationSettings = ZenithTooltipAnimationContext.Settings.capture();
 
@@ -231,6 +231,39 @@ public final class ZenithTooltipLayout {
         return pageHint.isEmpty()
                 ? 0
                 : PAGE_HINT_TOP_GAP + lineBlockHeight(font, pageHint.size(), LINE_GAP);
+    }
+
+    private static ZenithTooltipPage pageWithSharedTitleIcon(
+            ZenithTooltipDocument document,
+            ZenithTooltipPage page
+    ) {
+        if (hasLeadingTitleIcon(page)) {
+            return page;
+        }
+
+        Optional<TitleIconElement> sharedTitleIcon = sharedTitleIcon(document);
+        if (sharedTitleIcon.isEmpty()) {
+            return page;
+        }
+
+        List<ZenithTooltipElement> elements = new ArrayList<>(page.elements().size() + 1);
+        elements.add(sharedTitleIcon.get());
+        elements.addAll(page.elements());
+        return new ZenithTooltipPage(page.title(), elements);
+    }
+
+    private static Optional<TitleIconElement> sharedTitleIcon(ZenithTooltipDocument document) {
+        for (ZenithTooltipPage page : document.pages()) {
+            if (page.elements().isEmpty()) {
+                continue;
+            }
+
+            if (page.elements().get(0) instanceof TitleIconElement titleIcon && titleIcon.onAllPages()) {
+                return Optional.of(titleIcon);
+            }
+        }
+
+        return Optional.empty();
     }
 
     private static boolean hasLeadingTitleIcon(ZenithTooltipPage page) {
