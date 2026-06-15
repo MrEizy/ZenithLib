@@ -41,6 +41,12 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
         super(output, ZenithLib.MOD_ID);
     }
 
+    // With a seperate provider extending the same class, you need to override this getName method...
+    @Override
+    public String getName() {
+        return "Showcase Zenith Tooltips, which will be removed soon";
+    }
+
     @Override
     protected void addTooltips() {
         addShowcaseTemplates();

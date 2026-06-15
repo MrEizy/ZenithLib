@@ -5,7 +5,7 @@ import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.classification.datagen.ZenithClassificationDataProvider;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 
-/** Generates the small built-in classification showcase. */
+/** Generates the classifications. */
 public final class ZenithLibClassificationDataProvider extends ZenithClassificationDataProvider {
     public ZenithLibClassificationDataProvider(PackOutput output) {
         super(output, ZenithLib.MOD_ID);
