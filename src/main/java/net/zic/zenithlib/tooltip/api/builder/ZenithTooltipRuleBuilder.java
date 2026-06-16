@@ -48,9 +48,6 @@ public final class ZenithTooltipRuleBuilder {
         return this;
     }
 
-    public ZenithTooltipRuleBuilder document(Identifier document) {
-        return template(document);
-    }
 
     public ZenithTooltipRuleBuilder theme(Identifier theme) {
         this.theme = Objects.requireNonNull(theme, "theme");

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Defines one page of a Zenith tooltip document.
+ * Defines one page of a Zenith tooltip page.
  */
 
 public record ZenithTooltipPage(

@@ -8,7 +8,7 @@ import net.minecraft.resources.Identifier;
 import java.util.List;
 
 /**
- * Reusable, theme-independent tooltip document definition.
+ * Reusable, theme-independent tooltip template definition.
  */
 public record ZenithTooltipTemplate(List<ZenithTooltipPage> pages, List<Identifier> animationPresets) {
     public static final MapCodec<ZenithTooltipTemplate> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->

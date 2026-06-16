@@ -1,0 +1,9 @@
+{
+  "effects": [
+    "divider_sweep",
+    "bar_edge_sparks"
+  ],
+  "parents": [
+    "zenithlib:celestial"
+  ]
+}

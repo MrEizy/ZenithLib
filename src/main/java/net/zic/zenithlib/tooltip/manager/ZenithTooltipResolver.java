@@ -6,6 +6,7 @@ import net.zic.zenithlib.classification.ZenithClassifications;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
+import net.zic.zenithlib.tooltip.api.condition.ZenithTooltipConditions;
 import net.zic.zenithlib.tooltip.api.context.ZenithTooltipContext;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Resolves source-backed authored data into an ordinary draw-ready tooltip document.
+ * Resolves source-backed authored data into an ordinary draw-ready tooltip page.
  */
 public final class ZenithTooltipResolver {
     private ZenithTooltipResolver() {}
@@ -121,39 +122,11 @@ public final class ZenithTooltipResolver {
             SectionElement section,
             ZenithTooltipContext context
     ) {
-        if (!conditionMatches(section.condition(), context)) {
+        if (!ZenithTooltipConditions.matches(section.condition(), context)) {
             return List.of();
         }
 
         return resolveResolvedElements(section, section.elements(), context);
-    }
-
-    private static boolean conditionMatches(
-            net.minecraft.resources.Identifier condition,
-            ZenithTooltipContext context
-    ) {
-        String namespace = condition.getNamespace();
-        String path = condition.getPath();
-
-        if (!"zenithlib".equals(namespace)) {
-            return context.data(condition, Boolean.class).orElse(false);
-        }
-
-        return switch (path) {
-            case "always" -> true;
-            case "never" -> false;
-            case "shift_down" -> modifier(context, "shift_down");
-            case "ctrl_down", "control_down" -> modifier(context, "ctrl_down");
-            case "alt_down" -> modifier(context, "alt_down");
-            case "not_shift_down" -> !modifier(context, "shift_down");
-            case "not_ctrl_down", "not_control_down" -> !modifier(context, "ctrl_down");
-            case "not_alt_down" -> !modifier(context, "alt_down");
-            default -> context.data(condition, Boolean.class).orElse(false);
-        };
-    }
-
-    private static boolean modifier(ZenithTooltipContext context, String path) {
-        return context.data(net.minecraft.resources.Identifier.fromNamespaceAndPath("zenithlib", path), Boolean.class).orElse(false);
     }
 
     private static List<ZenithTooltipElement> resolveClassification(
@@ -287,9 +260,31 @@ public final class ZenithTooltipResolver {
                     valueText = ZenithTooltipText.resolved(progress.displayText().orElseThrow());
                 }
             }
+        } else if (bar.hasScalarSources()) {
+            value = resolveInt(bar.valueSource(), context).orElse(value);
+            max = resolveInt(bar.maxSource(), context).orElse(max);
         }
 
         return new BarElement(label, value, max, valueText, bar.color(), "");
+    }
+
+
+    private static Optional<Integer> resolveInt(
+            String source,
+            ZenithTooltipContext context
+    ) {
+        if (source == null || source.isBlank()) {
+            return Optional.empty();
+        }
+
+        Optional<ZenithTooltipValue> resolved = ZenithTooltipSources.resolveValue(source, context);
+        if (resolved.orElse(null) instanceof ZenithTooltipValue.Number number) {
+            return Optional.of(number.value());
+        }
+        if (resolved.orElse(null) instanceof ZenithTooltipValue.Progress progress) {
+            return Optional.of(progress.value());
+        }
+        return Optional.empty();
     }
 
     private static ZenithTooltipText resolveText(
@@ -315,6 +310,9 @@ public final class ZenithTooltipResolver {
             Component display = progress.displayText()
                     .orElseGet(() -> Component.literal(progress.value() + " / " + progress.max()));
             return ZenithTooltipText.resolved(display);
+        }
+        if (value instanceof ZenithTooltipValue.Number number) {
+            return ZenithTooltipText.resolved(Component.literal(Integer.toString(number.value())));
         }
 
         return ZenithTooltipText.literal("");

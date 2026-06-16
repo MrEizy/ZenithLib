@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Immutable runtime context used by contextual document providers and tooltip value
+ * Immutable runtime context used by contextual tooltip providers and tooltip value
  * sources.
  */
 public final class ZenithTooltipContext {
@@ -111,6 +111,10 @@ public final class ZenithTooltipContext {
         return new ZenithTooltipContext(stack, itemId, registryAccess, player, subject, next);
     }
 
+    public ZenithTooltipContext withData(String key, Object value) {
+        return withData(parseKey(key), value);
+    }
+
     public Optional<Object> data(Identifier key) {
         Objects.requireNonNull(key, "key");
         return Optional.ofNullable(data.get(key));
@@ -119,6 +123,14 @@ public final class ZenithTooltipContext {
     public <T> Optional<T> data(Identifier key, Class<T> type) {
         Objects.requireNonNull(type, "type");
         return data(key).filter(type::isInstance).map(type::cast);
+    }
+
+    public Optional<Object> data(String key) {
+        return data(parseKey(key));
+    }
+
+    public <T> Optional<T> data(String key, Class<T> type) {
+        return data(parseKey(key), type);
     }
 
     public Map<Identifier, Object> dataView() {
@@ -140,6 +152,13 @@ public final class ZenithTooltipContext {
     public <T> Optional<T> subject(Class<T> type) {
         Objects.requireNonNull(type, "type");
         return subjectValue().filter(type::isInstance).map(type::cast);
+    }
+
+    private static Identifier parseKey(String key) {
+        String trimmed = Objects.requireNonNull(key, "key").trim();
+        return trimmed.indexOf(':') < 0
+                ? Identifier.fromNamespaceAndPath("zenithlib", trimmed)
+                : Identifier.parse(trimmed);
     }
 
     public record SubjectReference(

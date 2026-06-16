@@ -33,6 +33,9 @@ public interface ZenithTooltipValue {
         }
     }
 
+
+    record Number(int value) implements ZenithTooltipValue {}
+
     record Progress(
             int value,
             int max,
@@ -101,6 +104,10 @@ public interface ZenithTooltipValue {
 
     static Text text(Component component) {
         return new Text(component);
+    }
+
+    static Number number(int value) {
+        return new Number(value);
     }
 
     static Progress progress(int value, int max) {

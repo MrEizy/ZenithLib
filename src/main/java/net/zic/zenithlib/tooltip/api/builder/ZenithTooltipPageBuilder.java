@@ -6,6 +6,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
+import net.zic.zenithlib.tooltip.api.condition.ZenithTooltipConditions;
 import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
 
@@ -185,6 +186,24 @@ public final class ZenithTooltipPageBuilder {
     public ZenithTooltipPageBuilder dynamicBar(ZenithTooltipText label, Identifier source, ZenithTooltipColor color) {
         return add(ZenithTooltipBuilders.dynamicBar(label, source, color));
     }
+    public ZenithTooltipPageBuilder sourcedBar(
+            ZenithTooltipText label,
+            String valueSource,
+            String maxSource,
+            ZenithTooltipColor color
+    ) {
+        return add(ZenithTooltipBuilders.sourcedBar(label, valueSource, maxSource, color));
+    }
+
+    public ZenithTooltipPageBuilder sourcedBar(
+            ZenithTooltipText label,
+            Identifier valueSource,
+            Identifier maxSource,
+            ZenithTooltipColor color
+    ) {
+        return add(ZenithTooltipBuilders.sourcedBar(label, valueSource, maxSource, color));
+    }
+
 
     public ZenithTooltipPageBuilder durabilityBar(ZenithTooltipText label, ZenithTooltipColor color) {
         return add(ZenithTooltipBuilders.durabilityBar(label, color));
@@ -240,11 +259,11 @@ public final class ZenithTooltipPageBuilder {
     }
 
     public ZenithTooltipPageBuilder section(String condition, ZenithTooltipElement... elements) {
-        return section(Identifier.parse(condition), elements);
+        return section(ZenithTooltipConditions.identifier(condition), elements);
     }
 
     public ZenithTooltipPageBuilder shiftSection(ZenithTooltipElement... elements) {
-        return section(Identifier.fromNamespaceAndPath("zenithlib", "shift_down"), elements);
+        return section(ZenithTooltipConditions.SHIFT_DOWN, elements);
     }
 
     public ZenithTooltipPage build() {

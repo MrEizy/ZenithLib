@@ -11,6 +11,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.fml.ModList;
 import net.zic.zenithlib.ZenithLib;
 
 import java.util.ArrayList;
@@ -18,14 +19,17 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Client-side repository for classifications.
  */
 public final class ZenithClassifications {
     private static volatile Snapshot snapshot = Snapshot.empty();
+    private static final Map<Identifier, ClassificationProvider> PROVIDERS = new ConcurrentHashMap<>();
 
     private ZenithClassifications() {}
 
@@ -39,6 +43,24 @@ public final class ZenithClassifications {
     public static Optional<ZenithClassification> get(ItemStack stack, Identifier itemId) {
         if (stack.isEmpty()) {
             return Optional.empty();
+        }
+
+        for (Map.Entry<Identifier, ClassificationProvider> entry : PROVIDERS.entrySet().stream()
+                .sorted(Comparator.comparing(value -> value.getKey().toString()))
+                .toList()) {
+            try {
+                Optional<ZenithClassification> provided = entry.getValue().resolve(stack, itemId);
+                if (provided != null && provided.isPresent()) {
+                    return provided;
+                }
+            } catch (RuntimeException exception) {
+                ZenithLib.LOGGER.warn(
+                        "Zenith classification provider {} failed while handling {}",
+                        entry.getKey(),
+                        itemId,
+                        exception
+                );
+            }
         }
 
         Optional<BlockMatch> block = blockMatch(stack);
@@ -61,6 +83,26 @@ public final class ZenithClassifications {
 
     public static Map<Identifier, ZenithClassification.Rule> rulesView() {
         return snapshot.sourceRules();
+    }
+
+
+    public static void registerProvider(Identifier id, ClassificationProvider provider) {
+        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(provider, "provider");
+        if (PROVIDERS.putIfAbsent(id, provider) != null) {
+            ZenithLib.LOGGER.debug("Skipped duplicate Zenith classification provider registration for {}", id);
+        }
+    }
+
+    public static void registerProviderIfLoaded(String requiredModId, Identifier id, ClassificationProvider provider) {
+        Objects.requireNonNull(requiredModId, "requiredModId");
+        if (ModList.get().isLoaded(requiredModId)) {
+            registerProvider(id, provider);
+        }
+    }
+
+    public static List<Identifier> providerIds() {
+        return PROVIDERS.keySet().stream().sorted().toList();
     }
 
     private static Optional<BlockMatch> blockMatch(ItemStack stack) {
@@ -220,6 +262,11 @@ public final class ZenithClassifications {
     }
 
     private record BlockMatch(Identifier id, Block block) {}
+
+    @FunctionalInterface
+    public interface ClassificationProvider {
+        Optional<ZenithClassification> resolve(ItemStack stack, Identifier itemId);
+    }
 
     public static final class CategoriesReloadListener extends SimpleJsonResourceReloadListener<ZenithClassification.Category> {
         public CategoriesReloadListener() {

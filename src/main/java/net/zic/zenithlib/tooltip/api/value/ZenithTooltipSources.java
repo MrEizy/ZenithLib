@@ -60,6 +60,14 @@ public final class ZenithTooltipSources {
         registerValue(id, context -> source.apply(context).map(ZenithTooltipValue::text));
     }
 
+    public static void registerNumber(
+            Identifier id,
+            Function<ZenithTooltipContext, Optional<Integer>> source
+    ) {
+        Objects.requireNonNull(source, "source");
+        registerValue(id, context -> source.apply(context).map(ZenithTooltipValue::number));
+    }
+
     public static void registerProgress(
             Identifier id,
             Function<ZenithTooltipContext, Optional<ZenithTooltipValue.Progress>> source

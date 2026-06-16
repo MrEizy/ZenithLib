@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import java.util.Set;
 
 /**
- * Describes a colour reference used by tooltip document content.
+ * Describes a colour reference used by tooltip content.
  */
 public record ZenithTooltipColor(String value) {
     private static final Set<String> PALETTE_KEYS = Set.of(

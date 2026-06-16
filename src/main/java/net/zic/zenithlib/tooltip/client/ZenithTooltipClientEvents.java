@@ -24,6 +24,7 @@ import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipData;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipProviders;
+import net.zic.zenithlib.tooltip.api.condition.ZenithTooltipConditions;
 import net.zic.zenithlib.tooltip.api.context.ZenithTooltipContext;
 import net.zic.zenithlib.tooltip.manager.ZenithTooltipRepository;
 import net.zic.zenithlib.tooltip.manager.ZenithTooltipResolver;
@@ -73,9 +74,9 @@ public final class ZenithTooltipClientEvents {
 
         Optional<Player> player = Optional.ofNullable((Player) Minecraft.getInstance().player);
         ZenithTooltipContext baseContext = ZenithTooltipContext.of(stack, id, registryAccess, player)
-                .withData(Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "shift_down"), InputHandler.isShiftDown())
-                .withData(Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "ctrl_down"), InputHandler.isControlDown())
-                .withData(Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "alt_down"), InputHandler.isAltDown());
+                .withData(ZenithTooltipConditions.SHIFT_DOWN, InputHandler.isShiftDown())
+                .withData(ZenithTooltipConditions.CTRL_DOWN, InputHandler.isControlDown())
+                .withData(ZenithTooltipConditions.ALT_DOWN, InputHandler.isAltDown());
         Optional<ZenithTooltipProviders.Result> provided = ZenithTooltipProviders.create(baseContext);
 
         ZenithTooltipContext resolutionContext = provided

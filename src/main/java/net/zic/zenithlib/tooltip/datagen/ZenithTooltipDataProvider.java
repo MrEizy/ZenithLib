@@ -12,8 +12,10 @@ import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipPageBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipRuleBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplateBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipThemeBuilder;
+import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -27,16 +29,19 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
     private final PackOutput.PathProvider definitionPaths;
     private final PackOutput.PathProvider templatePaths;
     private final PackOutput.PathProvider themePaths;
+    private final PackOutput.PathProvider animationPresetPaths;
 
     private final Map<Identifier, ZenithTooltipTemplateBuilder> templates = new LinkedHashMap<>();
     private final Map<Identifier, ZenithTooltipRuleBuilder> rules = new LinkedHashMap<>();
     private final Map<Identifier, ZenithTooltipThemeBuilder> themes = new LinkedHashMap<>();
+    private final Map<Identifier, ZenithTooltipPresets.Data> animationPresets = new LinkedHashMap<>();
 
     protected ZenithTooltipDataProvider(PackOutput output, String modId) {
         this.modId = Objects.requireNonNull(modId, "modId");
         this.definitionPaths = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "zenith_tooltips/definitions");
         this.templatePaths = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "zenith_tooltips/templates");
         this.themePaths = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "zenith_tooltips/themes");
+        this.animationPresetPaths = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "zenith_tooltips/animation_presets");
     }
 
     protected abstract void addTooltips();
@@ -80,12 +85,50 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
         return theme(id(path));
     }
 
+    protected final void animationPreset(String path, String... effects) {
+        animationPreset(id(path), List.of(effects));
+    }
+
+    protected final void animationPreset(Identifier id, List<String> effects) {
+        animationPreset(id, List.of(), effects);
+    }
+
+    protected final void animationPreset(Identifier id, List<Identifier> parents, List<String> effects) {
+        requireOwnedOutputId(id);
+        ensureAnimationPresetPathAvailable(id);
+        this.animationPresets.put(id, new ZenithTooltipPresets.Data(parents, effects));
+    }
+
     protected final ZenithTooltipRuleBuilder itemTooltip(String path, Identifier template) {
         return rule(path).template(template);
     }
 
     protected final ZenithTooltipRuleBuilder itemTooltip(String path, String templatePath) {
         return itemTooltip(path, id(templatePath));
+    }
+
+    protected final ZenithTooltipRuleBuilder itemTooltip(String path, Identifier item, Identifier template) {
+        return rule(path).items(item).template(template);
+    }
+
+    protected final ZenithTooltipRuleBuilder itemTooltip(String path, Identifier item, String templatePath) {
+        return itemTooltip(path, item, id(templatePath));
+    }
+
+    protected final ZenithTooltipRuleBuilder tagTooltip(String path, Identifier tag, Identifier template) {
+        return rule(path).tags(tag).template(template);
+    }
+
+    protected final ZenithTooltipRuleBuilder tagTooltip(String path, Identifier tag, String templatePath) {
+        return tagTooltip(path, tag, id(templatePath));
+    }
+
+    protected final ZenithTooltipRuleBuilder namespaceTooltip(String path, String namespace, Identifier template) {
+        return rule(path).namespaces(namespace).template(template);
+    }
+
+    protected final ZenithTooltipRuleBuilder namespaceTooltip(String path, String namespace, String templatePath) {
+        return namespaceTooltip(path, namespace, id(templatePath));
     }
 
     protected final void template(String path, Consumer<ZenithTooltipTemplateBuilder> action) {
@@ -145,6 +188,7 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
         this.templates.clear();
         this.rules.clear();
         this.themes.clear();
+        this.animationPresets.clear();
 
         addTooltips();
 
@@ -156,6 +200,8 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
 
         Map<Identifier, ZenithTooltipTheme> encodedThemes = new LinkedHashMap<>();
         this.themes.forEach((id, builder) -> encodedThemes.put(id, builder.build()));
+
+        Map<Identifier, ZenithTooltipPresets.Data> encodedAnimationPresets = new LinkedHashMap<>(this.animationPresets);
 
         CompletableFuture<?> rulesFuture = DataProvider.saveAll(
                 output,
@@ -178,7 +224,14 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
                 encodedThemes
         );
 
-        return CompletableFuture.allOf(rulesFuture, templatesFuture, themesFuture);
+        CompletableFuture<?> animationPresetsFuture = DataProvider.saveAll(
+                output,
+                ZenithTooltipPresets.Data.CODEC,
+                this.animationPresetPaths,
+                encodedAnimationPresets
+        );
+
+        return CompletableFuture.allOf(rulesFuture, templatesFuture, themesFuture, animationPresetsFuture);
     }
 
     @Override
@@ -205,10 +258,6 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
             return templateId;
         }
 
-        @Deprecated
-        public Identifier documentId() {
-            return templateId;
-        }
 
         public ZenithTooltipTemplateBuilder template() {
             return template;
@@ -297,6 +346,12 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
     private void ensureThemePathAvailable(Identifier id) {
         if (this.themes.containsKey(id)) {
             throw new IllegalStateException("Duplicate generated Zenith tooltip theme id: " + id);
+        }
+    }
+
+    private void ensureAnimationPresetPathAvailable(Identifier id) {
+        if (this.animationPresets.containsKey(id)) {
+            throw new IllegalStateException("Duplicate generated Zenith tooltip animation preset id: " + id);
         }
     }
 

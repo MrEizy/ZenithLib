@@ -13,6 +13,7 @@ import net.zic.zenithlib.tooltip.api.animation.TextEffectStack;
 import net.zic.zenithlib.tooltip.api.animation.TypewriterTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.WaveTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
+import net.zic.zenithlib.tooltip.api.condition.ZenithTooltipConditions;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
@@ -489,17 +490,35 @@ public final class ZenithTooltipBuilders {
         return BarElement.dynamic(label, source, color);
     }
 
+    public static BarElement sourcedBar(
+            ZenithTooltipText label,
+            String valueSource,
+            String maxSource,
+            ZenithTooltipColor color
+    ) {
+        return BarElement.sourced(label, valueSource, maxSource, color);
+    }
+
+    public static BarElement sourcedBar(
+            ZenithTooltipText label,
+            Identifier valueSource,
+            Identifier maxSource,
+            ZenithTooltipColor color
+    ) {
+        return sourcedBar(label, valueSource.toString(), maxSource.toString(), color);
+    }
+
 
     public static SectionElement section(Identifier condition, List<net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement> elements) {
         return new SectionElement(condition, elements);
     }
 
     public static SectionElement section(String condition, List<net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement> elements) {
-        return section(identifier(condition), elements);
+        return section(ZenithTooltipConditions.identifier(condition), elements);
     }
 
     public static SectionElement shiftSection(List<net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement> elements) {
-        return section(identifier("zenithlib:shift_down"), elements);
+        return section(ZenithTooltipConditions.SHIFT_DOWN, elements);
     }
 
     public static DynamicElement dynamic(Identifier source) {

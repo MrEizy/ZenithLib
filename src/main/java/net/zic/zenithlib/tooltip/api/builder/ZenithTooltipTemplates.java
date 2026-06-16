@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.*;
 
-/** Beginner-friendly factories for common tooltip document shapes. */
+/** Beginner-friendly factories for common tooltip template shapes. */
 public final class ZenithTooltipTemplates {
     private static final Map<Identifier, RegisteredTemplate<?>> CUSTOM_TEMPLATES = new ConcurrentHashMap<>();
 

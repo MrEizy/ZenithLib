@@ -11,7 +11,7 @@ import java.util.Optional;
 
 /**
  * Compact framed label used for rarity, item class, restrictions, or other status
- * markers inside a tooltip document.
+ * markers inside a tooltip page.
  */
 public record BadgeElement(
         ZenithTooltipText text,

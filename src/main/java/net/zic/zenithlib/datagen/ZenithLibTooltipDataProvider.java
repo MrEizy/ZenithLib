@@ -11,46 +11,32 @@ import net.zic.zenithlib.tooltip.datagen.ZenithTooltipDataProvider;
 import static net.zic.zenithlib.tooltip.api.builder.ZenithTooltipBuilders.*;
 
 /**
- * Generates temporary showcase tooltip documents and selector rules.
- *
- * <p>Current Showcase Items:
- *      Diamond - A basic custom tooltip
- *      Emerald - Text Animation Effects
- *      Amethyst Shard - The Corrupted Animation Preset
- *      Echo Shard - iconTitleSummary Template
- *      Nether Star - Nebula Animation Preset
- *      Slime Ball - statCard Template
- *      Redstone Dust - Segmented Bars/ Gauge Extremes
- *      Lapis Lazuli - Scrolling long page
- *      Gold Ingot - progressDisplay Template
- *      Ender Pearl - requirementsDisplay Template
- *      Iron Sword - Dynamic item tooltip
- *      Book - Lore, scramble reveal, Living Animation Preset
- *      Prismarine Crystals - Background Animations
- *      Quartz - Border and Divider Animations
- *      Blaze Powder - Gauge Motions
- *      Clock - Page Motions </p>
- *
- *      I will be so for real, I couldn't be bothered to make updated tooltips after refactoring everything,
- *      so I had AI make these showcase tooltips for me... these will be removed after
- *      I make a guide/documentation for the tooltips.
-*/
+ * Generates showcase tooltips for ZenithLib
+ */
 
 public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvider {
     public ZenithLibTooltipDataProvider(PackOutput output) {
         super(output, ZenithLib.MOD_ID);
     }
 
-    // With a seperate provider extending the same class, you need to override this getName method...
     @Override
     public String getName() {
-        return "Showcase Zenith Tooltips, which will be removed soon";
+        return "ZenithLib tooltip showcases";
     }
 
     @Override
     protected void addTooltips() {
+        addShowcaseAnimationPresets();
         addShowcaseTemplates();
         addShowcaseRules();
+    }
+
+    private void addShowcaseAnimationPresets() {
+        animationPreset(
+                id("showcase_celestial_motion"),
+                java.util.List.of(ZenithTooltipPresets.CELESTIAL),
+                java.util.List.of("divider_sweep", "bar_edge_sparks")
+        );
     }
 
     private void addShowcaseTemplates() {
@@ -71,7 +57,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
 
     private void addMaterialShowcaseTemplate() {
         template(id("showcase_material"))
-                .animationPreset(ZenithTooltipPresets.CELESTIAL)
+                .animationPreset(id("showcase_celestial_motion"))
                 .page(page(translated("tooltip.zenithlib.diamond.title"))
                         .add(titleIcon(
                                 translated("tooltip.zenithlib.diamond.title"),

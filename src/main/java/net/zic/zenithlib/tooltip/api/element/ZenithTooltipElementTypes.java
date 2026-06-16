@@ -54,7 +54,6 @@ public final class ZenithTooltipElementTypes {
         registerBuiltIn("entity_preview", ENTITY_PREVIEW, EntityPreviewElement.CODEC);
         registerBuiltIn("dynamic", DYNAMIC, DynamicElement.CODEC);
         registerBuiltIn("section", SECTION, SectionElement.CODEC);
-        alias("source", DYNAMIC);
         alias("icon_row", ROW);
     }
 
