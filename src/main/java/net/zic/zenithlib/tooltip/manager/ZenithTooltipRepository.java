@@ -36,7 +36,12 @@ import java.util.Set;
 public final class ZenithTooltipRepository {
     private static final Codec<Either<ZenithTooltipRule, ZenithTooltipTemplate>> DEFINITION_CODEC =
             Codec.either(ZenithTooltipRule.CODEC, ZenithTooltipTemplate.CODEC);
+
     private static volatile Snapshot snapshot = Snapshot.empty();
+    private static Map<Identifier, ZenithTooltipRule> loadedRules = Map.of();
+    private static Map<Identifier, ZenithTooltipTemplate> legacyDefinitionTemplates = Map.of();
+    private static Map<Identifier, ZenithTooltipTemplate> loadedTemplates = Map.of();
+    private static Map<Identifier, ZenithTooltipTheme> loadedThemes = Map.of();
 
     private ZenithTooltipRepository() {}
 
@@ -115,14 +120,35 @@ public final class ZenithTooltipRepository {
             entry.getValue().ifRight(template -> templates.put(entry.getKey(), template));
         }
 
-        Snapshot current = snapshot;
-        snapshot = Snapshot.create(Map.copyOf(rules), Map.copyOf(templates), current.themes());
+        loadedRules = Map.copyOf(rules);
+        legacyDefinitionTemplates = Map.copyOf(templates);
+        rebuildSnapshot();
         return new LoadSummary(rules.size(), templates.size(), snapshot.missingTemplates());
     }
 
+    private static synchronized LoadSummary replaceTemplates(Map<Identifier, ZenithTooltipTemplate> templates) {
+        loadedTemplates = Map.copyOf(templates);
+        rebuildSnapshot();
+        return new LoadSummary(loadedRules.size(), loadedTemplates.size(), snapshot.missingTemplates());
+    }
+
     private static synchronized void replaceThemes(Map<Identifier, ZenithTooltipTheme> themes) {
-        Snapshot current = snapshot;
-        snapshot = Snapshot.create(current.rules(), current.templates(), Map.copyOf(themes));
+        loadedThemes = Map.copyOf(themes);
+        rebuildSnapshot();
+    }
+
+    private static void rebuildSnapshot() {
+        snapshot = Snapshot.create(loadedRules, mergedTemplates(), loadedThemes);
+    }
+
+    private static Map<Identifier, ZenithTooltipTemplate> mergedTemplates() {
+        if (legacyDefinitionTemplates.isEmpty()) {
+            return loadedTemplates;
+        }
+
+        Map<Identifier, ZenithTooltipTemplate> templates = new LinkedHashMap<>(legacyDefinitionTemplates);
+        templates.putAll(loadedTemplates);
+        return Map.copyOf(templates);
     }
 
     private static <T> T getWithLocalFallback(
@@ -287,10 +313,37 @@ public final class ZenithTooltipRepository {
             LoadSummary summary = replaceDefinitions(objects);
 
             ZenithLib.LOGGER.info(
-                    "Loaded {} Zenith tooltip rule(s) and {} template(s)",
+                    "Loaded {} Zenith tooltip rule definition(s) and {} legacy template definition(s)",
                     summary.rules(),
                     summary.templates()
             );
+
+            if (summary.missingTemplates() > 0) {
+                ZenithLib.LOGGER.warn(
+                        "Ignored {} Zenith tooltip rule(s) referencing missing templates",
+                        summary.missingTemplates()
+                );
+            }
+        }
+    }
+
+    public static final class TemplatesReloadListener extends SimpleJsonResourceReloadListener<ZenithTooltipTemplate> {
+        public TemplatesReloadListener() {
+            super(
+                    ZenithTooltipTemplate.CODEC,
+                    FileToIdConverter.json("zenith_tooltips/templates")
+            );
+        }
+
+        @Override
+        protected void apply(
+                Map<Identifier, ZenithTooltipTemplate> objects,
+                ResourceManager resourceManager,
+                ProfilerFiller profiler
+        ) {
+            LoadSummary summary = replaceTemplates(objects);
+
+            ZenithLib.LOGGER.info("Loaded {} Zenith tooltip template(s)", objects.size());
 
             if (summary.missingTemplates() > 0) {
                 ZenithLib.LOGGER.warn(

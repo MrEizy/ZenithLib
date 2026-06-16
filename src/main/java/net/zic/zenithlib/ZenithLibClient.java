@@ -52,6 +52,11 @@ public class ZenithLibClient {
         );
 
         event.addListener(
+                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "zenith_tooltip_templates"),
+                new ZenithTooltipRepository.TemplatesReloadListener()
+        );
+
+        event.addListener(
                 Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "zenith_tooltips"),
                 new ZenithTooltipRepository.RulesReloadListener()
         );
@@ -76,7 +81,7 @@ public class ZenithLibClient {
                 new ZenithClassifications.RulesReloadListener()
         );
 
-        ZenithLib.LOGGER.info("Registered tooltip reload listeners (themes + rules + animation presets + classifications)");
+        ZenithLib.LOGGER.info("Registered tooltip reload listeners (themes + templates + rules + animation presets + classifications)");
     }
 
 
