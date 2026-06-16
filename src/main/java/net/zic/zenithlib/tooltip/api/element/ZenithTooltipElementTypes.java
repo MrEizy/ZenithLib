@@ -33,6 +33,7 @@ public final class ZenithTooltipElementTypes {
     public static final Identifier BAR = id("bar");
     public static final Identifier ENTITY_PREVIEW = id("entity_preview");
     public static final Identifier DYNAMIC = id("dynamic");
+    public static final Identifier SECTION = id("section");
 
     private static final Map<String, Entry<?>> BY_NAME = new ConcurrentHashMap<>();
     private static final Map<Identifier, Entry<?>> BY_ID = new ConcurrentHashMap<>();
@@ -52,7 +53,9 @@ public final class ZenithTooltipElementTypes {
         registerBuiltIn("bar", BAR, BarElement.CODEC);
         registerBuiltIn("entity_preview", ENTITY_PREVIEW, EntityPreviewElement.CODEC);
         registerBuiltIn("dynamic", DYNAMIC, DynamicElement.CODEC);
+        registerBuiltIn("section", SECTION, SectionElement.CODEC);
         alias("source", DYNAMIC);
+        alias("icon_row", ROW);
     }
 
     private ZenithTooltipElementTypes() {}

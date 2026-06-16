@@ -16,6 +16,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipRule;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTemplate;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
+import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -78,6 +80,32 @@ public final class ZenithTooltipRepository {
         return snapshot.templates();
     }
 
+    public static Optional<ZenithTooltipDocument> fromTemplate(Identifier template, Identifier theme) {
+        Snapshot current = snapshot;
+        ZenithTooltipTemplate resolvedTemplate = current.templates().get(template);
+        if (resolvedTemplate == null) {
+            return Optional.empty();
+        }
+
+        ZenithTooltipTheme resolvedTheme = current.themes().getOrDefault(theme, ZenithTooltipTheme.defaultTheme());
+        return Optional.of(resolvedTemplate.themed(resolvedTheme));
+    }
+
+    public static Optional<ZenithTooltipDocument> fromTemplate(Identifier template) {
+        return fromTemplate(template, ZenithTooltipRule.DEFAULT_THEME);
+    }
+
+    /**
+     * Backwards-compatible name for callers that still think of templates as documents.
+     */
+    public static Optional<ZenithTooltipDocument> document(Identifier template, Identifier theme) {
+        return fromTemplate(template, theme);
+    }
+
+    public static Optional<ZenithTooltipDocument> document(Identifier template) {
+        return fromTemplate(template);
+    }
+
     private static synchronized LoadSummary replaceDefinitions(Map<Identifier, Either<ZenithTooltipRule, ZenithTooltipTemplate>> definitions) {
         Map<Identifier, ZenithTooltipRule> rules = new LinkedHashMap<>();
         Map<Identifier, ZenithTooltipTemplate> templates = new LinkedHashMap<>();
@@ -89,12 +117,25 @@ public final class ZenithTooltipRepository {
 
         Snapshot current = snapshot;
         snapshot = Snapshot.create(Map.copyOf(rules), Map.copyOf(templates), current.themes());
-        return new LoadSummary(rules.size(), templates.size(), snapshot.missingDocuments());
+        return new LoadSummary(rules.size(), templates.size(), snapshot.missingTemplates());
     }
 
     private static synchronized void replaceThemes(Map<Identifier, ZenithTooltipTheme> themes) {
         Snapshot current = snapshot;
         snapshot = Snapshot.create(current.rules(), current.templates(), Map.copyOf(themes));
+    }
+
+    private static <T> T getWithLocalFallback(
+            Map<Identifier, T> resources,
+            Identifier id,
+            String fallbackNamespace
+    ) {
+        T value = resources.get(id);
+        if (value != null || !"minecraft".equals(id.getNamespace()) || "minecraft".equals(fallbackNamespace)) {
+            return value;
+        }
+
+        return resources.get(Identifier.fromNamespaceAndPath(fallbackNamespace, id.getPath()));
     }
 
     private record Snapshot(
@@ -103,7 +144,7 @@ public final class ZenithTooltipRepository {
             Map<Identifier, ZenithTooltipTheme> themes,
             Map<Identifier, CompiledRule> exactRules,
             List<CompiledRule> dynamicRules,
-            int missingDocuments
+            int missingTemplates
     ) {
         private static final Comparator<CompiledRule> RULE_ORDER = Comparator
                 .comparingInt(CompiledRule::priority)
@@ -120,13 +161,17 @@ public final class ZenithTooltipRepository {
                 Map<Identifier, ZenithTooltipTheme> themes
         ) {
             List<CompiledRule> compiledRules = new ArrayList<>();
-            int missingDocuments = 0;
+            int missingTemplates = 0;
 
             for (Map.Entry<Identifier, ZenithTooltipRule> entry : rules.entrySet()) {
-                ZenithTooltipTemplate template = templates.get(entry.getValue().document());
+                ZenithTooltipTemplate template = getWithLocalFallback(
+                        templates,
+                        entry.getValue().template(),
+                        entry.getKey().getNamespace()
+                );
 
                 if (template == null) {
-                    missingDocuments++;
+                    missingTemplates++;
                     continue;
                 }
 
@@ -154,12 +199,13 @@ public final class ZenithTooltipRepository {
                     themes,
                     Map.copyOf(exactRules),
                     List.copyOf(dynamicRules),
-                    missingDocuments
+                    missingTemplates
             );
         }
+
     }
 
-    private record LoadSummary(int rules, int templates, int missingDocuments) {}
+    private record LoadSummary(int rules, int templates, int missingTemplates) {}
 
     private record CompiledRule(
             Identifier id,
@@ -173,8 +219,11 @@ public final class ZenithTooltipRepository {
                 ZenithTooltipTemplate template,
                 Map<Identifier, ZenithTooltipTheme> themes
         ) {
-            ZenithTooltipTheme theme = themes.getOrDefault(rule.theme(), ZenithTooltipTheme.defaultTheme());
-            return new CompiledRule(id, rule.priority(), template.themed(theme), CompiledSelector.create(rule.selector()));
+            ZenithTooltipTheme theme = getWithLocalFallback(themes, rule.theme(), id.getNamespace());
+            if (theme == null) {
+                theme = ZenithTooltipTheme.defaultTheme();
+            }
+            return new CompiledRule(id, rule.priority(), template.themed(theme), CompiledSelector.create(rule.selector(), id));
         }
     }
 
@@ -184,14 +233,19 @@ public final class ZenithTooltipRepository {
             Set<String> namespaces,
             List<TagKey<Item>> tags
     ) {
-        private static CompiledSelector create(ZenithTooltipRule.Selector selector) {
+        private static CompiledSelector create(ZenithTooltipRule.Selector selector, Identifier fallbackItemId) {
+            Set<Identifier> items = new HashSet<>(selector.items());
+            if (selector.inferredFromDefinitionId()) {
+                items.add(fallbackItemId);
+            }
+
             List<TagKey<Item>> tags = selector.tags().stream()
                     .map(id -> TagKey.create(BuiltInRegistries.ITEM.key(), id))
                     .toList();
 
             return new CompiledSelector(
                     selector.all(),
-                    Set.copyOf(new HashSet<>(selector.items())),
+                    Set.copyOf(items),
                     Set.copyOf(new HashSet<>(selector.namespaces())),
                     tags
             );
@@ -233,15 +287,15 @@ public final class ZenithTooltipRepository {
             LoadSummary summary = replaceDefinitions(objects);
 
             ZenithLib.LOGGER.info(
-                    "Loaded {} Zenith tooltip rule(s) and {} document(s)",
+                    "Loaded {} Zenith tooltip rule(s) and {} template(s)",
                     summary.rules(),
                     summary.templates()
             );
 
-            if (summary.missingDocuments() > 0) {
+            if (summary.missingTemplates() > 0) {
                 ZenithLib.LOGGER.warn(
-                        "Ignored {} Zenith tooltip rule(s) referencing missing documents",
-                        summary.missingDocuments()
+                        "Ignored {} Zenith tooltip rule(s) referencing missing templates",
+                        summary.missingTemplates()
                 );
             }
         }
@@ -263,6 +317,25 @@ public final class ZenithTooltipRepository {
         ) {
             replaceThemes(objects);
             ZenithLib.LOGGER.info("Loaded {} Zenith tooltip theme(s)", objects.size());
+        }
+    }
+
+    public static final class AnimationPresetsReloadListener extends SimpleJsonResourceReloadListener<ZenithTooltipPresets.Data> {
+        public AnimationPresetsReloadListener() {
+            super(
+                    ZenithTooltipPresets.Data.CODEC,
+                    FileToIdConverter.json("zenith_tooltips/animation_presets")
+            );
+        }
+
+        @Override
+        protected void apply(
+                Map<Identifier, ZenithTooltipPresets.Data> objects,
+                ResourceManager resourceManager,
+                ProfilerFiller profiler
+        ) {
+            ZenithTooltipPresets.replaceDataDriven(objects);
+            ZenithLib.LOGGER.info("Loaded {} Zenith tooltip animation preset(s)", objects.size());
         }
     }
 }

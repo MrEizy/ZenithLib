@@ -1,10 +1,10 @@
 {
-  "document": "zenithlib:showcase_mechanical_gauges",
   "priority": 100,
   "selector": {
     "items": [
       "minecraft:redstone"
     ]
   },
+  "template": "zenithlib:showcase_mechanical_gauges",
   "theme": "zenithlib:crimson_red"
 }

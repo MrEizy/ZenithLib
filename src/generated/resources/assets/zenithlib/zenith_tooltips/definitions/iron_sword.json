@@ -1,9 +1,9 @@
 {
-  "document": "zenithlib:showcase_dynamic_item",
   "priority": 100,
   "selector": {
     "items": [
       "minecraft:iron_sword"
     ]
-  }
+  },
+  "template": "zenithlib:showcase_dynamic_item"
 }

@@ -1,10 +1,10 @@
 {
-  "document": "zenithlib:showcase_gauge_motion_lab",
   "priority": 100,
   "selector": {
     "items": [
       "minecraft:blaze_powder"
     ]
   },
+  "template": "zenithlib:showcase_gauge_motion_lab",
   "theme": "zenithlib:ember_orange"
 }

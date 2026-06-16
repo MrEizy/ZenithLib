@@ -4,6 +4,7 @@ import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
+import net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
@@ -18,10 +19,16 @@ import java.util.function.Consumer;
 /** Builder for one ordered tooltip page. */
 public final class ZenithTooltipPageBuilder {
     private final ZenithTooltipText title;
+    private ZenithTooltipTextEffect titleEffect;
     private final List<ZenithTooltipElement> elements = new java.util.ArrayList<>();
 
     public ZenithTooltipPageBuilder(ZenithTooltipText title) {
         this.title = Objects.requireNonNull(title, "title");
+    }
+
+    public ZenithTooltipPageBuilder titleEffect(ZenithTooltipTextEffect effect) {
+        this.titleEffect = Objects.requireNonNull(effect, "effect");
+        return this;
     }
 
     public ZenithTooltipPageBuilder add(ZenithTooltipElement element) {
@@ -90,6 +97,10 @@ public final class ZenithTooltipPageBuilder {
         return add(ZenithTooltipBuilders.header(text, color));
     }
 
+    public ZenithTooltipPageBuilder header(ZenithTooltipText text, ZenithTooltipColor color, ZenithTooltipTextEffect effect) {
+        return add(ZenithTooltipBuilders.header(text, color, effect));
+    }
+
     public ZenithTooltipPageBuilder divider() {
         return add(ZenithTooltipBuilders.divider());
     }
@@ -113,6 +124,16 @@ public final class ZenithTooltipPageBuilder {
             ZenithTooltipColor rightColor
     ) {
         return add(ZenithTooltipBuilders.row(left, right, leftColor, rightColor));
+    }
+
+    public ZenithTooltipPageBuilder row(
+            ZenithTooltipInlineIcon icon,
+            ZenithTooltipText left,
+            ZenithTooltipText right,
+            ZenithTooltipColor leftColor,
+            ZenithTooltipColor rightColor
+    ) {
+        return add(ZenithTooltipBuilders.row(icon, left, right, leftColor, rightColor));
     }
 
     public ZenithTooltipPageBuilder badge(ZenithTooltipText text) {
@@ -205,7 +226,28 @@ public final class ZenithTooltipPageBuilder {
         return add(ZenithTooltipBuilders.titleIcon(title, subtitle, onAllPages));
     }
 
+    public ZenithTooltipPageBuilder titleIcon(
+            ZenithTooltipText title,
+            ZenithTooltipText subtitle,
+            boolean onAllPages,
+            ZenithTooltipTextEffect titleEffect
+    ) {
+        return add(ZenithTooltipBuilders.titleIcon(title, subtitle, onAllPages, titleEffect));
+    }
+
+    public ZenithTooltipPageBuilder section(Identifier condition, ZenithTooltipElement... elements) {
+        return add(ZenithTooltipBuilders.section(condition, List.of(elements)));
+    }
+
+    public ZenithTooltipPageBuilder section(String condition, ZenithTooltipElement... elements) {
+        return section(Identifier.parse(condition), elements);
+    }
+
+    public ZenithTooltipPageBuilder shiftSection(ZenithTooltipElement... elements) {
+        return section(Identifier.fromNamespaceAndPath("zenithlib", "shift_down"), elements);
+    }
+
     public ZenithTooltipPage build() {
-        return new ZenithTooltipPage(this.title, List.copyOf(this.elements));
+        return new ZenithTooltipPage(this.title, java.util.Optional.ofNullable(this.titleEffect), List.copyOf(this.elements));
     }
 }

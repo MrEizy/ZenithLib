@@ -15,7 +15,7 @@ public final class ZenithTooltipRuleBuilder {
     private final List<Identifier> items = new ArrayList<>();
     private final List<Identifier> tags = new ArrayList<>();
     private final List<String> namespaces = new ArrayList<>();
-    private Identifier document;
+    private Identifier template;
     private Identifier theme = ZenithTooltipRule.DEFAULT_THEME;
 
     public ZenithTooltipRuleBuilder priority(int priority) {
@@ -43,9 +43,13 @@ public final class ZenithTooltipRuleBuilder {
         return this;
     }
 
-    public ZenithTooltipRuleBuilder document(Identifier document) {
-        this.document = Objects.requireNonNull(document, "document");
+    public ZenithTooltipRuleBuilder template(Identifier template) {
+        this.template = Objects.requireNonNull(template, "template");
         return this;
+    }
+
+    public ZenithTooltipRuleBuilder document(Identifier document) {
+        return template(document);
     }
 
     public ZenithTooltipRuleBuilder theme(Identifier theme) {
@@ -54,14 +58,14 @@ public final class ZenithTooltipRuleBuilder {
     }
 
     public ZenithTooltipRule build() {
-        if (this.document == null) {
-            throw new IllegalStateException("A generated Zenith tooltip rule must reference a document");
+        if (this.template == null) {
+            throw new IllegalStateException("A generated Zenith tooltip rule must reference a template");
         }
 
         return new ZenithTooltipRule(
                 this.priority,
                 new ZenithTooltipRule.Selector(this.all, this.items, this.tags, this.namespaces),
-                this.document,
+                this.template,
                 this.theme
         );
     }

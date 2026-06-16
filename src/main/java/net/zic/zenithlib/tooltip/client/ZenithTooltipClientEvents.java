@@ -72,7 +72,10 @@ public final class ZenithTooltipClientEvents {
         }
 
         Optional<Player> player = Optional.ofNullable((Player) Minecraft.getInstance().player);
-        ZenithTooltipContext baseContext = ZenithTooltipContext.of(stack, id, registryAccess, player);
+        ZenithTooltipContext baseContext = ZenithTooltipContext.of(stack, id, registryAccess, player)
+                .withData(Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "shift_down"), InputHandler.isShiftDown())
+                .withData(Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "ctrl_down"), InputHandler.isControlDown())
+                .withData(Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID, "alt_down"), InputHandler.isAltDown());
         Optional<ZenithTooltipProviders.Result> provided = ZenithTooltipProviders.create(baseContext);
 
         ZenithTooltipContext resolutionContext = provided

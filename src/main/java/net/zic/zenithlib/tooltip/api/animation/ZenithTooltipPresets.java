@@ -1,5 +1,7 @@
 package net.zic.zenithlib.tooltip.api.animation;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.ZenithLib;
 
@@ -21,6 +23,7 @@ public final class ZenithTooltipPresets {
     public static final Identifier KINETIC = id("kinetic");
 
     private static final Map<Identifier, Preset> PRESETS = new LinkedHashMap<>();
+    private static final Map<Identifier, Preset> DATA_DRIVEN_PRESETS = new LinkedHashMap<>();
 
     static {
         register(Preset.builder(CELESTIAL)
@@ -87,6 +90,23 @@ public final class ZenithTooltipPresets {
         Preset preset = Preset.builder(id).parents(parents).build();
         register(preset);
         return preset;
+    }
+
+    public static synchronized void replaceDataDriven(Map<Identifier, Data> presets) {
+        for (Identifier id : DATA_DRIVEN_PRESETS.keySet()) {
+            Preset existing = PRESETS.get(id);
+            if (existing == DATA_DRIVEN_PRESETS.get(id)) {
+                PRESETS.remove(id);
+            }
+        }
+
+        DATA_DRIVEN_PRESETS.clear();
+
+        for (Map.Entry<Identifier, Data> entry : presets.entrySet()) {
+            Preset preset = entry.getValue().asPreset(entry.getKey());
+            DATA_DRIVEN_PRESETS.put(entry.getKey(), preset);
+            PRESETS.put(entry.getKey(), preset);
+        }
     }
 
     public static Optional<Preset> get(Identifier id) {
@@ -203,6 +223,64 @@ public final class ZenithTooltipPresets {
                     || frameAssembly || openingBloom || pageSlide || pageWash || titleShimmer
                     || iconFloat || iconOrbit || segmentedBars || barScanline || barPulse || barEdgeSparks
                     || dividerSweep || dividerRunes || dividerPulse || staggeredElements);
+        }
+    }
+
+    public record Data(
+            List<Identifier> parents,
+            List<String> effects
+    ) {
+        public static final Codec<Data> CODEC = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        Identifier.CODEC.listOf().optionalFieldOf("parents", List.of()).forGetter(Data::parents),
+                        Codec.STRING.listOf().optionalFieldOf("effects", List.of()).forGetter(Data::effects)
+                ).apply(instance, Data::new)
+        );
+
+        public Data {
+            parents = parents == null ? List.of() : List.copyOf(parents);
+            effects = effects == null ? List.of() : effects.stream()
+                    .map(effect -> effect == null ? "" : effect.trim())
+                    .filter(effect -> !effect.isBlank())
+                    .toList();
+        }
+
+        public Preset asPreset(Identifier id) {
+            Preset.Builder builder = Preset.builder(id).parents(parents);
+
+            for (String effect : effects) {
+                switch (effect) {
+                    case "star_field" -> builder.starField(true);
+                    case "drifting_mist" -> builder.driftingMist(true);
+                    case "aurora_background" -> builder.auroraBackground(true);
+                    case "mote_field" -> builder.moteField(true);
+                    case "scanline_background" -> builder.scanlineBackground(true);
+                    case "travelling_border_energy", "traveling_border_energy" -> builder.travellingBorderEnergy(true);
+                    case "pulsing_border" -> builder.pulsingBorder(true);
+                    case "corner_sparks" -> builder.cornerSparks(true);
+                    case "twin_border_comets" -> builder.twinBorderComets(true);
+                    case "frame_assembly" -> builder.frameAssembly(true);
+                    case "opening_bloom" -> builder.openingBloom(true);
+                    case "page_slide" -> builder.pageSlide(true);
+                    case "page_wash" -> builder.pageWash(true);
+                    case "title_shimmer" -> builder.titleShimmer(true);
+                    case "icon_float" -> builder.iconFloat(true);
+                    case "icon_orbit" -> builder.iconOrbit(true);
+                    case "segmented_bars" -> builder.segmentedBars(true);
+                    case "bar_scanline" -> builder.barScanline(true);
+                    case "bar_pulse" -> builder.barPulse(true);
+                    case "bar_edge_sparks" -> builder.barEdgeSparks(true);
+                    case "divider_sweep" -> builder.dividerSweep(true);
+                    case "divider_runes" -> builder.dividerRunes(true);
+                    case "divider_pulse" -> builder.dividerPulse(true);
+                    case "staggered_elements" -> builder.staggeredElements(true);
+                    default -> {
+                        // Unknown effect names are ignored so resource packs can stay forward-compatible.
+                    }
+                }
+            }
+
+            return builder.build();
         }
     }
 

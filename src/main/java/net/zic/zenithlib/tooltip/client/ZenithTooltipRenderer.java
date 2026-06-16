@@ -2,9 +2,11 @@ package net.zic.zenithlib.tooltip.client;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
+import net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon;
 import net.zic.zenithlib.tooltip.api.animation.ShimmerTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
 
@@ -37,7 +39,21 @@ public final class ZenithTooltipRenderer {
         int textY = y + theme.padding();
 
         if (!layout.titleLines().isEmpty()) {
-            if (presets.titleShimmer() && animation.allowsMotion()) {
+            if (layout.titleEffect().isPresent()) {
+                ZenithTooltipTextAnimator.render(
+                        font,
+                        graphics,
+                        textX,
+                        textY + layout.titleAnimationPadding(),
+                        layout.titleLines(),
+                        theme.text(),
+                        ZenithTooltipLayout.LINE_GAP,
+                        layout.titleEffect().orElseThrow(),
+                        animation.settings(),
+                        frame,
+                        layout.titleAnimationSeed()
+                );
+            } else if (presets.titleShimmer() && animation.allowsMotion()) {
                 ZenithTooltipTextAnimator.render(
                         font,
                         graphics,
@@ -60,10 +76,11 @@ public final class ZenithTooltipRenderer {
                     textY,
                     layout.innerWidth(),
                     maxLineWidth(font, layout.titleLines()),
-                    ZenithTooltipLayout.lineBlockHeight(font, layout.titleLines().size(), ZenithTooltipLayout.LINE_GAP),
+                    ZenithTooltipLayout.lineBlockHeight(font, layout.titleLines().size(), ZenithTooltipLayout.LINE_GAP) + layout.titleAnimationPadding() * 2,
                     theme
             );
             textY += ZenithTooltipLayout.lineBlockHeight(font, layout.titleLines().size(), ZenithTooltipLayout.LINE_GAP)
+                    + layout.titleAnimationPadding() * 2
                     + ZenithTooltipLayout.TITLE_BODY_GAP;
         } else if (layout.titleIconHeader() != null) {
             ZenithTooltipLayout.PreparedTitleIcon titleIconHeader = layout.titleIconHeader();
@@ -272,7 +289,12 @@ public final class ZenithTooltipRenderer {
         }
 
         if (element instanceof ZenithTooltipLayout.PreparedHeader header) {
-            if (presets.titleShimmer() && animation.allowsMotion()) {
+            if (header.effect().isPresent()) {
+                ZenithTooltipTextAnimator.render(
+                        font, graphics, textX, textY + header.animationPadding(), header.lines(), header.color(), ZenithTooltipLayout.LINE_GAP,
+                        header.effect().orElseThrow(), animation.settings(), frame, header.animationSeed()
+                );
+            } else if (presets.titleShimmer() && animation.allowsMotion()) {
                 ZenithTooltipTextAnimator.render(
                         font, graphics, textX, textY, header.lines(), header.color(), ZenithTooltipLayout.LINE_GAP,
                         new ShimmerTextEffect(2600, 0.22F, 0.35F, false), animation.settings(), frame, header.hashCode()
@@ -286,7 +308,7 @@ public final class ZenithTooltipRenderer {
                     textY,
                     innerWidth,
                     maxLineWidth(font, header.lines()),
-                    ZenithTooltipLayout.lineBlockHeight(font, header.lines().size(), ZenithTooltipLayout.LINE_GAP),
+                    ZenithTooltipLayout.lineBlockHeight(font, header.lines().size(), ZenithTooltipLayout.LINE_GAP) + header.animationPadding() * 2,
                     theme
             );
             return;
@@ -298,13 +320,20 @@ public final class ZenithTooltipRenderer {
         }
 
         if (element instanceof ZenithTooltipLayout.PreparedRow row) {
-            renderLines(font, graphics, textX, textY, row.leftLines(), row.leftColor(), ZenithTooltipLayout.LINE_GAP);
+            int leftX = textX;
+            if (row.icon().isPresent()) {
+                ZenithTooltipInlineIcon icon = row.icon().orElseThrow();
+                int iconY = textY + Math.max(0, (row.height() - icon.size()) / 2);
+                renderInlineIcon(graphics, icon, leftX, iconY);
+                leftX += icon.size() + ZenithTooltipLayout.INLINE_ICON_GAP;
+            }
+            renderLines(font, graphics, leftX, textY, row.leftLines(), row.leftColor(), ZenithTooltipLayout.LINE_GAP);
             renderRightAlignedLines(font, graphics, textX, textY, innerWidth, row.rightLines(), row.rightColor());
             return;
         }
 
         if (element instanceof ZenithTooltipLayout.PreparedBadge badge) {
-            renderBadge(font, graphics, textX, textY, theme, badge);
+            renderBadge(font, graphics, textX, textY, theme, badge, animation);
             return;
         }
 
@@ -541,28 +570,49 @@ public final class ZenithTooltipRenderer {
             int textX,
             int textY,
             ZenithTooltipTheme theme,
-            ZenithTooltipLayout.PreparedBadge badge
+            ZenithTooltipLayout.PreparedBadge badge,
+            ZenithTooltipAnimationContext animation
     ) {
         ZenithTooltipTheme.BadgeStyle style = theme.badgeStyle();
-        int width = 0;
-        for (FormattedCharSequence line : badge.lines()) {
-            width = Math.max(width, font.width(line));
-        }
-        width += style.horizontalPadding() * 2;
 
-        graphics.fill(textX, textY, textX + width, textY + badge.height(), style.fillColor(badge.backgroundColor()));
-        for (int inset = 0; inset < style.borderWidth() && width - inset * 2 > 0 && badge.height() - inset * 2 > 0; inset++) {
-            graphics.outline(textX + inset, textY + inset, width - inset * 2, badge.height() - inset * 2, badge.borderColor());
+        graphics.fill(textX, textY, textX + badge.width(), textY + badge.height(), style.fillColor(badge.backgroundColor()));
+        for (int inset = 0; inset < style.borderWidth() && badge.width() - inset * 2 > 0 && badge.height() - inset * 2 > 0; inset++) {
+            graphics.outline(textX + inset, textY + inset, badge.width() - inset * 2, badge.height() - inset * 2, badge.borderColor());
         }
-        renderLines(
-                font,
-                graphics,
-                textX + style.horizontalPadding(),
-                textY + style.verticalPadding(),
-                badge.lines(),
-                badge.textColor(),
-                0
-        );
+
+        int contentX = textX + style.horizontalPadding();
+        if (badge.icon().isPresent()) {
+            ZenithTooltipInlineIcon icon = badge.icon().orElseThrow();
+            int iconY = textY + Math.max(0, (badge.height() - icon.size()) / 2);
+            renderInlineIcon(graphics, icon, contentX, iconY);
+            contentX += icon.size() + ZenithTooltipLayout.INLINE_ICON_GAP;
+        }
+
+        if (badge.effect().isPresent()) {
+            ZenithTooltipTextAnimator.render(
+                    font,
+                    graphics,
+                    contentX,
+                    textY + style.verticalPadding() + badge.animationPadding(),
+                    badge.lines(),
+                    badge.textColor(),
+                    0,
+                    badge.effect().orElseThrow(),
+                    animation.settings(),
+                    animation.frame(),
+                    badge.animationSeed()
+            );
+        } else {
+            renderLines(
+                    font,
+                    graphics,
+                    contentX,
+                    textY + style.verticalPadding(),
+                    badge.lines(),
+                    badge.textColor(),
+                    0
+            );
+        }
     }
 
     private static void renderBar(
@@ -649,24 +699,60 @@ public final class ZenithTooltipRenderer {
             ZenithTooltipLayout.PreparedTitleIcon titleIcon,
             ZenithTooltipAnimationContext animation
     ) {
-        ZenithTooltipPresets.Resolved presets = animation.presets();
-        ZenithTooltipAnimationState.Frame frame = animation.frame();
         ZenithTooltipTheme.IconHolder holder = theme.iconHolder();
         renderItemHolder(graphics, textX, textY + iconFloatOffset(animation), stack, theme, animation);
 
         int labelX = textX + holder.boxSize() + holder.gap();
-        int labelLineCount = titleIcon.titleLines().size() + titleIcon.subtitleLines().size();
-        int labelHeight = ZenithTooltipLayout.lineBlockHeight(font, labelLineCount, ZenithTooltipLayout.ICON_LINE_GAP);
+        int titleHeight = ZenithTooltipLayout.lineBlockHeight(font, titleIcon.titleLines().size(), ZenithTooltipLayout.ICON_LINE_GAP)
+                + titleIcon.titleAnimationPadding() * 2;
+        int subtitleHeight = ZenithTooltipLayout.lineBlockHeight(font, titleIcon.subtitleLines().size(), ZenithTooltipLayout.ICON_LINE_GAP)
+                + titleIcon.subtitleAnimationPadding() * 2;
+        int labelHeight = titleHeight + subtitleHeight;
+        if (!titleIcon.titleLines().isEmpty() && !titleIcon.subtitleLines().isEmpty()) {
+            labelHeight += ZenithTooltipLayout.ICON_LINE_GAP;
+        }
         int labelY = textY + Math.max(0, (holder.boxSize() - labelHeight) / 2);
 
-        renderLines(font, graphics, labelX, labelY, titleIcon.titleLines(), theme.text(), ZenithTooltipLayout.ICON_LINE_GAP);
-        if (!titleIcon.titleLines().isEmpty() && !titleIcon.subtitleLines().isEmpty()) {
-            labelY += ZenithTooltipLayout.lineBlockHeight(font, titleIcon.titleLines().size(), ZenithTooltipLayout.ICON_LINE_GAP)
-                    + ZenithTooltipLayout.ICON_LINE_GAP;
+        if (titleIcon.titleEffect().isPresent()) {
+            ZenithTooltipTextAnimator.render(
+                    font,
+                    graphics,
+                    labelX,
+                    labelY + titleIcon.titleAnimationPadding(),
+                    titleIcon.titleLines(),
+                    theme.text(),
+                    ZenithTooltipLayout.ICON_LINE_GAP,
+                    titleIcon.titleEffect().orElseThrow(),
+                    animation.settings(),
+                    animation.frame(),
+                    titleIcon.animationSeed()
+            );
         } else {
-            labelY += ZenithTooltipLayout.lineBlockHeight(font, titleIcon.titleLines().size(), ZenithTooltipLayout.ICON_LINE_GAP);
+            renderLines(font, graphics, labelX, labelY, titleIcon.titleLines(), theme.text(), ZenithTooltipLayout.ICON_LINE_GAP);
         }
-        renderLines(font, graphics, labelX, labelY, titleIcon.subtitleLines(), theme.accent(), ZenithTooltipLayout.ICON_LINE_GAP);
+
+        labelY += titleHeight;
+        if (!titleIcon.titleLines().isEmpty() && !titleIcon.subtitleLines().isEmpty()) {
+            labelY += ZenithTooltipLayout.ICON_LINE_GAP;
+        }
+
+        if (titleIcon.subtitleEffect().isPresent()) {
+            ZenithTooltipTextAnimator.render(
+                    font,
+                    graphics,
+                    labelX,
+                    labelY + titleIcon.subtitleAnimationPadding(),
+                    titleIcon.subtitleLines(),
+                    theme.accent(),
+                    ZenithTooltipLayout.ICON_LINE_GAP,
+                    titleIcon.subtitleEffect().orElseThrow(),
+                    animation.settings(),
+                    animation.frame(),
+                    titleIcon.animationSeed() ^ 0x5355425449544C45L
+            );
+        } else {
+            renderLines(font, graphics, labelX, labelY, titleIcon.subtitleLines(), theme.accent(), ZenithTooltipLayout.ICON_LINE_GAP);
+        }
 
         int textBlockWidth = Math.max(
                 maxLineWidth(font, titleIcon.titleLines()),
@@ -680,6 +766,26 @@ public final class ZenithTooltipRenderer {
                 textBlockWidth,
                 holder.boxSize() - 2,
                 theme
+        );
+    }
+
+    private static void renderInlineIcon(
+            GuiGraphicsExtractor graphics,
+            ZenithTooltipInlineIcon icon,
+            int x,
+            int y
+    ) {
+        graphics.blit(
+                RenderPipelines.GUI_TEXTURED,
+                icon.texture(),
+                x,
+                y,
+                0,
+                0,
+                icon.size(),
+                icon.size(),
+                icon.textureWidth(),
+                icon.textureHeight()
         );
     }
 

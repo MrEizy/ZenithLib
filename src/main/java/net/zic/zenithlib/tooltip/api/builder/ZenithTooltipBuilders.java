@@ -3,6 +3,7 @@ package net.zic.zenithlib.tooltip.api.builder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
+import net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.animation.RainbowTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.RuneDecipherTextEffect;
@@ -21,6 +22,7 @@ import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.IconElement;
 import net.zic.zenithlib.tooltip.api.element.RowElement;
+import net.zic.zenithlib.tooltip.api.element.SectionElement;
 import net.zic.zenithlib.tooltip.api.element.SpacerElement;
 import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
@@ -47,6 +49,18 @@ public final class ZenithTooltipBuilders {
 
     public static Identifier sourceId(String source) {
         return ZenithTooltipSources.identifier(source);
+    }
+
+    public static ZenithTooltipInlineIcon inlineIcon(Identifier texture) {
+        return new ZenithTooltipInlineIcon(texture);
+    }
+
+    public static ZenithTooltipInlineIcon inlineIcon(String texture) {
+        return inlineIcon(identifier(texture));
+    }
+
+    public static ZenithTooltipInlineIcon inlineIcon(Identifier texture, int size) {
+        return new ZenithTooltipInlineIcon(texture, size, 16, 16);
     }
 
     public static ZenithTooltipText literal(String text) {
@@ -272,6 +286,10 @@ public final class ZenithTooltipBuilders {
         return new HeaderElement(text, color);
     }
 
+    public static HeaderElement header(ZenithTooltipText text, ZenithTooltipColor color, ZenithTooltipTextEffect effect) {
+        return new HeaderElement(text, color, java.util.Optional.of(effect));
+    }
+
     public static DividerElement divider() {
         return new DividerElement();
     }
@@ -295,6 +313,16 @@ public final class ZenithTooltipBuilders {
             ZenithTooltipColor rightColor
     ) {
         return new RowElement(left, right, leftColor, rightColor);
+    }
+
+    public static RowElement row(
+            ZenithTooltipInlineIcon icon,
+            ZenithTooltipText left,
+            ZenithTooltipText right,
+            ZenithTooltipColor leftColor,
+            ZenithTooltipColor rightColor
+    ) {
+        return new RowElement(left, right, leftColor, rightColor, java.util.Optional.of(icon));
     }
 
     public static IconElement icon() {
@@ -327,6 +355,15 @@ public final class ZenithTooltipBuilders {
             boolean onAllPages
     ) {
         return new TitleIconElement(title, subtitle, onAllPages);
+    }
+
+    public static TitleIconElement titleIcon(
+            ZenithTooltipText title,
+            ZenithTooltipText subtitle,
+            boolean onAllPages,
+            ZenithTooltipTextEffect titleEffect
+    ) {
+        return new TitleIconElement(title, subtitle, onAllPages, java.util.Optional.of(titleEffect), java.util.Optional.empty());
     }
 
     public static BadgeElement badge(ZenithTooltipText text) {
@@ -368,6 +405,26 @@ public final class ZenithTooltipBuilders {
             ZenithTooltipColor borderColor
     ) {
         return new BadgeElement(text, textColor, backgroundColor, borderColor);
+    }
+
+    public static BadgeElement badge(
+            ZenithTooltipInlineIcon icon,
+            ZenithTooltipText text,
+            ZenithTooltipColor textColor,
+            ZenithTooltipColor backgroundColor,
+            ZenithTooltipColor borderColor
+    ) {
+        return new BadgeElement(text, textColor, backgroundColor, borderColor, java.util.Optional.of(icon), java.util.Optional.empty());
+    }
+
+    public static BadgeElement badge(
+            ZenithTooltipText text,
+            ZenithTooltipColor textColor,
+            ZenithTooltipColor backgroundColor,
+            ZenithTooltipColor borderColor,
+            ZenithTooltipTextEffect effect
+    ) {
+        return new BadgeElement(text, textColor, backgroundColor, borderColor, java.util.Optional.empty(), java.util.Optional.of(effect));
     }
 
     public static ClassificationElement classification() {
@@ -432,6 +489,18 @@ public final class ZenithTooltipBuilders {
         return BarElement.dynamic(label, source, color);
     }
 
+
+    public static SectionElement section(Identifier condition, List<net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement> elements) {
+        return new SectionElement(condition, elements);
+    }
+
+    public static SectionElement section(String condition, List<net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement> elements) {
+        return section(identifier(condition), elements);
+    }
+
+    public static SectionElement shiftSection(List<net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement> elements) {
+        return section(identifier("zenithlib:shift_down"), elements);
+    }
 
     public static DynamicElement dynamic(Identifier source) {
         return new DynamicElement(source);

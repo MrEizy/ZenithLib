@@ -1,10 +1,10 @@
 {
-  "document": "zenithlib:showcase_celestial_preset",
   "priority": 100,
   "selector": {
     "items": [
       "minecraft:nether_star"
     ]
   },
+  "template": "zenithlib:showcase_celestial_preset",
   "theme": "zenithlib:glass_clear"
 }

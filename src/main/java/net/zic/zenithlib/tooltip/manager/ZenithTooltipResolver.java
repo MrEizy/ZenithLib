@@ -16,6 +16,7 @@ import net.zic.zenithlib.tooltip.api.element.EntityPreviewElement;
 import net.zic.zenithlib.tooltip.api.element.HeaderElement;
 import net.zic.zenithlib.tooltip.api.element.IconElement;
 import net.zic.zenithlib.tooltip.api.element.RowElement;
+import net.zic.zenithlib.tooltip.api.element.SectionElement;
 import net.zic.zenithlib.tooltip.api.element.SpacerElement;
 import net.zic.zenithlib.tooltip.api.element.TextElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
@@ -53,7 +54,7 @@ public final class ZenithTooltipResolver {
         for (ZenithTooltipElement element : page.elements()) {
             elements.addAll(resolveElement(element, context));
         }
-        return new ZenithTooltipPage(resolveText(page.title(), context), elements);
+        return new ZenithTooltipPage(resolveText(page.title(), context), page.titleEffect(), elements);
     }
 
     private static List<ZenithTooltipElement> resolveElement(
@@ -63,18 +64,22 @@ public final class ZenithTooltipResolver {
         if (element instanceof DynamicElement dynamic) {
             return resolveDynamic(dynamic, context);
         }
+        if (element instanceof SectionElement section) {
+            return resolveSection(section, context);
+        }
         if (element instanceof TextElement text) {
             return List.of(new TextElement(resolveText(text.text(), context), text.color(), text.effect()));
         }
         if (element instanceof HeaderElement header) {
-            return List.of(new HeaderElement(resolveText(header.text(), context), header.color()));
+            return List.of(new HeaderElement(resolveText(header.text(), context), header.color(), header.effect()));
         }
         if (element instanceof RowElement row) {
             return List.of(new RowElement(
                     resolveText(row.left(), context),
                     resolveText(row.right(), context),
                     row.leftColor(),
-                    row.rightColor()
+                    row.rightColor(),
+                    row.icon()
             ));
         }
         if (element instanceof BadgeElement badge) {
@@ -82,7 +87,9 @@ public final class ZenithTooltipResolver {
                     resolveText(badge.text(), context),
                     badge.textColor(),
                     badge.backgroundColor(),
-                    badge.borderColor()
+                    badge.borderColor(),
+                    badge.icon(),
+                    badge.effect()
             ));
         }
         if (element instanceof ClassificationElement classification) {
@@ -92,7 +99,9 @@ public final class ZenithTooltipResolver {
             return List.of(new TitleIconElement(
                     resolveText(titleIcon.title(), context),
                     resolveText(titleIcon.subtitle(), context),
-                    titleIcon.onAllPages()
+                    titleIcon.onAllPages(),
+                    titleIcon.titleEffect(),
+                    titleIcon.subtitleEffect()
             ));
         }
         if (element instanceof BarElement bar) {
@@ -105,6 +114,46 @@ public final class ZenithTooltipResolver {
             return List.of(element);
         }
         return resolveResolvedElements(element, ZenithTooltipElementTypes.resolve(element, context), context);
+    }
+
+
+    private static List<ZenithTooltipElement> resolveSection(
+            SectionElement section,
+            ZenithTooltipContext context
+    ) {
+        if (!conditionMatches(section.condition(), context)) {
+            return List.of();
+        }
+
+        return resolveResolvedElements(section, section.elements(), context);
+    }
+
+    private static boolean conditionMatches(
+            net.minecraft.resources.Identifier condition,
+            ZenithTooltipContext context
+    ) {
+        String namespace = condition.getNamespace();
+        String path = condition.getPath();
+
+        if (!"zenithlib".equals(namespace)) {
+            return context.data(condition, Boolean.class).orElse(false);
+        }
+
+        return switch (path) {
+            case "always" -> true;
+            case "never" -> false;
+            case "shift_down" -> modifier(context, "shift_down");
+            case "ctrl_down", "control_down" -> modifier(context, "ctrl_down");
+            case "alt_down" -> modifier(context, "alt_down");
+            case "not_shift_down" -> !modifier(context, "shift_down");
+            case "not_ctrl_down", "not_control_down" -> !modifier(context, "ctrl_down");
+            case "not_alt_down" -> !modifier(context, "alt_down");
+            default -> context.data(condition, Boolean.class).orElse(false);
+        };
+    }
+
+    private static boolean modifier(ZenithTooltipContext context, String path) {
+        return context.data(net.minecraft.resources.Identifier.fromNamespaceAndPath("zenithlib", path), Boolean.class).orElse(false);
     }
 
     private static List<ZenithTooltipElement> resolveClassification(

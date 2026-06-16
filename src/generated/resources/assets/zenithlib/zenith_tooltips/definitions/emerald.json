@@ -1,10 +1,10 @@
 {
-  "document": "zenithlib:showcase_text_lab",
   "priority": 100,
   "selector": {
     "items": [
       "minecraft:emerald"
     ]
   },
+  "template": "zenithlib:showcase_text_lab",
   "theme": "zenithlib:arcane_purple"
 }

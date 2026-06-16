@@ -1,10 +1,10 @@
 {
-  "document": "zenithlib:showcase_template_icon_summary",
   "priority": 100,
   "selector": {
     "items": [
       "minecraft:amethyst_shard"
     ]
   },
+  "template": "zenithlib:showcase_template_icon_summary",
   "theme": "zenithlib:moonlit_white"
 }

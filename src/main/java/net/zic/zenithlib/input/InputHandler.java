@@ -1,7 +1,9 @@
 package net.zic.zenithlib.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -71,6 +73,26 @@ public class InputHandler {
             KeyMapping.Category.MISC
     );
 
+    public static boolean isShiftDown() {
+        Window window = Minecraft.getInstance().getWindow();
+
+        return InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT)
+                || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
+    }
+
+    public static boolean isControlDown() {
+        Window window = Minecraft.getInstance().getWindow();
+
+        return InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL)
+                || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_CONTROL);
+    }
+
+    public static boolean isAltDown() {
+        Window window = Minecraft.getInstance().getWindow();
+
+        return InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_ALT)
+                || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_ALT);
+    }
 
 
     public static MappingHandler registerMapping(KeyMapping mapping){

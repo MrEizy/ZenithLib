@@ -4,16 +4,32 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
+import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
+
+import java.util.Optional;
 
 /* Tooltip element that renders a prominent text heading within a page body */
 
 public record HeaderElement(
         ZenithTooltipText text,
-        ZenithTooltipColor color
+        ZenithTooltipColor color,
+        Optional<ZenithTooltipTextEffect> effect
 ) implements ZenithTooltipElement {
+
+    public HeaderElement(ZenithTooltipText text, ZenithTooltipColor color) {
+        this(text, color, Optional.empty());
+    }
 
     public HeaderElement(String key, ZenithTooltipColor color) {
         this(ZenithTooltipText.translatable(key), color);
+    }
+
+    public HeaderElement {
+        effect = effect == null ? Optional.empty() : effect;
+    }
+
+    public HeaderElement withEffect(ZenithTooltipTextEffect effect) {
+        return new HeaderElement(text, color, Optional.of(effect));
     }
 
     public static HeaderElement literal(String text, ZenithTooltipColor color) {
@@ -23,7 +39,8 @@ public record HeaderElement(
     public static final MapCodec<HeaderElement> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     ZenithTooltipText.CODEC.fieldOf("text").forGetter(HeaderElement::text),
-                    ZenithTooltipColor.CODEC.optionalFieldOf("color", ZenithTooltipColor.ACCENT).forGetter(HeaderElement::color)
+                    ZenithTooltipColor.CODEC.optionalFieldOf("color", ZenithTooltipColor.ACCENT).forGetter(HeaderElement::color),
+                    ZenithTooltipTextEffect.CODEC.optionalFieldOf("effect").forGetter(HeaderElement::effect)
             ).apply(instance, HeaderElement::new)
     );
 

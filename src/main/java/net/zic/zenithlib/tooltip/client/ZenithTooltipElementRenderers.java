@@ -219,11 +219,17 @@ public final class ZenithTooltipElementRenderers {
                 header.text().component().copy().withStyle(ChatFormatting.BOLD),
                 context.innerWidth()
         );
+        int animationPadding = header.effect()
+                .map(effect -> ZenithTooltipTextAnimator.verticalPadding(effect, context.animationSettings()))
+                .orElse(0);
         return Optional.of(new ZenithTooltipLayout.PreparedHeader(
                 lines,
                 header.color().resolve(context.theme()),
                 context.maxLineWidth(lines),
-                context.lineBlockHeight(lines.size(), ZenithTooltipLayout.LINE_GAP) + 2
+                context.lineBlockHeight(lines.size(), ZenithTooltipLayout.LINE_GAP) + 2 + animationPadding * 2,
+                header.effect(),
+                animationPadding,
+                context.seed()
         ));
     }
 
@@ -236,7 +242,8 @@ public final class ZenithTooltipElementRenderers {
     }
 
     private static Optional<ZenithTooltipLayout.PreparedElement> prepareRow(LayoutContext context, RowElement row) {
-        int availableWidth = Math.max(2, context.innerWidth() - ZenithTooltipLayout.ROW_COLUMN_GAP);
+        int iconWidth = row.icon().map(icon -> icon.size() + ZenithTooltipLayout.INLINE_ICON_GAP).orElse(0);
+        int availableWidth = Math.max(2, context.innerWidth() - iconWidth - ZenithTooltipLayout.ROW_COLUMN_GAP);
         int minimumColumnWidth = Math.max(1, Math.min(ZenithTooltipLayout.ROW_MIN_COLUMN_WIDTH, availableWidth / 2));
         int leftNaturalWidth = context.font().width(row.left().component());
         int rightNaturalWidth = context.font().width(row.right().component());
@@ -262,17 +269,19 @@ public final class ZenithTooltipElementRenderers {
         List<FormattedCharSequence> rightLines = context.split(row.right().component(), rightWidth);
         int leftMeasured = context.maxLineWidth(leftLines);
         int rightMeasured = context.maxLineWidth(rightLines);
-        int width = leftMeasured + ZenithTooltipLayout.ROW_COLUMN_GAP + rightMeasured;
-        int height = Math.max(
+        int width = iconWidth + leftMeasured + ZenithTooltipLayout.ROW_COLUMN_GAP + rightMeasured;
+        int textHeight = Math.max(
                 context.lineBlockHeight(leftLines.size(), ZenithTooltipLayout.LINE_GAP),
                 context.lineBlockHeight(rightLines.size(), ZenithTooltipLayout.LINE_GAP)
         );
+        int height = Math.max(textHeight, row.icon().map(net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon::size).orElse(0));
 
         return Optional.of(new ZenithTooltipLayout.PreparedRow(
                 leftLines,
                 rightLines,
                 row.leftColor().resolve(context.theme()),
                 row.rightColor().resolve(context.theme()),
+                row.icon(),
                 width,
                 height
         ));
@@ -280,17 +289,27 @@ public final class ZenithTooltipElementRenderers {
 
     private static Optional<ZenithTooltipLayout.PreparedElement> prepareBadge(LayoutContext context, BadgeElement badge) {
         ZenithTooltipTheme.BadgeStyle style = context.theme().badgeStyle();
-        int textWidth = Math.max(1, context.innerWidth() - style.horizontalPadding() * 2);
+        int iconWidth = badge.icon().map(icon -> icon.size() + ZenithTooltipLayout.INLINE_ICON_GAP).orElse(0);
+        int textWidth = Math.max(1, context.innerWidth() - style.horizontalPadding() * 2 - iconWidth);
         List<FormattedCharSequence> lines = context.split(badge.text().component(), textWidth);
-        int width = context.maxLineWidth(lines) + style.horizontalPadding() * 2;
-        int height = context.lineBlockHeight(lines.size(), 0) + style.verticalPadding() * 2;
+        int animationPadding = badge.effect()
+                .map(effect -> ZenithTooltipTextAnimator.verticalPadding(effect, context.animationSettings()))
+                .orElse(0);
+        int width = iconWidth + context.maxLineWidth(lines) + style.horizontalPadding() * 2;
+        int textHeight = context.lineBlockHeight(lines.size(), 0) + animationPadding * 2;
+        int height = Math.max(textHeight, badge.icon().map(net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon::size).orElse(0))
+                + style.verticalPadding() * 2;
         return Optional.of(new ZenithTooltipLayout.PreparedBadge(
                 lines,
                 badge.textColor().resolve(context.theme()),
                 badge.backgroundColor().resolve(context.theme()),
                 badge.borderColor().resolve(context.theme()),
+                badge.icon(),
                 width,
-                height
+                height,
+                badge.effect(),
+                animationPadding,
+                context.seed()
         ));
     }
 
@@ -343,12 +362,32 @@ public final class ZenithTooltipElementRenderers {
         List<FormattedCharSequence> subtitleLines = titleIcon.subtitle().isBlank()
                 ? List.of()
                 : context.split(titleIcon.subtitle().component(), labelWidth);
-        int labelLineCount = titleLines.size() + subtitleLines.size();
-        int labelHeight = context.lineBlockHeight(labelLineCount, ZenithTooltipLayout.ICON_LINE_GAP);
+        int titlePadding = titleIcon.titleEffect()
+                .map(effect -> ZenithTooltipTextAnimator.verticalPadding(effect, context.animationSettings()))
+                .orElse(0);
+        int subtitlePadding = titleIcon.subtitleEffect()
+                .map(effect -> ZenithTooltipTextAnimator.verticalPadding(effect, context.animationSettings()))
+                .orElse(0);
+        int titleHeight = context.lineBlockHeight(titleLines.size(), ZenithTooltipLayout.ICON_LINE_GAP) + titlePadding * 2;
+        int subtitleHeight = context.lineBlockHeight(subtitleLines.size(), ZenithTooltipLayout.ICON_LINE_GAP) + subtitlePadding * 2;
+        int labelHeight = titleHeight + subtitleHeight;
+        if (!titleLines.isEmpty() && !subtitleLines.isEmpty()) {
+            labelHeight += ZenithTooltipLayout.ICON_LINE_GAP;
+        }
         int height = Math.max(holder.boxSize(), labelHeight) + ZenithTooltipLayout.TITLE_ICON_BOTTOM_GAP;
         int textWidth = Math.max(context.maxLineWidth(titleLines), context.maxLineWidth(subtitleLines));
         int width = holder.boxSize() + holder.gap() + textWidth;
-        return Optional.of(new ZenithTooltipLayout.PreparedTitleIcon(titleLines, subtitleLines, width, height));
+        return Optional.of(new ZenithTooltipLayout.PreparedTitleIcon(
+                titleLines,
+                subtitleLines,
+                width,
+                height,
+                titleIcon.titleEffect(),
+                titleIcon.subtitleEffect(),
+                titlePadding,
+                subtitlePadding,
+                context.seed()
+        ));
     }
 
     private record Entry<T extends ZenithTooltipElement>(

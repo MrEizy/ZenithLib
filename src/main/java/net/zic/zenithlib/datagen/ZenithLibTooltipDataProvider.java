@@ -423,11 +423,11 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
         addShowcaseRule("clock", "showcase_page_motion_lab", "cobalt_blue");
     }
 
-    private void addShowcaseRule(String itemPath, String documentPath, String themePath) {
+    private void addShowcaseRule(String itemPath, String templatePath, String themePath) {
         rule(id(itemPath))
                 .priority(100)
                 .items(minecraft(itemPath))
-                .document(id(documentPath))
+                .template(id(templatePath))
                 .theme(id(themePath));
     }
 

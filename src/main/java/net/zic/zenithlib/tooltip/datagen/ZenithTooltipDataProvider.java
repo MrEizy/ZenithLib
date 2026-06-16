@@ -1,7 +1,5 @@
 package net.zic.zenithlib.tooltip.datagen;
 
-import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -15,23 +13,21 @@ import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipRuleBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplateBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipThemeBuilder;
 
-import java.util.function.Consumer;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
- * Base data provider for generated Zenith tooltip definitions and themes.
+ * Base data provider for generated Zenith tooltip rules, templates, and themes.
  */
 public abstract class ZenithTooltipDataProvider implements DataProvider {
-    private static final Codec<Either<ZenithTooltipRule, ZenithTooltipTemplate>> DEFINITION_CODEC =
-            Codec.either(ZenithTooltipRule.CODEC, ZenithTooltipTemplate.CODEC);
-
     private final String modId;
     private final PackOutput.PathProvider definitionPaths;
+    private final PackOutput.PathProvider templatePaths;
     private final PackOutput.PathProvider themePaths;
+
     private final Map<Identifier, ZenithTooltipTemplateBuilder> templates = new LinkedHashMap<>();
     private final Map<Identifier, ZenithTooltipRuleBuilder> rules = new LinkedHashMap<>();
     private final Map<Identifier, ZenithTooltipThemeBuilder> themes = new LinkedHashMap<>();
@@ -39,6 +35,7 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
     protected ZenithTooltipDataProvider(PackOutput output, String modId) {
         this.modId = Objects.requireNonNull(modId, "modId");
         this.definitionPaths = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "zenith_tooltips/definitions");
+        this.templatePaths = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "zenith_tooltips/templates");
         this.themePaths = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "zenith_tooltips/themes");
     }
 
@@ -63,7 +60,12 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
     protected final GeneratedTooltipBuilder tooltip(String path) {
         Identifier templateId = id(path);
         Identifier ruleId = id(path + "_rule");
-        return new GeneratedTooltipBuilder(templateId, template(templateId), rule(ruleId).document(templateId));
+
+        return new GeneratedTooltipBuilder(
+                templateId,
+                template(templateId),
+                rule(ruleId).template(templateId)
+        );
     }
 
     protected final ZenithTooltipTemplateBuilder template(String path) {
@@ -76,6 +78,14 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
 
     protected final ZenithTooltipThemeBuilder theme(String path) {
         return theme(id(path));
+    }
+
+    protected final ZenithTooltipRuleBuilder itemTooltip(String path, Identifier template) {
+        return rule(path).template(template);
+    }
+
+    protected final ZenithTooltipRuleBuilder itemTooltip(String path, String templatePath) {
+        return itemTooltip(path, id(templatePath));
     }
 
     protected final void template(String path, Consumer<ZenithTooltipTemplateBuilder> action) {
@@ -105,7 +115,8 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
 
     protected final ZenithTooltipTemplateBuilder template(Identifier id) {
         requireOwnedOutputId(id);
-        ensureDefinitionPathAvailable(id);
+        ensureTemplatePathAvailable(id);
+
         ZenithTooltipTemplateBuilder builder = new ZenithTooltipTemplateBuilder();
         this.templates.put(id, builder);
         return builder;
@@ -113,7 +124,8 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
 
     protected final ZenithTooltipRuleBuilder rule(Identifier id) {
         requireOwnedOutputId(id);
-        ensureDefinitionPathAvailable(id);
+        ensureRulePathAvailable(id);
+
         ZenithTooltipRuleBuilder builder = new ZenithTooltipRuleBuilder();
         this.rules.put(id, builder);
         return builder;
@@ -121,9 +133,8 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
 
     protected final ZenithTooltipThemeBuilder theme(Identifier id) {
         requireOwnedOutputId(id);
-        if (this.themes.containsKey(id)) {
-            throw new IllegalStateException("Duplicate generated Zenith tooltip theme id: " + id);
-        }
+        ensureThemePathAvailable(id);
+
         ZenithTooltipThemeBuilder builder = new ZenithTooltipThemeBuilder();
         this.themes.put(id, builder);
         return builder;
@@ -134,43 +145,69 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
         this.templates.clear();
         this.rules.clear();
         this.themes.clear();
+
         addTooltips();
 
-        Map<Identifier, Either<ZenithTooltipRule, ZenithTooltipTemplate>> definitions = new LinkedHashMap<>();
-        this.templates.forEach((id, builder) -> definitions.put(id, Either.right(builder.build())));
-        this.rules.forEach((id, builder) -> definitions.put(id, Either.left(builder.build())));
+        Map<Identifier, ZenithTooltipRule> encodedRules = new LinkedHashMap<>();
+        this.rules.forEach((id, builder) -> encodedRules.put(id, builder.build()));
+
+        Map<Identifier, ZenithTooltipTemplate> encodedTemplates = new LinkedHashMap<>();
+        this.templates.forEach((id, builder) -> encodedTemplates.put(id, builder.build()));
 
         Map<Identifier, ZenithTooltipTheme> encodedThemes = new LinkedHashMap<>();
         this.themes.forEach((id, builder) -> encodedThemes.put(id, builder.build()));
 
-        CompletableFuture<?> definitionsFuture = DataProvider.saveAll(output, DEFINITION_CODEC, this.definitionPaths, definitions);
-        CompletableFuture<?> themesFuture = DataProvider.saveAll(output, ZenithTooltipTheme.CODEC, this.themePaths, encodedThemes);
-        return CompletableFuture.allOf(definitionsFuture, themesFuture);
+        CompletableFuture<?> rulesFuture = DataProvider.saveAll(
+                output,
+                ZenithTooltipRule.CODEC,
+                this.definitionPaths,
+                encodedRules
+        );
+
+        CompletableFuture<?> templatesFuture = DataProvider.saveAll(
+                output,
+                ZenithTooltipTemplate.CODEC,
+                this.templatePaths,
+                encodedTemplates
+        );
+
+        CompletableFuture<?> themesFuture = DataProvider.saveAll(
+                output,
+                ZenithTooltipTheme.CODEC,
+                this.themePaths,
+                encodedThemes
+        );
+
+        return CompletableFuture.allOf(rulesFuture, templatesFuture, themesFuture);
     }
 
     @Override
     public String getName() {
-        return "Zenith tooltip definitions and themes: " + this.modId;
+        return "Zenith tooltip resources: " + this.modId;
     }
 
-
     protected final class GeneratedTooltipBuilder {
-        private final Identifier documentId;
+        private final Identifier templateId;
         private final ZenithTooltipTemplateBuilder template;
         private final ZenithTooltipRuleBuilder rule;
 
         private GeneratedTooltipBuilder(
-                Identifier documentId,
+                Identifier templateId,
                 ZenithTooltipTemplateBuilder template,
                 ZenithTooltipRuleBuilder rule
         ) {
-            this.documentId = documentId;
+            this.templateId = templateId;
             this.template = template;
             this.rule = rule;
         }
 
+        public Identifier templateId() {
+            return templateId;
+        }
+
+        @Deprecated
         public Identifier documentId() {
-            return documentId;
+            return templateId;
         }
 
         public ZenithTooltipTemplateBuilder template() {
@@ -245,14 +282,27 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
         }
     }
 
-    private void ensureDefinitionPathAvailable(Identifier id) {
-        if (this.templates.containsKey(id) || this.rules.containsKey(id)) {
-            throw new IllegalStateException("Duplicate generated Zenith tooltip definition id: " + id);
+    private void ensureTemplatePathAvailable(Identifier id) {
+        if (this.templates.containsKey(id)) {
+            throw new IllegalStateException("Duplicate generated Zenith tooltip template id: " + id);
+        }
+    }
+
+    private void ensureRulePathAvailable(Identifier id) {
+        if (this.rules.containsKey(id)) {
+            throw new IllegalStateException("Duplicate generated Zenith tooltip rule id: " + id);
+        }
+    }
+
+    private void ensureThemePathAvailable(Identifier id) {
+        if (this.themes.containsKey(id)) {
+            throw new IllegalStateException("Duplicate generated Zenith tooltip theme id: " + id);
         }
     }
 
     private void requireOwnedOutputId(Identifier id) {
         Objects.requireNonNull(id, "id");
+
         if (!this.modId.equals(id.getNamespace())) {
             throw new IllegalArgumentException(
                     "Generated Zenith tooltip resources must be in provider namespace '" + this.modId + "': " + id

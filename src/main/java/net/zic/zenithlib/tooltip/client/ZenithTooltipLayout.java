@@ -11,6 +11,8 @@ import net.zic.zenithlib.input.InputHandler;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
+import net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon;
+import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
 import org.jspecify.annotations.Nullable;
@@ -29,6 +31,7 @@ public final class ZenithTooltipLayout {
     public static final int PAGE_HINT_TOP_GAP = 4;
     public static final int ROW_COLUMN_GAP = 8;
     public static final int ROW_MIN_COLUMN_WIDTH = 34;
+    public static final int INLINE_ICON_GAP = 4;
     public static final int ICON_LINE_GAP = 1;
     public static final int ICON_ELEMENT_BOTTOM_GAP = 4;
     public static final int TITLE_ICON_BOTTOM_GAP = 3;
@@ -61,6 +64,10 @@ public final class ZenithTooltipLayout {
                         page.title().component().copy().withStyle(ChatFormatting.BOLD),
                         maxInnerWidth
                 );
+        Optional<ZenithTooltipTextEffect> titleEffect = titleProvidedByHeader ? Optional.empty() : page.titleEffect();
+        int titleAnimationPadding = titleEffect
+                .map(effect -> ZenithTooltipTextAnimator.verticalPadding(effect, animationSettings))
+                .orElse(0);
 
         List<PreparedElement> prepared = new ArrayList<>(page.elements().size());
         for (int elementIndex = 0; elementIndex < page.elements().size(); elementIndex++) {
@@ -76,7 +83,7 @@ public final class ZenithTooltipLayout {
             elements = List.copyOf(prepared.subList(1, prepared.size()));
         }
 
-        int headerHeight = measuredHeaderHeight(font, theme, titleLines, titleIconHeader, elements);
+        int headerHeight = measuredHeaderHeight(font, theme, titleLines, titleAnimationPadding, titleIconHeader, elements);
         int bodyContentHeight = measuredBodyHeight(theme, elements);
         boolean hasMultiplePages = document.pages().size() > 1;
 
@@ -124,6 +131,9 @@ public final class ZenithTooltipLayout {
                     theme,
                     document.animationPresets(),
                     titleLines,
+                    titleEffect,
+                    titleAnimationPadding,
+                    animationFrame.seed() ^ page.title().hashCode(),
                     titleIconHeader,
                     elements,
                     pageHint,
@@ -159,6 +169,9 @@ public final class ZenithTooltipLayout {
                 theme,
                 document.animationPresets(),
                 titleLines,
+                titleEffect,
+                titleAnimationPadding,
+                animationFrame.seed() ^ page.title().hashCode(),
                 titleIconHeader,
                 elements,
                 pageHint,
@@ -194,11 +207,12 @@ public final class ZenithTooltipLayout {
             Font font,
             ZenithTooltipTheme theme,
             List<FormattedCharSequence> titleLines,
+            int titleAnimationPadding,
             @Nullable PreparedTitleIcon titleIconHeader,
             List<PreparedElement> bodyElements
     ) {
         if (!titleLines.isEmpty()) {
-            return lineBlockHeight(font, titleLines.size(), LINE_GAP) + TITLE_BODY_GAP;
+            return lineBlockHeight(font, titleLines.size(), LINE_GAP) + titleAnimationPadding * 2 + TITLE_BODY_GAP;
         }
 
         if (titleIconHeader == null) {
@@ -249,7 +263,7 @@ public final class ZenithTooltipLayout {
         List<ZenithTooltipElement> elements = new ArrayList<>(page.elements().size() + 1);
         elements.add(sharedTitleIcon.get());
         elements.addAll(page.elements());
-        return new ZenithTooltipPage(page.title(), elements);
+        return new ZenithTooltipPage(page.title(), page.titleEffect(), elements);
     }
 
     private static Optional<TitleIconElement> sharedTitleIcon(ZenithTooltipDocument document) {
@@ -447,6 +461,9 @@ public final class ZenithTooltipLayout {
             ZenithTooltipTheme theme,
             List<Identifier> animationPresets,
             List<FormattedCharSequence> titleLines,
+            Optional<ZenithTooltipTextEffect> titleEffect,
+            int titleAnimationPadding,
+            long titleAnimationSeed,
             @Nullable PreparedTitleIcon titleIconHeader,
             List<PreparedElement> elements,
             List<FormattedCharSequence> pageHintLines,
@@ -493,7 +510,10 @@ public final class ZenithTooltipLayout {
             List<FormattedCharSequence> lines,
             int color,
             int width,
-            int height
+            int height,
+            Optional<ZenithTooltipTextEffect> effect,
+            int animationPadding,
+            long animationSeed
     ) implements PreparedElement {}
 
     public record PreparedDivider(int width, int height) implements PreparedElement {}
@@ -505,6 +525,7 @@ public final class ZenithTooltipLayout {
             List<FormattedCharSequence> rightLines,
             int leftColor,
             int rightColor,
+            Optional<ZenithTooltipInlineIcon> icon,
             int width,
             int height
     ) implements PreparedElement {
@@ -527,7 +548,12 @@ public final class ZenithTooltipLayout {
             List<FormattedCharSequence> titleLines,
             List<FormattedCharSequence> subtitleLines,
             int width,
-            int height
+            int height,
+            Optional<ZenithTooltipTextEffect> titleEffect,
+            Optional<ZenithTooltipTextEffect> subtitleEffect,
+            int titleAnimationPadding,
+            int subtitleAnimationPadding,
+            long animationSeed
     ) implements PreparedElement {}
 
     public record PreparedBadge(
@@ -535,8 +561,12 @@ public final class ZenithTooltipLayout {
             int textColor,
             int backgroundColor,
             int borderColor,
+            Optional<ZenithTooltipInlineIcon> icon,
             int width,
-            int height
+            int height,
+            Optional<ZenithTooltipTextEffect> effect,
+            int animationPadding,
+            long animationSeed
     ) implements PreparedElement {}
 
     public record PreparedBar(
