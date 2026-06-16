@@ -1,6 +1,7 @@
 package net.zic.zenithlib.datagen;
 
 import net.minecraft.data.PackOutput;
+import net.minecraft.network.chat.Component;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
@@ -381,7 +382,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
     private void addDynamicItemTemplate() {
         template(id("showcase_dynamic_item"))
                 .animationPreset(ZenithTooltipPresets.KINETIC)
-                .page(page(literal("Dynamic Item Tooltip"))
+                .page(page(literal("If you have a title icon, it doesn't display the Page title, which is nice :)"))
                         .add(titleIcon(sourced("item_name"), literal("Uses built-in value sources")))
                         .add(text(literal("Authored text mixes with values pulled from the hovered stack.")))
                         .add(divider())

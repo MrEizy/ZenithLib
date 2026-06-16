@@ -42,7 +42,7 @@
         }
       ],
       "title": {
-        "literal": "Dynamic Item Tooltip"
+        "literal": "If you have a title icon, it doesn't display the Page title, which is nice :)"
       }
     }
   ]
