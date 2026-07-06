@@ -302,20 +302,22 @@ public final class ZenithTooltipRenderer {
             } else {
                 renderLines(font, graphics, textX, textY, header.lines(), header.color(), ZenithTooltipLayout.LINE_GAP);
             }
-            renderHeaderOrnament(
-                    graphics,
-                    textX,
-                    textY,
-                    innerWidth,
-                    maxLineWidth(font, header.lines()),
-                    ZenithTooltipLayout.lineBlockHeight(font, header.lines().size(), ZenithTooltipLayout.LINE_GAP) + header.animationPadding() * 2,
-                    theme
-            );
+            if (header.underline()) {
+                renderHeaderOrnament(
+                        graphics,
+                        textX,
+                        textY,
+                        innerWidth,
+                        maxLineWidth(font, header.lines()),
+                        ZenithTooltipLayout.lineBlockHeight(font, header.lines().size(), ZenithTooltipLayout.LINE_GAP) + header.animationPadding() * 2,
+                        theme
+                );
+            }
             return;
         }
 
-        if (element instanceof ZenithTooltipLayout.PreparedDivider) {
-            renderDivider(graphics, textX, textY, innerWidth, theme, animation);
+        if (element instanceof ZenithTooltipLayout.PreparedDivider divider) {
+            renderDivider(graphics, textX, textY, innerWidth, theme, divider, animation);
             return;
         }
 
@@ -334,6 +336,13 @@ public final class ZenithTooltipRenderer {
 
         if (element instanceof ZenithTooltipLayout.PreparedBadge badge) {
             renderBadge(font, graphics, textX, textY, theme, badge, animation);
+            return;
+        }
+
+        if (element instanceof ZenithTooltipLayout.PreparedBadgeRow row) {
+            for (ZenithTooltipLayout.PreparedBadgePlacement placement : row.badges()) {
+                renderBadge(font, graphics, textX + placement.x(), textY + placement.y(), theme, placement.badge(), animation);
+            }
             return;
         }
 
@@ -408,80 +417,117 @@ public final class ZenithTooltipRenderer {
             int textY,
             int innerWidth,
             ZenithTooltipTheme theme,
+            ZenithTooltipLayout.PreparedDivider divider,
             ZenithTooltipAnimationContext animation
     ) {
         ZenithTooltipPresets.Resolved presets = animation.presets();
         ZenithTooltipAnimationState.Frame frame = animation.frame();
         ZenithTooltipTheme.DividerStyle style = theme.dividerStyle();
-        int color = style.colorValue(theme);
-        int ornamentSize = style.ornamentSize();
-        int lineY = textY + style.gapAbove() + (ornamentSize - style.thickness()) / 2;
-        int centerX = textX + innerWidth / 2;
+        int inset = Math.min(divider.inset(), Math.max(0, innerWidth / 2));
+        int lineLeft = textX + inset;
+        int lineWidth = Math.max(0, innerWidth - inset * 2);
+        if (lineWidth <= 0) {
+            return;
+        }
+
+        int ornamentSize = switch (style.decoration()) {
+            case DIAMOND, DOUBLE_DIAMOND, CENTER_RUNE -> 5;
+            case DOTTED, NONE -> divider.thickness();
+        };
+        int lineY = textY + style.gapAbove() + (ornamentSize - divider.thickness()) / 2;
+        int centerX = lineLeft + lineWidth / 2;
         int radius = ornamentSize / 2;
 
         switch (style.decoration()) {
-            case NONE -> graphics.fill(textX, lineY, textX + innerWidth, lineY + style.thickness(), color);
+            case NONE -> renderDividerLine(graphics, lineLeft, lineLeft + lineWidth, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
             case DIAMOND -> {
                 int leftEnd = centerX - radius - 2;
                 int rightStart = centerX + radius + 2;
-                graphics.fill(textX, lineY, leftEnd, lineY + style.thickness(), color);
-                graphics.fill(rightStart, lineY, textX + innerWidth, lineY + style.thickness(), color);
-                renderSolidDiamond(graphics, centerX, textY + style.gapAbove() + radius, radius, color);
+                renderDividerLine(graphics, lineLeft, leftEnd, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
+                renderDividerLine(graphics, rightStart, lineLeft + lineWidth, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
+                renderSolidDiamond(graphics, centerX, textY + style.gapAbove() + radius, radius, divider.color());
             }
             case DOUBLE_DIAMOND -> {
                 int offset = radius + 3;
                 int leftCenter = centerX - offset;
                 int rightCenter = centerX + offset;
-                graphics.fill(textX, lineY, leftCenter - radius - 2, lineY + style.thickness(), color);
-                graphics.fill(leftCenter + radius + 2, lineY, rightCenter - radius - 2, lineY + style.thickness(), color);
-                graphics.fill(rightCenter + radius + 2, lineY, textX + innerWidth, lineY + style.thickness(), color);
+                renderDividerLine(graphics, lineLeft, leftCenter - radius - 2, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
+                renderDividerLine(graphics, leftCenter + radius + 2, rightCenter - radius - 2, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
+                renderDividerLine(graphics, rightCenter + radius + 2, lineLeft + lineWidth, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
                 int centerY = textY + style.gapAbove() + radius;
-                renderSolidDiamond(graphics, leftCenter, centerY, radius, color);
-                renderSolidDiamond(graphics, rightCenter, centerY, radius, color);
+                renderSolidDiamond(graphics, leftCenter, centerY, radius, divider.color());
+                renderSolidDiamond(graphics, rightCenter, centerY, radius, divider.endColor());
             }
             case CENTER_RUNE -> {
                 int leftEnd = centerX - radius - 3;
                 int rightStart = centerX + radius + 4;
-                graphics.fill(textX, lineY, leftEnd, lineY + style.thickness(), color);
-                graphics.fill(rightStart, lineY, textX + innerWidth, lineY + style.thickness(), color);
+                renderDividerLine(graphics, lineLeft, leftEnd, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
+                renderDividerLine(graphics, rightStart, lineLeft + lineWidth, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
                 int centerY = textY + style.gapAbove() + radius;
-                renderSolidDiamond(graphics, centerX, centerY, radius, color);
-                graphics.fill(centerX, centerY - radius - 1, centerX + 1, centerY + radius + 2, color);
+                int centerColor = gradientColor(divider.color(), divider.endColor(), 0.5F);
+                renderSolidDiamond(graphics, centerX, centerY, radius, centerColor);
+                graphics.fill(centerX, centerY - radius - 1, centerX + 1, centerY + radius + 2, centerColor);
             }
             case DOTTED -> {
-                int step = style.thickness() + 3;
-                for (int px = textX; px < textX + innerWidth; px += step) {
-                    int dotWidth = Math.min(style.thickness() + 1, textX + innerWidth - px);
-                    graphics.fill(px, lineY, px + dotWidth, lineY + style.thickness(), color);
+                int step = divider.thickness() + 3;
+                for (int px = lineLeft; px < lineLeft + lineWidth; px += step) {
+                    int dotWidth = Math.min(divider.thickness() + 1, lineLeft + lineWidth - px);
+                    renderDividerLine(graphics, px, px + dotWidth, lineY, divider.thickness(), lineLeft, lineWidth, divider.color(), divider.endColor());
                 }
             }
         }
 
         if (presets.dividerPulse() && animation.enabled() && !animation.reduceMotion()) {
             int pulseAlpha = 55 + (int) ((Math.sin(frame.pageElapsedMillis() / 260.0D) + 1.0D) * 34.0D * animation.intensity());
-            int pulseWidth = Math.max(18, innerWidth / 3);
+            int pulseWidth = Math.max(18, lineWidth / 3);
             int pulseLeft = centerX - pulseWidth / 2;
             int pulseRight = centerX + pulseWidth / 2;
-            graphics.fill(Math.max(textX, pulseLeft), lineY - 1, Math.min(textX + innerWidth, pulseRight), lineY + style.thickness() + 1, withAlpha(theme.accent(), pulseAlpha));
+            graphics.fill(Math.max(lineLeft, pulseLeft), lineY - 1, Math.min(lineLeft + lineWidth, pulseRight), lineY + divider.thickness() + 1, withAlpha(theme.accent(), pulseAlpha));
         }
 
         if (presets.dividerRunes() && animation.enabled()) {
-            renderDividerRunes(graphics, textX, lineY, innerWidth, style.thickness(), theme, animation, frame);
+            renderDividerRunes(graphics, lineLeft, lineY, lineWidth, divider.thickness(), theme, animation, frame);
         }
 
         if (presets.dividerSweep() && animation.enabled() && !animation.reduceMotion()) {
-            int sweepWidth = Math.max(8, innerWidth / 5);
-            int travel = innerWidth + sweepWidth;
+            int sweepWidth = Math.max(8, lineWidth / 5);
+            int travel = lineWidth + sweepWidth;
             int offset = (int) ((frame.elapsedMillis() / 9L) % Math.max(1, travel));
-            int start = textX + offset - sweepWidth;
-            int end = Math.min(textX + innerWidth, start + sweepWidth);
-            if (end > textX && start < textX + innerWidth) {
-                int clippedStart = Math.max(textX, start);
-                graphics.fill(clippedStart, lineY - 1, end, lineY + style.thickness() + 1, withAlpha(theme.accent(), 150));
+            int start = lineLeft + offset - sweepWidth;
+            int end = Math.min(lineLeft + lineWidth, start + sweepWidth);
+            if (end > lineLeft && start < lineLeft + lineWidth) {
+                int clippedStart = Math.max(lineLeft, start);
+                graphics.fill(clippedStart, lineY - 1, end, lineY + divider.thickness() + 1, withAlpha(theme.accent(), 150));
                 if (end - clippedStart > 5) {
-                    graphics.fill(end - 2, lineY - 2, end, lineY + style.thickness() + 2, withAlpha(theme.borderTop(), 210));
+                    graphics.fill(end - 2, lineY - 2, end, lineY + divider.thickness() + 2, withAlpha(theme.borderTop(), 210));
                 }
             }
+        }
+    }
+
+    private static void renderDividerLine(
+            GuiGraphicsExtractor graphics,
+            int left,
+            int right,
+            int y,
+            int thickness,
+            int gradientLeft,
+            int gradientWidth,
+            int color,
+            int endColor
+    ) {
+        if (right <= left || thickness <= 0) {
+            return;
+        }
+
+        if (color == endColor || gradientWidth <= 1) {
+            graphics.fill(left, y, right, y + thickness, color);
+            return;
+        }
+
+        for (int px = left; px < right; px++) {
+            float position = (px - gradientLeft) / (float) Math.max(1, gradientWidth - 1);
+            graphics.fill(px, y, px + 1, y + thickness, gradientColor(color, endColor, position));
         }
     }
 
@@ -575,7 +621,7 @@ public final class ZenithTooltipRenderer {
     ) {
         ZenithTooltipTheme.BadgeStyle style = theme.badgeStyle();
 
-        graphics.fill(textX, textY, textX + badge.width(), textY + badge.height(), style.fillColor(badge.backgroundColor()));
+        renderBadgeBackground(graphics, textX, textY, badge.width(), badge.height(), style, badge);
         for (int inset = 0; inset < style.borderWidth() && badge.width() - inset * 2 > 0 && badge.height() - inset * 2 > 0; inset++) {
             graphics.outline(textX + inset, textY + inset, badge.width() - inset * 2, badge.height() - inset * 2, badge.borderColor());
         }
@@ -613,6 +659,23 @@ public final class ZenithTooltipRenderer {
                     0
             );
         }
+    }
+
+    private static void renderBadgeBackground(
+            GuiGraphicsExtractor graphics,
+            int x,
+            int y,
+            int width,
+            int height,
+            ZenithTooltipTheme.BadgeStyle style,
+            ZenithTooltipLayout.PreparedBadge badge
+    ) {
+        if (!badge.hasBackgroundGradient()) {
+            graphics.fill(x, y, x + width, y + height, style.fillColor(badge.backgroundColor()));
+            return;
+        }
+
+        renderGradientFill(graphics, x, y, width, height, badge.backgroundGradient(), badge.gradientDirection(), style.fillAlpha());
     }
 
     private static void renderBar(
@@ -1545,6 +1608,64 @@ public final class ZenithTooltipRenderer {
     private static float easeOutCubic(float value) {
         float inverse = 1.0F - value;
         return 1.0F - inverse * inverse * inverse;
+    }
+
+    private static void renderGradientFill(
+            GuiGraphicsExtractor graphics,
+            int x,
+            int y,
+            int width,
+            int height,
+            List<Integer> colors,
+            net.zic.zenithlib.tooltip.api.element.BadgeElement.GradientDirection direction,
+            int alpha
+    ) {
+        if (colors.isEmpty() || width <= 0 || height <= 0) {
+            return;
+        }
+
+        if (colors.size() == 1) {
+            graphics.fill(x, y, x + width, y + height, withAlpha(colors.get(0), alpha));
+            return;
+        }
+
+        if (direction == net.zic.zenithlib.tooltip.api.element.BadgeElement.GradientDirection.VERTICAL) {
+            for (int py = 0; py < height; py++) {
+                float position = py / (float) Math.max(1, height - 1);
+                graphics.fill(x, y + py, x + width, y + py + 1, gradientColor(colors, position, alpha));
+            }
+            return;
+        }
+
+        for (int px = 0; px < width; px++) {
+            float position = px / (float) Math.max(1, width - 1);
+            graphics.fill(x + px, y, x + px + 1, y + height, gradientColor(colors, position, alpha));
+        }
+    }
+
+    private static int gradientColor(List<Integer> colors, float position, int alpha) {
+        if (colors.size() == 1) {
+            return withAlpha(colors.get(0), alpha);
+        }
+
+        float clamped = Math.max(0.0F, Math.min(1.0F, position));
+        float scaled = clamped * (colors.size() - 1);
+        int index = Math.min(colors.size() - 2, (int) Math.floor(scaled));
+        float local = scaled - index;
+        return gradientColor(withAlpha(colors.get(index), alpha), withAlpha(colors.get(index + 1), alpha), local);
+    }
+
+    private static int gradientColor(int start, int end, float position) {
+        float clamped = Math.max(0.0F, Math.min(1.0F, position));
+        int a = interpolateChannel((start >>> 24) & 0xFF, (end >>> 24) & 0xFF, clamped);
+        int r = interpolateChannel((start >>> 16) & 0xFF, (end >>> 16) & 0xFF, clamped);
+        int g = interpolateChannel((start >>> 8) & 0xFF, (end >>> 8) & 0xFF, clamped);
+        int b = interpolateChannel(start & 0xFF, end & 0xFF, clamped);
+        return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    private static int interpolateChannel(int start, int end, float position) {
+        return Math.round(start + (end - start) * position);
     }
 
     private static int withAlpha(int color, int alpha) {

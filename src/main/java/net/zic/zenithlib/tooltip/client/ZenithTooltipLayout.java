@@ -13,6 +13,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipPage;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
+import net.zic.zenithlib.tooltip.api.element.BadgeElement;
 import net.zic.zenithlib.tooltip.api.element.TitleIconElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
 import org.jspecify.annotations.Nullable;
@@ -480,7 +481,7 @@ public final class ZenithTooltipLayout {
 
     public sealed interface PreparedElement
             permits PreparedText, PreparedHeader, PreparedDivider, PreparedSpacer, PreparedRow,
-            PreparedIcon, PreparedTitleIcon, PreparedBadge, PreparedBar, PreparedEntityPreview, PreparedCustom {
+            PreparedIcon, PreparedTitleIcon, PreparedBadge, PreparedBadgeRow, PreparedBar, PreparedEntityPreview, PreparedCustom {
         int width();
 
         int height();
@@ -513,10 +514,22 @@ public final class ZenithTooltipLayout {
             int height,
             Optional<ZenithTooltipTextEffect> effect,
             int animationPadding,
-            long animationSeed
+            long animationSeed,
+            boolean underline
     ) implements PreparedElement {}
 
-    public record PreparedDivider(int width, int height) implements PreparedElement {}
+    public record PreparedDivider(
+            int width,
+            int height,
+            int color,
+            int endColor,
+            int inset,
+            int thickness
+    ) implements PreparedElement {
+        public boolean gradient() {
+            return color != endColor;
+        }
+    }
 
     public record PreparedSpacer(int width, int height) implements PreparedElement {}
 
@@ -566,8 +579,35 @@ public final class ZenithTooltipLayout {
             int height,
             Optional<ZenithTooltipTextEffect> effect,
             int animationPadding,
-            long animationSeed
-    ) implements PreparedElement {}
+            long animationSeed,
+            List<Integer> backgroundGradient,
+            BadgeElement.GradientDirection gradientDirection
+    ) implements PreparedElement {
+        public PreparedBadge {
+            backgroundGradient = backgroundGradient == null ? List.of() : List.copyOf(backgroundGradient);
+            gradientDirection = gradientDirection == null ? BadgeElement.GradientDirection.HORIZONTAL : gradientDirection;
+        }
+
+        public boolean hasBackgroundGradient() {
+            return backgroundGradient.size() > 1;
+        }
+    }
+
+    public record PreparedBadgeRow(
+            List<PreparedBadgePlacement> badges,
+            int width,
+            int height
+    ) implements PreparedElement {
+        public PreparedBadgeRow {
+            badges = badges == null ? List.of() : List.copyOf(badges);
+        }
+    }
+
+    public record PreparedBadgePlacement(
+            PreparedBadge badge,
+            int x,
+            int y
+    ) {}
 
     public record PreparedBar(
             List<FormattedCharSequence> labelLines,

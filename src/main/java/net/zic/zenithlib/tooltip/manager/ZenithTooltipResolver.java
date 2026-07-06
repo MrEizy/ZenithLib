@@ -9,6 +9,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.condition.ZenithTooltipConditions;
 import net.zic.zenithlib.tooltip.api.context.ZenithTooltipContext;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
+import net.zic.zenithlib.tooltip.api.element.BadgeRowElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
@@ -72,7 +73,7 @@ public final class ZenithTooltipResolver {
             return List.of(new TextElement(resolveText(text.text(), context), text.color(), text.effect()));
         }
         if (element instanceof HeaderElement header) {
-            return List.of(new HeaderElement(resolveText(header.text(), context), header.color(), header.effect()));
+            return List.of(new HeaderElement(resolveText(header.text(), context), header.color(), header.effect(), header.underline()));
         }
         if (element instanceof RowElement row) {
             return List.of(new RowElement(
@@ -84,13 +85,18 @@ public final class ZenithTooltipResolver {
             ));
         }
         if (element instanceof BadgeElement badge) {
-            return List.of(new BadgeElement(
-                    resolveText(badge.text(), context),
-                    badge.textColor(),
-                    badge.backgroundColor(),
-                    badge.borderColor(),
-                    badge.icon(),
-                    badge.effect()
+            return List.of(resolveBadge(badge, context));
+        }
+        if (element instanceof BadgeRowElement row) {
+            List<BadgeElement> badges = new ArrayList<>(row.badges().size());
+            for (BadgeElement badge : row.badges()) {
+                badges.add(resolveBadge(badge, context));
+            }
+            return List.of(new BadgeRowElement(
+                    badges,
+                    row.spacing(),
+                    row.rowSpacing(),
+                    row.wrap()
             ));
         }
         if (element instanceof ClassificationElement classification) {
@@ -99,7 +105,7 @@ public final class ZenithTooltipResolver {
         if (element instanceof TitleIconElement titleIcon) {
             return List.of(new TitleIconElement(
                     resolveText(titleIcon.title(), context),
-                    resolveText(titleIcon.subtitle(), context),
+                    titleIcon.hasSubtitle() ? resolveText(titleIcon.subtitle(), context) : ZenithTooltipText.literal(""),
                     titleIcon.onAllPages(),
                     titleIcon.titleEffect(),
                     titleIcon.subtitleEffect()
@@ -117,6 +123,19 @@ public final class ZenithTooltipResolver {
         return resolveResolvedElements(element, ZenithTooltipElementTypes.resolve(element, context), context);
     }
 
+
+    private static BadgeElement resolveBadge(BadgeElement badge, ZenithTooltipContext context) {
+        return new BadgeElement(
+                resolveText(badge.text(), context),
+                badge.textColor(),
+                badge.backgroundColor(),
+                badge.borderColor(),
+                badge.icon(),
+                badge.effect(),
+                badge.backgroundGradient(),
+                badge.gradientDirection()
+        );
+    }
 
     private static List<ZenithTooltipElement> resolveSection(
             SectionElement section,

@@ -19,13 +19,54 @@
           "type": "zenithlib:classification"
         },
         {
+          "type": "zenithlib:badge_row",
+          "badges": [
+            {
+              "background_color": "#FF4D4D",
+              "background_gradient": [
+                "#FF4D4D",
+                "#FFD166",
+                "#85FF9A",
+                "#5CCBFF",
+                "#B48CFF"
+              ],
+              "text": {
+                "literal": "RAINBOW"
+              },
+              "text_color": "text"
+            },
+            {
+              "background_color": "accent",
+              "effect": {
+                "type": "zenithlib:shimmer"
+              },
+              "text": {
+                "literal": "SHIMMER"
+              },
+              "text_color": "background"
+            },
+            {
+              "background_color": "positive",
+              "border_color": "positive",
+              "text": {
+                "literal": "INLINE"
+              },
+              "text_color": "background"
+            }
+          ]
+        },
+        {
           "type": "zenithlib:text",
           "text": {
             "translate": "tooltip.zenithlib.diamond.line_1"
           }
         },
         {
-          "type": "zenithlib:divider"
+          "type": "zenithlib:divider",
+          "color": "accent",
+          "end_color": "positive",
+          "inset": 8,
+          "thickness": 2
         },
         {
           "type": "zenithlib:row",
@@ -67,7 +108,8 @@
           "type": "zenithlib:header",
           "text": {
             "literal": "Quiet Motion"
-          }
+          },
+          "underline": false
         },
         {
           "type": "zenithlib:text",

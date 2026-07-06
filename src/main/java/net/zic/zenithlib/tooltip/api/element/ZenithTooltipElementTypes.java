@@ -29,6 +29,7 @@ public final class ZenithTooltipElementTypes {
     public static final Identifier ICON = id("icon");
     public static final Identifier TITLE_ICON = id("title_icon");
     public static final Identifier BADGE = id("badge");
+    public static final Identifier BADGE_ROW = id("badge_row");
     public static final Identifier CLASSIFICATION = id("classification");
     public static final Identifier BAR = id("bar");
     public static final Identifier ENTITY_PREVIEW = id("entity_preview");
@@ -49,12 +50,14 @@ public final class ZenithTooltipElementTypes {
         registerBuiltIn("icon", ICON, IconElement.CODEC);
         registerBuiltIn("title_icon", TITLE_ICON, TitleIconElement.CODEC);
         registerBuiltIn("badge", BADGE, BadgeElement.CODEC);
+        registerBuiltIn("badge_row", BADGE_ROW, BadgeRowElement.CODEC);
         registerBuiltIn("classification", CLASSIFICATION, ClassificationElement.CODEC);
         registerBuiltIn("bar", BAR, BarElement.CODEC);
         registerBuiltIn("entity_preview", ENTITY_PREVIEW, EntityPreviewElement.CODEC);
         registerBuiltIn("dynamic", DYNAMIC, DynamicElement.CODEC);
         registerBuiltIn("section", SECTION, SectionElement.CODEC);
         alias("icon_row", ROW);
+        alias("badges", BADGE_ROW);
     }
 
     private ZenithTooltipElementTypes() {}

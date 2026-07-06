@@ -1,5 +1,6 @@
 package net.zic.zenithlib.tooltip.api.element;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
@@ -13,11 +14,16 @@ import java.util.Optional;
 public record HeaderElement(
         ZenithTooltipText text,
         ZenithTooltipColor color,
-        Optional<ZenithTooltipTextEffect> effect
+        Optional<ZenithTooltipTextEffect> effect,
+        boolean underline
 ) implements ZenithTooltipElement {
 
     public HeaderElement(ZenithTooltipText text, ZenithTooltipColor color) {
-        this(text, color, Optional.empty());
+        this(text, color, Optional.empty(), true);
+    }
+
+    public HeaderElement(ZenithTooltipText text, ZenithTooltipColor color, Optional<ZenithTooltipTextEffect> effect) {
+        this(text, color, effect, true);
     }
 
     public HeaderElement(String key, ZenithTooltipColor color) {
@@ -29,7 +35,15 @@ public record HeaderElement(
     }
 
     public HeaderElement withEffect(ZenithTooltipTextEffect effect) {
-        return new HeaderElement(text, color, Optional.of(effect));
+        return new HeaderElement(text, color, Optional.of(effect), underline);
+    }
+
+    public HeaderElement withUnderline(boolean underline) {
+        return new HeaderElement(text, color, effect, underline);
+    }
+
+    public HeaderElement withoutUnderline() {
+        return withUnderline(false);
     }
 
     public static HeaderElement literal(String text, ZenithTooltipColor color) {
@@ -40,7 +54,8 @@ public record HeaderElement(
             instance.group(
                     ZenithTooltipText.CODEC.fieldOf("text").forGetter(HeaderElement::text),
                     ZenithTooltipColor.CODEC.optionalFieldOf("color", ZenithTooltipColor.ACCENT).forGetter(HeaderElement::color),
-                    ZenithTooltipTextEffect.CODEC.optionalFieldOf("effect").forGetter(HeaderElement::effect)
+                    ZenithTooltipTextEffect.CODEC.optionalFieldOf("effect").forGetter(HeaderElement::effect),
+                    Codec.BOOL.optionalFieldOf("underline", true).forGetter(HeaderElement::underline)
             ).apply(instance, HeaderElement::new)
     );
 

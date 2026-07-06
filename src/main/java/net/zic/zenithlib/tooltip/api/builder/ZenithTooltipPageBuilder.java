@@ -7,6 +7,8 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipInlineIcon;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.condition.ZenithTooltipConditions;
+import net.zic.zenithlib.tooltip.api.element.BadgeElement;
+import net.zic.zenithlib.tooltip.api.element.BadgeRowElement;
 import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
 import net.zic.zenithlib.tooltip.api.element.ZenithTooltipElement;
 
@@ -143,6 +145,14 @@ public final class ZenithTooltipPageBuilder {
 
     public ZenithTooltipPageBuilder badge(ZenithTooltipText text, ZenithTooltipColor backgroundColor) {
         return add(ZenithTooltipBuilders.badge(text, backgroundColor));
+    }
+
+    public ZenithTooltipPageBuilder badgeRow(BadgeElement... badges) {
+        return add(ZenithTooltipBuilders.badgeRow(badges));
+    }
+
+    public ZenithTooltipPageBuilder badgeRow(BadgeRowElement row) {
+        return add(row);
     }
 
     public ZenithTooltipPageBuilder classification() {

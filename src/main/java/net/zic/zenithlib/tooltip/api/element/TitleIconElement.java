@@ -29,8 +29,16 @@ public record TitleIconElement(
         this(title, subtitle, onAllPages, Optional.empty(), Optional.empty());
     }
 
+    public TitleIconElement(ZenithTooltipText title, boolean onAllPages) {
+        this(title, ZenithTooltipText.literal(""), onAllPages);
+    }
+
     public TitleIconElement(ZenithTooltipText title, ZenithTooltipText subtitle) {
         this(title, subtitle, false);
+    }
+
+    public TitleIconElement(ZenithTooltipText title) {
+        this(title, ZenithTooltipText.literal(""), false);
     }
 
     public TitleIconElement(String title, String subtitle) {
@@ -38,8 +46,18 @@ public record TitleIconElement(
     }
 
     public TitleIconElement {
+        title = title == null ? ZenithTooltipText.literal("") : title;
+        subtitle = subtitle == null || subtitle.isBlank() ? ZenithTooltipText.literal("") : subtitle;
         titleEffect = titleEffect == null ? Optional.empty() : titleEffect;
         subtitleEffect = subtitleEffect == null ? Optional.empty() : subtitleEffect;
+    }
+
+    public boolean hasSubtitle() {
+        return !subtitle.isBlank();
+    }
+
+    public static TitleIconElement literal(String title) {
+        return new TitleIconElement(ZenithTooltipText.literal(title));
     }
 
     public static TitleIconElement literal(String title, String subtitle) {

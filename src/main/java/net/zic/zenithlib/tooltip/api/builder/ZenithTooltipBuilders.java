@@ -15,6 +15,7 @@ import net.zic.zenithlib.tooltip.api.animation.WaveTextEffect;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipTextEffect;
 import net.zic.zenithlib.tooltip.api.condition.ZenithTooltipConditions;
 import net.zic.zenithlib.tooltip.api.element.BadgeElement;
+import net.zic.zenithlib.tooltip.api.element.BadgeRowElement;
 import net.zic.zenithlib.tooltip.api.element.BarElement;
 import net.zic.zenithlib.tooltip.api.element.ClassificationElement;
 import net.zic.zenithlib.tooltip.api.element.DividerElement;
@@ -295,6 +296,18 @@ public final class ZenithTooltipBuilders {
         return new DividerElement();
     }
 
+    public static DividerElement divider(ZenithTooltipColor color) {
+        return divider().withColor(color);
+    }
+
+    public static DividerElement divider(ZenithTooltipColor startColor, ZenithTooltipColor endColor) {
+        return divider().withGradient(startColor, endColor);
+    }
+
+    public static DividerElement divider(ZenithTooltipColor startColor, ZenithTooltipColor endColor, int inset) {
+        return divider(startColor, endColor).withInset(inset);
+    }
+
     public static SpacerElement spacer() {
         return new SpacerElement(4);
     }
@@ -339,11 +352,11 @@ public final class ZenithTooltipBuilders {
     }
 
     public static TitleIconElement titleIcon(ZenithTooltipText title) {
-        return titleIcon(title, EMPTY_TEXT, false);
+        return new TitleIconElement(title);
     }
 
     public static TitleIconElement titleIcon(ZenithTooltipText title, boolean onAllPages) {
-        return titleIcon(title, EMPTY_TEXT, onAllPages);
+        return new TitleIconElement(title, onAllPages);
     }
 
     public static TitleIconElement titleIcon(ZenithTooltipText title, ZenithTooltipText subtitle) {
@@ -409,16 +422,6 @@ public final class ZenithTooltipBuilders {
     }
 
     public static BadgeElement badge(
-            ZenithTooltipInlineIcon icon,
-            ZenithTooltipText text,
-            ZenithTooltipColor textColor,
-            ZenithTooltipColor backgroundColor,
-            ZenithTooltipColor borderColor
-    ) {
-        return new BadgeElement(text, textColor, backgroundColor, borderColor, java.util.Optional.of(icon), java.util.Optional.empty());
-    }
-
-    public static BadgeElement badge(
             ZenithTooltipText text,
             ZenithTooltipColor textColor,
             ZenithTooltipColor backgroundColor,
@@ -426,6 +429,44 @@ public final class ZenithTooltipBuilders {
             ZenithTooltipTextEffect effect
     ) {
         return new BadgeElement(text, textColor, backgroundColor, borderColor, java.util.Optional.empty(), java.util.Optional.of(effect));
+    }
+
+    public static BadgeElement gradientBadge(
+            ZenithTooltipText text,
+            ZenithTooltipColor textColor,
+            ZenithTooltipColor borderColor,
+            ZenithTooltipColor... backgroundGradient
+    ) {
+        return new BadgeElement(text, textColor, backgroundGradient.length == 0 ? ZenithTooltipColor.BACKGROUND : backgroundGradient[0], borderColor)
+                .withBackgroundGradient(BadgeElement.GradientDirection.HORIZONTAL, backgroundGradient);
+    }
+
+    public static BadgeElement verticalGradientBadge(
+            ZenithTooltipText text,
+            ZenithTooltipColor textColor,
+            ZenithTooltipColor borderColor,
+            ZenithTooltipColor... backgroundGradient
+    ) {
+        return new BadgeElement(text, textColor, backgroundGradient.length == 0 ? ZenithTooltipColor.BACKGROUND : backgroundGradient[0], borderColor)
+                .withBackgroundGradient(BadgeElement.GradientDirection.VERTICAL, backgroundGradient);
+    }
+
+    public static BadgeRowElement badgeRow(BadgeElement... badges) {
+        return new BadgeRowElement(badges);
+    }
+
+    public static BadgeRowElement badgeRow(List<BadgeElement> badges) {
+        return new BadgeRowElement(badges);
+    }
+
+    public static BadgeElement badge(
+            ZenithTooltipInlineIcon icon,
+            ZenithTooltipText text,
+            ZenithTooltipColor textColor,
+            ZenithTooltipColor backgroundColor,
+            ZenithTooltipColor borderColor
+    ) {
+        return new BadgeElement(text, textColor, backgroundColor, borderColor, java.util.Optional.of(icon), java.util.Optional.empty());
     }
 
     public static ClassificationElement classification() {

@@ -1,7 +1,6 @@
 package net.zic.zenithlib.datagen;
 
 import net.minecraft.data.PackOutput;
-import net.minecraft.network.chat.Component;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
@@ -65,8 +64,28 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                                 translated("tooltip.zenithlib.diamond.header")
                         ).withOnAllPages(true))
                         .add(classificationRows())
+                        .add(badgeRow(
+                                gradientBadge(
+                                        literal("RAINBOW"),
+                                        ZenithTooltipColor.TEXT,
+                                        ZenithTooltipColor.ACCENT,
+                                        color("#FF4D4D"),
+                                        color("#FFD166"),
+                                        color("#85FF9A"),
+                                        color("#5CCBFF"),
+                                        color("#B48CFF")
+                                ),
+                                badge(
+                                        literal("SHIMMER"),
+                                        ZenithTooltipColor.BACKGROUND,
+                                        ZenithTooltipColor.ACCENT,
+                                        ZenithTooltipColor.ACCENT,
+                                        shimmer()
+                                ),
+                                badge(literal("INLINE"), ZenithTooltipColor.POSITIVE)
+                        ))
                         .add(text(translated("tooltip.zenithlib.diamond.line_1")))
-                        .add(divider())
+                        .add(divider(ZenithTooltipColor.ACCENT, ZenithTooltipColor.POSITIVE, 8).withThickness(2))
                         .add(row(
                                 translated("tooltip.zenithlib.diamond.row.rarity"),
                                 translated("tooltip.zenithlib.diamond.row.rarity_value"),
@@ -85,7 +104,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                                 ZenithTooltipColor.MUTED
                         )))
                 .page(page(literal("Celestial Motion"))
-                        .add(header(literal("Quiet Motion"), ZenithTooltipColor.ACCENT))
+                        .add(header(literal("Quiet Motion"), ZenithTooltipColor.ACCENT).withoutUnderline())
                         .add(text(literal("Stars shimmer behind the card while the frame gathers at the edges.")))
                         .add(text(
                                 literal("The motion stays decorative: no extra space, no shifting rows."),
