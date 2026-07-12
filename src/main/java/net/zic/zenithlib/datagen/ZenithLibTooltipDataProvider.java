@@ -3,6 +3,7 @@ package net.zic.zenithlib.datagen;
 import net.minecraft.data.PackOutput;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipColor;
+import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplateBuilder;
 import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplates;
@@ -53,6 +54,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
         addScrollableSheetTemplate();
         addTemplateBuilderShowcases();
         addDynamicItemTemplate();
+        addThemeOverrideShowcaseTemplate();
     }
 
     private void addMaterialShowcaseTemplate() {
@@ -409,6 +411,93 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
                         .add(durabilityBar(literal("Live Durability"), ZenithTooltipColor.POSITIVE)));
     }
 
+    private void addThemeOverrideShowcaseTemplate() {
+        template(id("showcase_theme_override"))
+                .animationPreset(ZenithTooltipPresets.CELESTIAL)
+                .page(page(literal("Theme Override Showcase"))
+                        .add(titleIcon(
+                                literal("Heart of the Sea"),
+                                literal("Mana Blue with alterations")
+                        ))
+                        .add(badge(
+                                literal("BASE THEME + PATCH"),
+                                ZenithTooltipColor.BACKGROUND,
+                                ZenithTooltipColor.ACCENT,
+                                ZenithTooltipColor.ACCENT
+                        ))
+                        .add(text(
+                                literal(
+                                        "This tooltip uses the mana-blue theme, "
+                                                + "then changes only selected visual properties."
+                                )
+                        ))
+                        .add(divider())
+                        .add(row(
+                                literal("Base Theme"),
+                                literal("Mana Blue"),
+                                ZenithTooltipColor.TEXT,
+                                ZenithTooltipColor.ACCENT
+                        ))
+                        .add(row(
+                                literal("Palette"),
+                                literal("Locally Overridden"),
+                                ZenithTooltipColor.TEXT,
+                                ZenithTooltipColor.POSITIVE
+                        ))
+                        .add(row(
+                                literal("Animations"),
+                                literal("Still Celestial"),
+                                ZenithTooltipColor.TEXT,
+                                ZenithTooltipColor.WARNING
+                        ))
+                        .add(bar(
+                                literal("Inherited Bar Style"),
+                                72,
+                                100,
+                                literal("72%"),
+                                ZenithTooltipColor.ACCENT
+                        ))
+                        .add(divider())
+                        .add(text(
+                                literal(
+                                        "The padding, bar metrics, badge metrics, "
+                                                + "and other untouched settings still come "
+                                                + "from mana_blue."
+                                ),
+                                ZenithTooltipColor.MUTED
+                        )));
+    }
+
+    private void addThemeOverrideShowcaseRule() {
+        rule(id("theme_override_showcase"))
+                .priority(100)
+                .items(minecraft("heart_of_the_sea"))
+                .template(id("showcase_theme_override"))
+                .theme(id("mana_blue"))
+                .themeOverrides(
+                    themeOverride()
+                        .background("#240807F2")
+                        .borderTop("#FFE16BFF")
+                        .borderBottom("#8C210FFF")
+                        .text("#FFF4D6FF")
+                        .accent("#FF6B35FF")
+                        .muted("#D49A78FF")
+                        .positive("#B8FF5AFF")
+                        .warning("#FFF06AFF")
+                        .negative("#FF355EFF")
+                        .maxWidth(280)
+                        .iconShape(ZenithTooltipTheme.Shape.BRACKET)
+                        .barHeight(8)
+                        .badgeFillAlpha(235)
+                        .dividerDecoration(ZenithTooltipTheme.Decoration.DOUBLE_DIAMOND)
+                        .frameCornerDecoration(ZenithTooltipTheme.CornerDecoration.NOTCHED)
+                        .backgroundPattern(ZenithTooltipTheme.Pattern.DIAGONAL_LINES)
+                        .backgroundPatternColor("warning")
+                        .backgroundPatternAlpha(28)
+                        .backgroundPatternSpacing(7)
+        );
+    }
+
 
     private void addShowcaseRules() {
         addShowcaseRule("diamond", "showcase_material", "mana_blue");
@@ -427,6 +516,7 @@ public final class ZenithLibTooltipDataProvider extends ZenithTooltipDataProvide
         addShowcaseRule("quartz", "showcase_frame_divider_lab", "arcane_purple");
         addShowcaseRule("blaze_powder", "showcase_gauge_motion_lab", "ember_orange");
         addShowcaseRule("clock", "showcase_page_motion_lab", "cobalt_blue");
+        addThemeOverrideShowcaseRule();
     }
 
     private void addShowcaseRule(String itemPath, String templatePath, String themePath) {

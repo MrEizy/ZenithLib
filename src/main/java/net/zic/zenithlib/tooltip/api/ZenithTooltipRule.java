@@ -7,6 +7,7 @@ import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Data-driven rule that selects item stacks and assigns them to a reusable
@@ -16,24 +17,43 @@ public record ZenithTooltipRule(
         int priority,
         Selector selector,
         Identifier template,
-        Identifier theme
+        Identifier theme,
+        Optional<ZenithTooltipThemeOverride> themeOverrides
 ) {
-    public static final Identifier DEFAULT_THEME = Identifier.fromNamespaceAndPath("zenithlib", "mana_blue");
+    public static final Identifier DEFAULT_THEME =
+            Identifier.fromNamespaceAndPath(
+                    "zenithlib",
+                    "mana_blue"
+            );
 
-    public static final MapCodec<ZenithTooltipRule> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                    Codec.INT.optionalFieldOf("priority", 0).forGetter(ZenithTooltipRule::priority),
-                    Selector.CODEC.optionalFieldOf("selector", Selector.inferred()).forGetter(ZenithTooltipRule::selector),
-                    Identifier.CODEC.fieldOf("template").forGetter(ZenithTooltipRule::template),
-                    Identifier.CODEC.optionalFieldOf("theme", DEFAULT_THEME).forGetter(ZenithTooltipRule::theme)
-            ).apply(instance, ZenithTooltipRule::new)
-    );
-    public static final Codec<ZenithTooltipRule> CODEC = MAP_CODEC.codec();
+    public static final MapCodec<ZenithTooltipRule> MAP_CODEC =
+            RecordCodecBuilder.mapCodec(instance ->
+                    instance.group(
+                            Codec.INT.optionalFieldOf("priority", 0).forGetter(ZenithTooltipRule::priority),
+                            Selector.CODEC.optionalFieldOf("selector", Selector.inferred()).forGetter(ZenithTooltipRule::selector),
+                            Identifier.CODEC.fieldOf("template").forGetter(ZenithTooltipRule::template),
+                            Identifier.CODEC.optionalFieldOf("theme", DEFAULT_THEME).forGetter(ZenithTooltipRule::theme),
+                            ZenithTooltipThemeOverride.CODEC.optionalFieldOf("theme_overrides").forGetter(ZenithTooltipRule::themeOverrides)
+                    ).apply(instance, ZenithTooltipRule::new)
+            );
+
+    public static final Codec<ZenithTooltipRule> CODEC =
+            MAP_CODEC.codec();
 
     public ZenithTooltipRule {
         selector = selector == null ? Selector.inferred() : selector;
         template = Objects.requireNonNull(template, "template");
         theme = theme == null ? DEFAULT_THEME : theme;
+        themeOverrides = themeOverrides == null ? Optional.empty() : themeOverrides;
+    }
+
+    public ZenithTooltipRule(
+            int priority,
+            Selector selector,
+            Identifier template,
+            Identifier theme
+    ) {
+        this(priority, selector, template, theme, Optional.empty());
     }
 
     public record Selector(

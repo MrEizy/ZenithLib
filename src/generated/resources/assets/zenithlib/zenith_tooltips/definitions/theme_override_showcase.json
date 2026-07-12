@@ -1,0 +1,46 @@
+{
+  "priority": 100,
+  "selector": {
+    "items": [
+      "minecraft:heart_of_the_sea"
+    ]
+  },
+  "template": "zenithlib:showcase_theme_override",
+  "theme_overrides": {
+    "background_style": {
+      "alpha": 28,
+      "color": "warning",
+      "pattern": "diagonal_lines",
+      "spacing": 7
+    },
+    "badge_style": {
+      "fill_alpha": 235
+    },
+    "bar_style": {
+      "height": 8
+    },
+    "colors": {
+      "accent": "#FF6B35FF",
+      "background": "#240807F2",
+      "border_bottom": "#8C210FFF",
+      "border_top": "#FFE16BFF",
+      "muted": "#D49A78FF",
+      "negative": "#FF355EFF",
+      "positive": "#B8FF5AFF",
+      "text": "#FFF4D6FF",
+      "warning": "#FFF06AFF"
+    },
+    "divider_style": {
+      "decoration": "double_diamond"
+    },
+    "frame_style": {
+      "corner_decoration": "notched"
+    },
+    "icon_holder": {
+      "shape": "bracket"
+    },
+    "layout": {
+      "max_width": 280
+    }
+  }
+}

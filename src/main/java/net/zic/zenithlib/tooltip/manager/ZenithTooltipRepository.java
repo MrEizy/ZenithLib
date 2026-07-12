@@ -10,10 +10,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.zic.zenithlib.ZenithLib;
-import net.zic.zenithlib.tooltip.api.ZenithTooltipDocument;
-import net.zic.zenithlib.tooltip.api.ZenithTooltipRule;
-import net.zic.zenithlib.tooltip.api.ZenithTooltipTemplate;
-import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
+import net.zic.zenithlib.tooltip.api.*;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
 
 import java.util.ArrayList;
@@ -78,15 +75,36 @@ public final class ZenithTooltipRepository {
         return snapshot.templates();
     }
 
-    public static Optional<ZenithTooltipDocument> fromTemplate(Identifier template, Identifier theme) {
+    public static Optional<ZenithTooltipDocument> fromTemplate(
+            Identifier template,
+            Identifier theme,
+            Optional<ZenithTooltipThemeOverride> themeOverride
+    ) {
         Snapshot current = snapshot;
-        ZenithTooltipTemplate resolvedTemplate = current.templates().get(template);
+
+        ZenithTooltipTemplate resolvedTemplate =
+                current.templates().get(template);
+
         if (resolvedTemplate == null) {
             return Optional.empty();
         }
 
         ZenithTooltipTheme resolvedTheme = current.themes().getOrDefault(theme, ZenithTooltipTheme.defaultTheme());
+
+        if (themeOverride.isPresent()) {
+            ZenithTooltipTheme baseTheme = resolvedTheme;
+
+            resolvedTheme = themeOverride.orElseThrow()
+                    .applyTo(baseTheme)
+                    .resultOrPartial(error -> ZenithLib.LOGGER.error("Failed to apply tooltip theme override: {}", error))
+                    .orElse(baseTheme);
+        }
+
         return Optional.of(resolvedTemplate.themed(resolvedTheme));
+    }
+
+    public static Optional<ZenithTooltipDocument> fromTemplate(Identifier template, Identifier theme) {
+        return fromTemplate(template, theme, Optional.empty());
     }
 
     public static Optional<ZenithTooltipDocument> fromTemplate(Identifier template) {
@@ -208,11 +226,41 @@ public final class ZenithTooltipRepository {
                 ZenithTooltipTemplate template,
                 Map<Identifier, ZenithTooltipTheme> themes
         ) {
-            ZenithTooltipTheme theme = getWithLocalFallback(themes, rule.theme(), id.getNamespace());
-            if (theme == null) {
-                theme = ZenithTooltipTheme.defaultTheme();
+            ZenithTooltipTheme baseTheme = getWithLocalFallback(
+                    themes,
+                    rule.theme(),
+                    id.getNamespace()
+            );
+
+            if (baseTheme == null) {
+                baseTheme = ZenithTooltipTheme.defaultTheme();
             }
-            return new CompiledRule(id, rule.priority(), template.themed(theme), CompiledSelector.create(rule.selector(), id));
+
+            ZenithTooltipTheme resolvedTheme = baseTheme;
+
+            if (rule.themeOverrides().isPresent()) {
+                resolvedTheme = rule.themeOverrides()
+                        .orElseThrow()
+                        .applyTo(baseTheme)
+                        .resultOrPartial(error ->
+                                ZenithLib.LOGGER.error(
+                                        "Failed to apply tooltip theme overrides for rule {}: {}",
+                                        id,
+                                        error
+                                )
+                        )
+                        .orElse(baseTheme);
+            }
+
+            return new CompiledRule(
+                    id,
+                    rule.priority(),
+                    template.themed(resolvedTheme),
+                    CompiledSelector.create(
+                            rule.selector(),
+                            id
+                    )
+            );
         }
     }
 

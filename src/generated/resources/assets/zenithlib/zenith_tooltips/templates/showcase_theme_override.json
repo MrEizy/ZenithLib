@@ -1,0 +1,90 @@
+{
+  "animation_presets": [
+    "zenithlib:celestial"
+  ],
+  "pages": [
+    {
+      "elements": [
+        {
+          "type": "zenithlib:title_icon",
+          "subtitle": {
+            "literal": "Mana Blue with alterations"
+          },
+          "title": {
+            "literal": "Heart of the Sea"
+          }
+        },
+        {
+          "type": "zenithlib:badge",
+          "background_color": "accent",
+          "text": {
+            "literal": "BASE THEME + PATCH"
+          },
+          "text_color": "background"
+        },
+        {
+          "type": "zenithlib:text",
+          "text": {
+            "literal": "This tooltip uses the mana-blue theme, then changes only selected visual properties."
+          }
+        },
+        {
+          "type": "zenithlib:divider"
+        },
+        {
+          "type": "zenithlib:row",
+          "left": {
+            "literal": "Base Theme"
+          },
+          "right": {
+            "literal": "Mana Blue"
+          }
+        },
+        {
+          "type": "zenithlib:row",
+          "left": {
+            "literal": "Palette"
+          },
+          "right": {
+            "literal": "Locally Overridden"
+          },
+          "right_color": "positive"
+        },
+        {
+          "type": "zenithlib:row",
+          "left": {
+            "literal": "Animations"
+          },
+          "right": {
+            "literal": "Still Celestial"
+          },
+          "right_color": "warning"
+        },
+        {
+          "type": "zenithlib:bar",
+          "label": {
+            "literal": "Inherited Bar Style"
+          },
+          "max": 100,
+          "value": 72,
+          "value_text": {
+            "literal": "72%"
+          }
+        },
+        {
+          "type": "zenithlib:divider"
+        },
+        {
+          "type": "zenithlib:text",
+          "color": "muted",
+          "text": {
+            "literal": "The padding, bar metrics, badge metrics, and other untouched settings still come from mana_blue."
+          }
+        }
+      ],
+      "title": {
+        "literal": "Theme Override Showcase"
+      }
+    }
+  ]
+}

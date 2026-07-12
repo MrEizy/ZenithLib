@@ -18,6 +18,8 @@ import java.util.List;
 public final class ZenithTooltipRenderer {
     private static final int INNER_HIGHLIGHT = 0x33FFFFFF;
     private static final int ITEM_ICON_SIZE = 16;
+    private static final float DIAGONAL_ANGLE = (float) (Math.PI / 4.0D);
+    private static final float INVERSE_SQRT_TWO = 0.70710677F;
 
     private ZenithTooltipRenderer() {}
 
@@ -213,17 +215,7 @@ public final class ZenithTooltipRenderer {
         int spacing = style.spacing();
 
         switch (style.pattern()) {
-            case DIAGONAL_LINES -> {
-                for (int start = -height; start < width; start += spacing) {
-                    for (int step = 0; step < width + height; step++) {
-                        int px = left + start + step;
-                        int py = top + step;
-                        if (px >= left && px < right && py >= top && py < bottom) {
-                            graphics.fill(px, py, px + 1, py + 1, color);
-                        }
-                    }
-                }
-            }
+            case DIAGONAL_LINES -> renderDiagonalBackgroundPattern(graphics, left, top, right, bottom, spacing, color);
             case GRID -> {
                 for (int px = left + spacing; px < right; px += spacing) {
                     graphics.fill(px, top, px + 1, bottom, color);
@@ -1640,6 +1632,34 @@ public final class ZenithTooltipRenderer {
         for (int px = 0; px < width; px++) {
             float position = px / (float) Math.max(1, width - 1);
             graphics.fill(x + px, y, x + px + 1, y + height, gradientColor(colors, position, alpha));
+        }
+    }
+
+    private static void renderDiagonalBackgroundPattern(GuiGraphicsExtractor graphics, int left, int top, int right, int bottom, int spacing, int color) {
+        int width = right - left;
+        int height = bottom - top;
+
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        int safeSpacing = Math.max(4, spacing);
+        int lineLength = Math.max(1, (int) Math.ceil((width + height) * INVERSE_SQRT_TWO));
+
+        graphics.enableScissor(left, top, right, bottom);
+        graphics.pose().pushMatrix();
+
+        try {
+            graphics.pose().translate(left, top);
+            graphics.pose().rotate(DIAGONAL_ANGLE);
+
+            for (int start = -height; start < width; start += safeSpacing) {
+                int localY = Math.round(-start * INVERSE_SQRT_TWO);
+                graphics.fill(-2, localY, lineLength + 2, localY + 1, color);
+            }
+        } finally {
+            graphics.pose().popMatrix();
+            graphics.disableScissor();
         }
     }
 

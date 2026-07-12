@@ -8,10 +8,7 @@ import net.zic.zenithlib.tooltip.api.ZenithTooltipRule;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTemplate;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipTheme;
 import net.zic.zenithlib.tooltip.api.ZenithTooltipText;
-import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipPageBuilder;
-import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipRuleBuilder;
-import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipTemplateBuilder;
-import net.zic.zenithlib.tooltip.api.builder.ZenithTooltipThemeBuilder;
+import net.zic.zenithlib.tooltip.api.builder.*;
 import net.zic.zenithlib.tooltip.api.animation.ZenithTooltipPresets;
 
 import java.util.LinkedHashMap;
@@ -141,6 +138,10 @@ public abstract class ZenithTooltipDataProvider implements DataProvider {
 
     protected final void theme(String path, Consumer<ZenithTooltipThemeBuilder> action) {
         Objects.requireNonNull(action, "action").accept(theme(path));
+    }
+
+    protected final ZenithTooltipThemeOverrideBuilder themeOverride() {
+        return new ZenithTooltipThemeOverrideBuilder();
     }
 
     protected final void addTemplatePages(ZenithTooltipTemplateBuilder target, ZenithTooltipTemplateBuilder source) {
