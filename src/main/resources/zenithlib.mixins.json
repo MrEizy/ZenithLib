@@ -4,8 +4,8 @@
   "package": "net.zic.zenithlib.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    //"client.DrawContextMixin",
-    //"client.ScreenKeyPressedMixin"
+    "creative.AbstractContainerScreenAccessor",
+    "creative.CreativeModeInventoryScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

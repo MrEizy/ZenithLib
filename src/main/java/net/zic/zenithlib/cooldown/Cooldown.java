@@ -1,7 +1,5 @@
 package net.zic.zenithlib.cooldown;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-
 /**
  * we are using a wrapper class to prevent constant Integer object creation
  */

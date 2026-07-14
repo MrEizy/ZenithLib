@@ -37,6 +37,13 @@ public class ZenithLanguageProvider extends LanguageProvider {
         add("classification.zenithlib.category.crafting_ingredient", "Crafting Ingredient");
         add("classification.zenithlib.rank.rare", "Rare");
 
+        add("creative_section.zenithlib.all", "All Items");
+        add("creative_section.zenithlib.debug.logs", "Logs");
+        add("creative_section.zenithlib.debug.planks", "Planks");
+        add("creative_section.zenithlib.debug.slabs", "Slabs");
+        add("creative_section.zenithlib.debug.stairs", "Stairs");
+        add("creative_section.zenithlib.debug.fences", "Fences");
+
         add("tooltip.zenithlib.vanilla.converted", "Converted Vanilla Tooltip");
         add("tooltip.zenithlib.vanilla.enchantments", "Enchantments");
         add("tooltip.zenithlib.vanilla.stats", "Stats");

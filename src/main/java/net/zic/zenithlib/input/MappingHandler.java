@@ -1,8 +1,6 @@
 package net.zic.zenithlib.input;
 
 import net.minecraft.client.KeyMapping;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.IntConsumer;
 

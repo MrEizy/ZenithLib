@@ -4,7 +4,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.common.ZenithAttachments;
 

@@ -5,7 +5,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 import net.zic.zenithlib.ZenithLib;
 

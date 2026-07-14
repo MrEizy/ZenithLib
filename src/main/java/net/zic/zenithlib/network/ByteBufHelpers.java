@@ -1,7 +1,6 @@
 package net.zic.zenithlib.network;
 
 import io.netty.buffer.ByteBuf;
-import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.resources.Identifier;
 
 import java.nio.charset.Charset;
