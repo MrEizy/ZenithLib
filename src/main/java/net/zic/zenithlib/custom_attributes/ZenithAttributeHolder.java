@@ -16,14 +16,12 @@ import net.zic.zenithlib.cooldown.EntityCooldownHandler;
 import net.zic.zenithlib.network.ByteBufHelpers;
 import net.zic.zenithlib.stats.Stat;
 import net.zic.zenithlib.stats.StatInstance;
+import net.zic.zenithlib.stats.StatProvider;
 import net.zic.zenithlib.stats.StatSheet;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * This is our custom attribute holder that all mods using this mod will include
@@ -39,7 +37,6 @@ public class ZenithAttributeHolder {
 
     private final LivingEntity attachedEntity;
     private final HashMap<Holder<Attribute>,ZenithAttribute> attributes = new HashMap<>();
-
 
     public ZenithAttributeHolder(LivingEntity attachedEntity){
         this.attachedEntity = attachedEntity;
@@ -63,14 +60,16 @@ public class ZenithAttributeHolder {
         return attributes.containsKey(attributeHolder);
     }
 
-    public void update(Map<Stat,StatInstance> stats){
-        attributes.forEach((attributeHolder, zenithAttribute) -> zenithAttribute.update(stats));
+
+    public void update(StatProvider provider){
+        attributes.forEach((holder,attribute)->attribute.update(provider));
     }
 
 
     public void attachEntity(){
         attributes.forEach(((attributeHolder, zenithAttribute) -> zenithAttribute.setAttachedEntity(attachedEntity)));
     }
+
 
     public void encode(ByteBuf buf){
         ByteBufHelpers.encodeMap(

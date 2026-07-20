@@ -10,6 +10,7 @@ import net.zic.zenithlib.network.ByteBufHelpers;
 import net.zic.zenithlib.common.ZenithRegistries;
 import net.zic.zenithlib.stats.Stat;
 import net.zic.zenithlib.stats.StatInstance;
+import net.zic.zenithlib.stats.StatProvider;
 import net.zic.zenithlib.stats.StatSheet;
 import net.zic.zenithlib.value_containers.ModifierOperation;
 import net.zic.zenithlib.value_containers.ValueContainer;
@@ -95,20 +96,18 @@ public class ZenithAttribute extends ValueContainer {
     }
 
 
-    //make sure to call this whenever you update a stat
-    public void update(Map<Stat,StatInstance> stats){
-        //used to retrieve the stat sheet for calculations
-
+    public void update(StatProvider provider){
         double baseVal = 0;
-        for (Stat stat : scaling.keySet()){
-            StatInstance instance = stats.get(stat);
-            if(instance == null) continue;
-            baseVal += instance.getValue()*scaling.get(stat).getValue();
+        for(Stat stat : scaling.keySet()){
+            baseVal += provider.getStat(stat)*scaling.get(stat).getValue();
         }
-        cachedBaseStatBonus = baseVal;
 
+        if(cachedBaseStatBonus == baseVal) return;
+
+        cachedBaseStatBonus = baseVal;
         calculateCachedVal();
     }
+
 
     @Override
     public double getBaseValue() {

@@ -11,6 +11,8 @@ import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.cooldown.EntityCooldownHandler;
 import net.zic.zenithlib.custom_attributes.ZenithAttributeHolder;
 import net.zic.zenithlib.input.action.PlayerActionManager;
+import net.zic.zenithlib.stats.ZenithStatHandler;
+import net.zic.zenithlib.stats.ZenithStatHolder;
 
 import java.util.function.Supplier;
 
@@ -27,6 +29,13 @@ public class ZenithAttachments {
                     (holder)-> new ZenithAttributeHolder((LivingEntity) holder)
             )
                     .sync(new ZenithAttributeHolder.SyncHandler())
+                    .build()
+    );
+    public static final Supplier<AttachmentType<ZenithStatHolder>> STAT_HOLDER = ATTACHMENT_TYPES.register(
+            "stat_holder",()-> AttachmentType.builder(
+                            (holder)-> new ZenithStatHolder((LivingEntity) holder)
+                    )
+                    .sync(new ZenithStatHolder.SyncHandler())
                     .build()
     );
     public static final Supplier<AttachmentType<EntityCooldownHandler>> COOLDOWN_HANDLER = ATTACHMENT_TYPES.register(

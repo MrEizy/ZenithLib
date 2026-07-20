@@ -27,6 +27,9 @@ public class ValueContainer {
 
     private double cachedVal;
 
+    private double maxValue = Double.MAX_VALUE;
+    private double minValue = Double.MIN_VALUE;
+
     private static final StreamCodec<ByteBuf,ValueContainer> STREAM_CODEC = StreamCodec.of(ValueContainer::encode,ValueContainer::decode);
 
 
@@ -92,8 +95,8 @@ public class ValueContainer {
         this.base = Math.max(0,base);
         calculateCachedVal();
     }
-
-    protected void addModifierNoCacheUpdate(ValueContainerModifier modifier){
+    //updates the modifier map, but does not trigger a cache update, great for bulk operations
+    public void addModifierNoCacheUpdate(ValueContainerModifier modifier){
         if(modifier == null) return;
         if(modifier.getOperation() == ModifierOperation.ADD_BASE)addBase.put(modifier.getIdentifier(),modifier);
         else if(modifier.getOperation() == ModifierOperation.ADD_FINAL) addFinal.put(modifier.getIdentifier(),modifier);
@@ -119,10 +122,13 @@ public class ValueContainer {
         }
     }
 
+
     public void addModifier(ValueContainerModifier modifier){
         addModifierNoCacheUpdate(modifier);
         calculateCachedVal();
     }
+
+
     public void removeModifier(Identifier id){
         addFinal.remove(id);
         addBase.remove(id);
@@ -139,8 +145,18 @@ public class ValueContainer {
         calculateCachedVal();
     }
 
-    public double getValue(){return cachedVal;}
+    public void setMaxValue(double max){
+        maxValue = max;
+    }
+
+    public void setMinValue(double minValue) {
+        this.minValue = minValue;
+    }
+
+
+    public double getValue(){return Math.clamp(cachedVal,minValue,maxValue);}
     public double getBaseValue(){return base;}
+
 
 
     public static void encode(ByteBuf buf,ValueContainer container){
