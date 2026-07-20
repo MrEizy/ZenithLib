@@ -45,9 +45,12 @@ public class StatSheet {
         return statInstances;
     }
 
+
+
     public StatInstance getStatInstance(Stat stat){
         return statInstances.get(stat);
     }
+    public Collection<Stat> getAllStats() {return statInstances.keySet();}
     public Collection<StatInstance> getAllInstances(){
         return statInstances.values();
     }

@@ -1,26 +1,29 @@
 package net.zic.zenithlib.stats.event;
 
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.Event;
 import net.zic.zenithlib.stats.Stat;
 import net.zic.zenithlib.stats.StatInstance;
 import net.zic.zenithlib.stats.StatSheet;
 
+
+import java.util.Collection;
 import java.util.Map;
 
 public class StatsUpdatedEvent extends Event {
     private final LivingEntity entity;
-    private final Map<Stat, StatInstance>  statSheet;
+    private final Collection<Stat> dirtyStats;
 
-    public StatsUpdatedEvent(LivingEntity entity, StatSheet statSheet) {
+    public StatsUpdatedEvent(LivingEntity entity, Collection<Stat> dirtyStats) {
         this.entity = entity;
-        this.statSheet = Map.copyOf(statSheet.asMap()); //ensures it is not modified during the event
+        this.dirtyStats = dirtyStats;
     }
 
     public LivingEntity getEntity(){
         return entity;
     }
-    public Map<Stat, StatInstance> getStatSheet(){
-        return statSheet;
+    public Collection<Stat> getModifiedStats(){
+        return dirtyStats;
     }
 }
