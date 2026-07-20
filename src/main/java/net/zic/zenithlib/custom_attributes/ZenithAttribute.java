@@ -38,7 +38,7 @@ public class ZenithAttribute extends ValueContainer {
     private LivingEntity attachedEntity;
 
 
-    private final HashMap<Stat,ValueContainer> scaling = new HashMap<>();
+    final HashMap<Stat,ValueContainer> scaling = new HashMap<>();
 
     double cachedBaseStatBonus;
     double cachedAttributeValue;
@@ -95,7 +95,9 @@ public class ZenithAttribute extends ValueContainer {
         if(scaling.get(stat).getAllModifiers().isEmpty()) scaling.remove(stat);
     }
 
-
+    public Map<Stat,ValueContainer> getScaling(){
+        return scaling;
+    }
     public void update(StatProvider provider){
         double baseVal = 0;
         for(Stat stat : scaling.keySet()){
