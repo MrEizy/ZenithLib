@@ -38,7 +38,6 @@ public class ZenithAttachments {
                             (holder)-> new ZenithStatHolder((LivingEntity) holder)
                     )
                     .sync(new ZenithStatHolder.SyncHandler())
-                    .copyOnDeath()
                     .build()
     );
     public static final Supplier<AttachmentType<EntityCooldownHandler>> COOLDOWN_HANDLER = ATTACHMENT_TYPES.register(
