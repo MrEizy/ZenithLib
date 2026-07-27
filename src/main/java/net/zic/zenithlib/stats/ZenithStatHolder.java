@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.attachment.AttachmentSyncHandler;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
+import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.common.ZenithRegistries;
 import net.zic.zenithlib.custom_attributes.ZenithAttributeHolder;
 import net.zic.zenithlib.network.ByteBufHelpers;
@@ -26,14 +27,19 @@ public class ZenithStatHolder implements StatProvider{
     public ZenithStatHolder(LivingEntity attachedEntity) {
         this.attachedEntity = attachedEntity;
     }
+    public void sync(){
+        if(attachedEntity == null) return;
+        attachedEntity.syncData(ZenithAttachments.STAT_HOLDER);
+    }
 
     public void registerStatProvider(StatProvider provider){
         providers.add(provider);
-        //TODO if new trigger recalc
+        updateStats(provider.getStats());
+
     }
     public void removeStatProvider(StatProvider provider){
         providers.remove(provider);
-        //TODO trigger recalc
+        updateStats(provider.getStats());
     }
 
     public void updateStat(Stat stat){
@@ -49,6 +55,7 @@ public class ZenithStatHolder implements StatProvider{
         }
         newStatInstance.calculateCachedVal();
         cachedStatSheet.setStat(newStatInstance);
+        sync();
     }
 
     public void updateStats(Collection<Stat> stats){

@@ -16,6 +16,7 @@ import net.neoforged.neoforge.attachment.AttachmentSyncHandler;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.neoforged.neoforge.attachment.IAttachmentSerializer;
 import net.zic.zenithlib.ZenithLib;
+import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.cooldown.Cooldown;
 import net.zic.zenithlib.cooldown.EntityCooldownHandler;
 import net.zic.zenithlib.nbt.NbtHelpers;
@@ -53,9 +54,15 @@ public class ZenithAttributeHolder {
     }
 
 
+    public void sync(){
+        if(attachedEntity == null) return;
+        attachedEntity.syncData(ZenithAttachments.ATTRIBUTE_HOLDER);
+    }
+
     public void addAttribute(Holder<Attribute> attributeHolder) {
         if (hasAttribute(attributeHolder)) return;
         attributes.put(attributeHolder, new ZenithAttribute(attributeHolder, attachedEntity));
+        sync();
     }
     public void addSuppressedAttribute(Holder<Attribute> attributeHolder) {
         if (!hasAttribute(attributeHolder)) {
@@ -65,11 +72,12 @@ public class ZenithAttributeHolder {
             }
             attributes.put(attributeHolder, attribute);
         } else makeAttributeSuppressable(attributeHolder);
-
+        sync();
     }
 
     public void removeAttribute(Holder<Attribute> attributeHolder) {
         attributes.remove(attributeHolder);
+        sync();
     }
 
     public ZenithAttribute getAttribute(Holder<Attribute> attributeHolder) {
@@ -97,11 +105,13 @@ public class ZenithAttributeHolder {
 
         suppressedAttribute.calculateCachedVal();
         attributes.put(attributeHolder,suppressedAttribute);
+        sync();
     }
     public void setSuppression(Holder<Attribute> attributeHolder,double suppression){
         if(!hasAttribute(attributeHolder) || !isSuppressable(attributeHolder)) return;
 
         ((SuppressedZenithAttribute) getAttribute(attributeHolder)).setSuppression(suppression);
+        sync();
     }
 
     public Collection<Holder<Attribute>> getSuppressedAttributes(){
@@ -114,7 +124,9 @@ public class ZenithAttributeHolder {
 
     public void update(StatProvider provider) {
         attributes.forEach((holder, attribute) -> attribute.update(provider));
+        sync();
     }
+
 
 
     public void attachEntity() {
