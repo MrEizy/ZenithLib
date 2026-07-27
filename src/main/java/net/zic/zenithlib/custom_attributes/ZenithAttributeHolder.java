@@ -104,6 +104,13 @@ public class ZenithAttributeHolder {
         ((SuppressedZenithAttribute) getAttribute(attributeHolder)).setSuppression(suppression);
     }
 
+    public Collection<Holder<Attribute>> getSuppressedAttributes(){
+        ArrayList<Holder<Attribute>> suppressed = new ArrayList<>();
+        for(Holder<Attribute> attribute : attributes.keySet()){
+            if(isSuppressable(attribute)) suppressed.add(attribute);
+        }
+        return suppressed;
+    }
 
     public void update(StatProvider provider) {
         attributes.forEach((holder, attribute) -> attribute.update(provider));

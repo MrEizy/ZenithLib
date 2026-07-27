@@ -14,6 +14,9 @@ public class ZenithStatHandler {
 
         event.getEntity().getData(ZenithAttachments.STAT_HOLDER).updateStats(event.getModifiedStats());
         event.getEntity().getData(ZenithAttachments.ATTRIBUTE_HOLDER).update(event.getEntity().getData(ZenithAttachments.STAT_HOLDER));
+
+        event.getEntity().syncData(ZenithAttachments.STAT_HOLDER);
+        event.getEntity().syncData(ZenithAttachments.ATTRIBUTE_HOLDER);
     }
 
 }
