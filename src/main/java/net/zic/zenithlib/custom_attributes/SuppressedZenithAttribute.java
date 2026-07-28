@@ -63,7 +63,7 @@ public class SuppressedZenithAttribute  extends ZenithAttribute{
         if(buf.readBoolean()){
             double suppression = buf.readDouble();
             attribute = new SuppressedZenithAttribute(identifier,suppression);
-        } attribute = new ZenithAttribute(identifier);
+        } else attribute = new ZenithAttribute(identifier);
 
         List<ValueContainerModifier> modifiers = ByteBufHelpers.decodeArray(buf, ValueContainerModifier::decode);
         List<ValueContainer> scaling = ByteBufHelpers.decodeArray(buf, ValueContainer::decode);
