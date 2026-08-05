@@ -49,6 +49,7 @@ public class SuppressedZenithAttribute  extends ZenithAttribute{
 
     public static void encode(ZenithAttribute attribute, ByteBuf buf){
         ByteBufHelpers.encodeIdentifier(attribute.getIdentifier(),buf);
+        buf.writeDouble(attribute.cachedBaseStatBonus);
         buf.writeBoolean(attribute instanceof SuppressedZenithAttribute);
         if(attribute instanceof SuppressedZenithAttribute suppressedZenithAttribute) buf.writeDouble(suppressedZenithAttribute.getSuppression());
 
@@ -58,7 +59,7 @@ public class SuppressedZenithAttribute  extends ZenithAttribute{
     }
     public static ZenithAttribute decode(ByteBuf buf){
         Identifier identifier = ByteBufHelpers.decodeIdentifier(buf);
-
+        double cachedBaseStatBonus = buf.readDouble();
         ZenithAttribute attribute;
         if(buf.readBoolean()){
             double suppression = buf.readDouble();
@@ -72,7 +73,8 @@ public class SuppressedZenithAttribute  extends ZenithAttribute{
         for(ValueContainer container : scaling){
             attribute.scaling.put(ZenithRegistries.STAT_REGISTRY.getValue(container.getIdentifier()),container);
         }
-
+        attribute.cachedBaseStatBonus = cachedBaseStatBonus;
+        attribute.calculateCachedVal();
         return attribute;
     }
     public static void write(SuppressedZenithAttribute attribute, ValueOutput output){
