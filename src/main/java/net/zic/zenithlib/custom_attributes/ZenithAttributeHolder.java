@@ -49,20 +49,35 @@ public class ZenithAttributeHolder {
 
     private final HashMap<Holder<Attribute>,Double> cachedSuppressionValues = new HashMap<>();
 
+    private String process = null;
+    private final Random random = new Random();
     public ZenithAttributeHolder(LivingEntity attachedEntity) {
         this.attachedEntity = attachedEntity;
     }
 
-
+    public void startProcess(String process){
+        if(this.process == null) this.process = process;
+    }
+    public boolean resolveProcess(String process){
+        if(this.process == null) return false;
+        if(!this.process.equals(process)) return false;
+        this.process = null;
+        sync();
+        return true;
+    }
     public void sync(){
         if(attachedEntity == null) return;
         attachedEntity.syncData(ZenithAttachments.ATTRIBUTE_HOLDER);
+    }
+    protected void startAndResolve(String process){
+        startProcess(process);
+        resolveProcess(process);
     }
 
     public void addAttribute(Holder<Attribute> attributeHolder) {
         if (hasAttribute(attributeHolder)) return;
         attributes.put(attributeHolder, new ZenithAttribute(attributeHolder, attachedEntity));
-        sync();
+        startAndResolve("small_attribute_modification"+random.nextLong());
     }
     public void addSuppressedAttribute(Holder<Attribute> attributeHolder) {
         if (!hasAttribute(attributeHolder)) {
@@ -71,13 +86,14 @@ public class ZenithAttributeHolder {
                 attribute.setSuppression(cachedSuppressionValues.remove(attributeHolder));
             }
             attributes.put(attributeHolder, attribute);
+            startAndResolve("small_attribute_modification"+random.nextLong());
         } else makeAttributeSuppressable(attributeHolder);
-        sync();
+
     }
 
     public void removeAttribute(Holder<Attribute> attributeHolder) {
         attributes.remove(attributeHolder);
-        sync();
+
     }
 
     public ZenithAttribute getAttribute(Holder<Attribute> attributeHolder) {
@@ -105,13 +121,14 @@ public class ZenithAttributeHolder {
 
         suppressedAttribute.calculateCachedVal();
         attributes.put(attributeHolder,suppressedAttribute);
-        sync();
+        startAndResolve("small_attribute_modification"+random.nextLong());
+
     }
     public void setSuppression(Holder<Attribute> attributeHolder,double suppression){
         if(!hasAttribute(attributeHolder) || !isSuppressable(attributeHolder)) return;
 
         ((SuppressedZenithAttribute) getAttribute(attributeHolder)).setSuppression(suppression);
-        sync();
+        startAndResolve("small_attribute_modification"+random.nextLong());
     }
 
     public Collection<Holder<Attribute>> getSuppressedAttributes(){
@@ -123,8 +140,10 @@ public class ZenithAttributeHolder {
     }
 
     public void update(StatProvider provider) {
+        String processId = "provider_update"+random.nextLong();
+        startProcess(processId);
         attributes.forEach((holder, attribute) -> attribute.update(provider));
-        sync();
+        resolveProcess(processId);
     }
 
 

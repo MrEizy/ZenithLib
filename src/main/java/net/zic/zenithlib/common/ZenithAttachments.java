@@ -11,7 +11,6 @@ import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.cooldown.EntityCooldownHandler;
 import net.zic.zenithlib.custom_attributes.ZenithAttributeHolder;
 import net.zic.zenithlib.input.action.PlayerActionManager;
-import net.zic.zenithlib.stats.ZenithStatHandler;
 import net.zic.zenithlib.stats.ZenithStatHolder;
 
 import java.util.function.Supplier;
