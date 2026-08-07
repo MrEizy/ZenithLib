@@ -13,6 +13,10 @@ public class ZenithPayloads {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
-
+        registrar.playToServer(
+                ActionChangedPacket.TYPE,
+                ActionChangedPacket.STREAM_CODEC,
+                ActionChangedPacket::handlePayload
+        );
     }
 }
