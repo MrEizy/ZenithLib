@@ -2,6 +2,8 @@ package net.zic.zenithlib;
 
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.zic.zenithlib.command.RandomTeleportCommand;
 import net.zic.zenithlib.command.ZenithInspectCommand;
 import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.datagen.ZenithLibDataGenerators;
@@ -33,7 +35,6 @@ public class ZenithLib {
 
 
         NeoForge.EVENT_BUS.register(this);
-        NeoForge.EVENT_BUS.addListener(ZenithInspectCommand::onRegisterCommands);
 
         ZenithAttachments.register(modEventBus);
 
@@ -41,6 +42,15 @@ public class ZenithLib {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
     }
+
+
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterCommandsEvent event) {
+        RandomTeleportCommand.onRegisterCommands(event);
+        ZenithInspectCommand.onRegisterCommands(event);
+    }
+
+
 
     private void commonSetup(FMLCommonSetupEvent event) {
 
