@@ -96,6 +96,7 @@ public class ValueContainer<T extends Number>{
         if(modifiers.containsKey(modifier.getId())) return;
 
         operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>()).addBonusModifier(modifier);
+        if(recalculate) calculateValue();
     }
     public void addMultiplierModifier(MultiplierModifier modifier){
         addMultiplierModifier(modifier,true);
@@ -103,6 +104,7 @@ public class ValueContainer<T extends Number>{
     public void addMultiplierModifier(MultiplierModifier modifier,boolean recalculate){
         if(modifiers.containsKey(modifier.getId())) return;
         operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>()).addMultiplierModifier(modifier);
+        if(recalculate) calculateValue();
     }
 
     public void calculateValue(){
@@ -134,4 +136,7 @@ public class ValueContainer<T extends Number>{
         return baseValue;
     }
 
+    public Identifier getContainerId() {
+        return containerId;
+    }
 }

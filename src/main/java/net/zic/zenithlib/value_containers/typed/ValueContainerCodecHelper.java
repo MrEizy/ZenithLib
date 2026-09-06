@@ -16,21 +16,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ValueContainerCodecHelper {
-    public record BaseValue<T extends Number>(Identifier container,T value){
-        public BaseValue(Map.Entry<Identifier,T> entry){
-            this(entry.getKey(),entry.getValue());
-        }
 
-    }
 
-    public static <T extends Number> Codec<List<BaseValue<T>>> baseValueListCodec(Codec<T> valCodec){
-        return Codec.unboundedMap(
-                Identifier.CODEC,
-                valCodec
-        ).xmap(
-                raw->raw.entrySet().stream().map(BaseValue::new).toList(),
-                list->list.stream().collect(Collectors.toMap(BaseValue::container,BaseValue::value))
-        );
+    public static <T extends Number> Codec<Map<Identifier,T>> containerBaseValuesCodec(Codec<T> valCodec){
+        return Codec.unboundedMap(Identifier.CODEC,valCodec);
     }
 
     public static <T extends Number> Codec<BonusModifier<T>> bonusModifierCodec(Codec<T> valCodec){
@@ -40,7 +29,6 @@ public class ValueContainerCodecHelper {
                                 val-> val.equals("bonus") ? DataResult.success(val) : DataResult.error(()->"expected multiplier")
                         ).fieldOf("type").forGetter((val)->"bonus"),
                         Identifier.CODEC.fieldOf("id").forGetter(BonusModifier::id),
-                        Identifier.CODEC.optionalFieldOf("group",Identifier.parse("none")).forGetter(BonusModifier::group),
                         Codec.INT.optionalFieldOf("operation_group",0).forGetter(BonusModifier::operationGroup),
                         valCodec.fieldOf("value").forGetter(BonusModifier<T>::val)
                 ).apply(instance,BonusModifier::new)
@@ -65,7 +53,7 @@ public class ValueContainerCodecHelper {
         return Codec.either(bonusModifierCodec(valCodec),multiplierModifierCodec());
     }
 
-    public static <T extends Number> Codec<Map<Identifier,List<Either<BonusModifier<T>,MultiplierModifier>>>> containerModifiers(Codec<T> valCodec){
+    public static <T extends Number> Codec<Map<Identifier,List<Either<BonusModifier<T>,MultiplierModifier>>>> containerModifiersCodec(Codec<T> valCodec){
 
         return Codec.unboundedMap(Identifier.CODEC,modifierCodec(valCodec).listOf());
     }

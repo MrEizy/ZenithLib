@@ -11,6 +11,7 @@ import net.zic.zenithlib.network.ByteBufHelpers;
 
 import java.util.Collection;
 
+@Deprecated
 public class NamedValueContainer extends ValueContainer{
 
     private final Component name;

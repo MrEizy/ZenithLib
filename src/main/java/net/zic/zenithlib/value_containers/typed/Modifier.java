@@ -10,4 +10,23 @@ public sealed interface Modifier permits BonusModifier,MultiplierModifier {
     Identifier getGroup();
     int getOperationGroup();
 
+    static <T extends Number> BonusModifier<T> bonus(Identifier id,T val){
+        return new BonusModifier<>(id,0,val);
+    }
+    static <T extends Number> BonusModifier<T> bonus(Identifier id,int operationGroup,T val){
+        return new BonusModifier<>(id,operationGroup,val);
+    }
+    static MultiplierModifier multiplier(Identifier id, double val){
+        return new MultiplierModifier(id,Identifier.parse("none"),0,val);
+    }
+    static MultiplierModifier multiplier(Identifier id,Identifier group, double val){
+        return new MultiplierModifier(id,group,0,val);
+    }
+    static MultiplierModifier multiplier(Identifier id,int operationGroup, double val){
+        return new MultiplierModifier(id,Identifier.parse("none"),operationGroup,val);
+    }
+    static MultiplierModifier multiplier(Identifier id,Identifier group,int operationGroup, double val){
+        return new MultiplierModifier(id,group,operationGroup,val);
+    }
+
 }
