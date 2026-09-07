@@ -19,6 +19,7 @@ public class ValueContainerHelpers {
 
 
     public static ValueContainer<Double> doubleValueContainer(Identifier containerId,double baseValue){
+
         return new ValueContainer<>(containerId,baseValue,Double::sum,DOUBLE_MUL);
     }
     public static NamedValueContainer<Double> namedDoubleValueContainer(Component name, Identifier containerId, double baseValue){

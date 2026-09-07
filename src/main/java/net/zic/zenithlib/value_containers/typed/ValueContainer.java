@@ -129,6 +129,11 @@ public class ValueContainer<T extends Number>{
 
     }
 
+    void setBaseValue(T baseValue){
+        this.baseValue = baseValue;
+        calculateValue();;
+    }
+
     public T getValue(){
         return calculatedValue;
     }
