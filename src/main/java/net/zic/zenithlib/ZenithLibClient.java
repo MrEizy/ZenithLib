@@ -10,7 +10,6 @@ import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.zic.zenithlib.classification.ZenithClassifications;
-import net.zic.zenithlib.creative.debug.CreativeSectionDebug;
 import net.zic.zenithlib.tooltip.manager.ZenithTooltipRepository;
 
 
@@ -37,7 +36,6 @@ public class ZenithLibClient {
     private void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             ZenithLib.LOGGER.info("(!) Zenith Lib Client Initialized (!)");
-            CreativeSectionDebug.register();
         });
     }
 

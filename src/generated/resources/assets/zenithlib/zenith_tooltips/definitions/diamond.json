@@ -1,9 +1,0 @@
-{
-  "priority": 100,
-  "selector": {
-    "items": [
-      "minecraft:diamond"
-    ]
-  },
-  "template": "zenithlib:showcase_material"
-}
