@@ -55,6 +55,11 @@ public class ZenithAttributeHolder {
         this.attachedEntity = attachedEntity;
     }
 
+    public static Holder<Attribute> getAttribute(Identifier attribute){
+        if(!BuiltInRegistries.ATTRIBUTE.containsKey(attribute)) return null;
+        return BuiltInRegistries.ATTRIBUTE.wrapAsHolder(BuiltInRegistries.ATTRIBUTE.getValue(attribute));
+    }
+
     public void startProcess(String process){
         if(this.process == null) this.process = process;
     }

@@ -13,6 +13,10 @@ import net.zic.zenithlib.network.ByteBufHelpers;
 
 import java.util.*;
 
+/**
+ * @deprecated scheduled for removal use {@link net.zic.zenithlib.value_containers.typed.ValueContainer}
+ */
+@Deprecated(forRemoval = true)
 public class ValueContainer {
     private final Identifier valueIdentifier;
     private double base;

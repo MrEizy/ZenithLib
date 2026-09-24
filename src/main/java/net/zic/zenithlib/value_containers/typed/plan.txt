@@ -1,0 +1,16 @@
+I want to be able to have different Value Containers for different types
+
+e.g a double int or long container
+
+the modifiers would need to reflect this
+
+so split them into:
+- bonus -> flat, same type as container
+- multiplier-> multiplied, always double
+
+
+so instead of Modifier operation we have either BonusModifier
+or MultiplierModifier
+
+then these receive a priority/order value (either int or fixed? not sure yet)
+

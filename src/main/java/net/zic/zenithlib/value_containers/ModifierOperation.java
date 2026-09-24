@@ -1,5 +1,6 @@
 package net.zic.zenithlib.value_containers;
 
+@Deprecated
 public enum ModifierOperation {
     MULTIPLY_BASE, // total += base*(1+val)
     ADD_BASE,
