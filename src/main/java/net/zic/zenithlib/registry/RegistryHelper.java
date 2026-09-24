@@ -1,6 +1,7 @@
 package net.zic.zenithlib.registry;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
@@ -23,6 +24,8 @@ public class RegistryHelper {
             }
             return registry.orElse(null);
         }
+
+
     }
 
     public static <T> DataPackRegistry<T> dataPackRegistry(String namespace, String key, Supplier<Codec<T>> codec){
