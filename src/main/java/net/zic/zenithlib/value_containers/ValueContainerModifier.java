@@ -3,12 +3,9 @@ package net.zic.zenithlib.value_containers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.network.ByteBufHelpers;
-import net.zic.zenithlib.value_containers.typed.BonusModifier;
-import net.zic.zenithlib.value_containers.typed.MultiplierModifier;
 
 import java.util.List;
 import java.util.Map;

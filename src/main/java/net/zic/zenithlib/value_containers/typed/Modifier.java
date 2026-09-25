@@ -1,32 +1,30 @@
 package net.zic.zenithlib.value_containers.typed;
 
 import net.minecraft.resources.Identifier;
-/*
-    While MultiplierModifier IS just Double bonus modifier, the key is that it is used to differentiate
-    them internally. e.g a double value container would need a way to differentiate flat vs multiplier
- */
-public sealed interface Modifier permits BonusModifier,MultiplierModifier {
-    Identifier getId();
-    Identifier getGroup();
-    int getOperationGroup();
 
-    static <T extends Number> BonusModifier<T> bonus(Identifier id,T val){
-        return new BonusModifier<>(id,0,val);
+public record Modifier<T extends Number>(String type, Identifier id, Identifier group, int operationGroup, T value){
+
+
+    public static Modifier<Double> multiplier(Identifier id, double value){
+        return multiplier(id,Identifier.parse("none"),0,value);
     }
-    static <T extends Number> BonusModifier<T> bonus(Identifier id,int operationGroup,T val){
-        return new BonusModifier<>(id,operationGroup,val);
+    public static Modifier<Double> multiplier(Identifier id, Identifier group, double value){
+        return multiplier(id,group,0,value);
     }
-    static MultiplierModifier multiplier(Identifier id, double val){
-        return new MultiplierModifier(id,Identifier.parse("none"),0,val);
+    public static Modifier<Double> multiplier(Identifier id, int operationGroup, double value){
+        return multiplier(id,Identifier.parse("none"),operationGroup,value);
     }
-    static MultiplierModifier multiplier(Identifier id,Identifier group, double val){
-        return new MultiplierModifier(id,group,0,val);
+    public static Modifier<Double> multiplier(Identifier id, Identifier group, int operationGroup, double value){
+        return new Modifier<>("multiplier",id,group,operationGroup,value);
     }
-    static MultiplierModifier multiplier(Identifier id,int operationGroup, double val){
-        return new MultiplierModifier(id,Identifier.parse("none"),operationGroup,val);
+
+    public static <T extends Number> Modifier<T> flat(Identifier id, int operationGroup, T value){
+        return new Modifier<>("flat",id,Identifier.parse("none"),operationGroup,value);
     }
-    static MultiplierModifier multiplier(Identifier id,Identifier group,int operationGroup, double val){
-        return new MultiplierModifier(id,group,operationGroup,val);
+    public static <T extends Number> Modifier<T> base(Identifier id, T value){
+        return flat(id,0,value);
     }
+
+
 
 }
