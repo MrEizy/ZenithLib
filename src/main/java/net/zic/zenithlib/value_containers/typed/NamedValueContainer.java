@@ -7,8 +7,8 @@ import java.util.function.BiFunction;
 
 public class NamedValueContainer<T extends Number> extends ValueContainer<T>{
     private final Component name;
-    public NamedValueContainer(Component name,Identifier containerId, T baseValue, BiFunction<T, T, T> adder, BiFunction<T, Double, T> multiplier) {
-        super(containerId,baseValue, adder, multiplier);
+    public NamedValueContainer(Component name,Identifier containerId, T baseValue, BiFunction<T, T, T> adder, BiFunction<T, Double, T> multiplier,T defaultValue) {
+        super(containerId,baseValue, adder, multiplier,defaultValue);
         this.name = name;
     }
 
