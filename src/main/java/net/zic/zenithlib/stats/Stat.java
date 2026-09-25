@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.Config;
+import net.zic.zenithlib.value_containers.typed.ValueContainer;
 
 // CONSIDER making this datapackable
 public class Stat {
@@ -36,8 +37,8 @@ public class Stat {
         return shortName;
     }
 
-    public StatInstance newInstance(double base){
-        return new StatInstance(this,base);
+    public ValueContainer<Double> statInstance(double base){
+        return ZenithStatHelper.statInstance(this,base);
     }
 
 

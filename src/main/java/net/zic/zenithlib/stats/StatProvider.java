@@ -1,6 +1,7 @@
 package net.zic.zenithlib.stats;
 
 import net.minecraft.resources.Identifier;
+import net.zic.zenithlib.value_containers.typed.ValueContainer;
 
 import java.util.Collection;
 
@@ -14,7 +15,7 @@ public interface StatProvider {
 
     Collection<Stat> getStats();
 
-    StatInstance getStatInstance(Stat stat);
+    ValueContainer<Double> getStatInstance(Stat stat);
 
     double getStat(Stat stat);
     double getBaseStat(Stat stat);

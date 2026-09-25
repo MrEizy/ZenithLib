@@ -31,15 +31,22 @@ public class ValueContainerHelpers {
     public static final Encoder<Float> FLOAT_ENCODER = (val, buf) -> buf.writeFloat(val);
     public static final Decoder<Float> FLOAT_DECODER = ByteBuf::readFloat;
 
+    public static ValueContainer<Double> doubleValueContainer(Identifier containerId){
+
+        return new ValueContainer<>(containerId,Double::sum,DOUBLE_MUL,DOUBLE_ENCODER,DOUBLE_DECODER,0d);
+    }
     public static ValueContainer<Double> doubleValueContainer(Identifier containerId,double baseValue){
 
         return new ValueContainer<>(containerId,baseValue,Double::sum,DOUBLE_MUL,DOUBLE_ENCODER,DOUBLE_DECODER,0d);
     }
+
     public static NamedValueContainer<Double> namedDoubleValueContainer(Component name, Identifier containerId, double baseValue){
         return new NamedValueContainer<>(name,containerId,baseValue,Double::sum,DOUBLE_MUL,DOUBLE_ENCODER,DOUBLE_DECODER,0d);
     }
 
-
+    public static ValueContainer<Integer> integerValueContainer(Identifier containerId){
+        return new ValueContainer<>(containerId,Integer::sum,INTEGER_MUL,INTEGER_ENCODER,INTEGER_DECODER,0);
+    }
     public static ValueContainer<Integer> integerValueContainer(Identifier containerId,int baseValue){
         return new ValueContainer<>(containerId,baseValue,Integer::sum,INTEGER_MUL,INTEGER_ENCODER,INTEGER_DECODER,0);
     }
@@ -47,7 +54,9 @@ public class ValueContainerHelpers {
         return new NamedValueContainer<>(name,containerId,baseValue,Integer::sum,INTEGER_MUL,INTEGER_ENCODER,INTEGER_DECODER,0);
     }
 
-
+    public static ValueContainer<Long> longValueContainer(Identifier containerId){
+        return new ValueContainer<>(containerId,Long::sum,LONG_MUL,LONG_ENCODER,LONG_DECODER,0L);
+    }
     public static ValueContainer<Long> longValueContainer(Identifier containerId,long baseValue){
         return new ValueContainer<>(containerId,baseValue,Long::sum,LONG_MUL,LONG_ENCODER,LONG_DECODER,0L);
     }
@@ -55,6 +64,9 @@ public class ValueContainerHelpers {
         return new NamedValueContainer<>(name,containerId,baseValue,Long::sum,LONG_MUL,LONG_ENCODER,LONG_DECODER,0L);
     }
 
+    public static ValueContainer<Float> floatValueContainer(Identifier containerId){
+        return new ValueContainer<>(containerId,Float::sum,FLOAT_MUL,FLOAT_ENCODER,FLOAT_DECODER,0f);
+    }
     public static ValueContainer<Float> floatValueContainer(Identifier containerId,float baseValue){
         return new ValueContainer<>(containerId,baseValue,Float::sum,FLOAT_MUL,FLOAT_ENCODER,FLOAT_DECODER,0f);
     }

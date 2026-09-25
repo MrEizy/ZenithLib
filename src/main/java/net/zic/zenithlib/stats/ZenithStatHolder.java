@@ -1,5 +1,6 @@
 package net.zic.zenithlib.stats;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,14 +11,12 @@ import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.common.ZenithRegistries;
 import net.zic.zenithlib.custom_attributes.ZenithAttributeHolder;
 import net.zic.zenithlib.network.ByteBufHelpers;
-import net.zic.zenithlib.value_containers.ValueContainerModifier;
+import net.zic.zenithlib.value_containers.typed.ValueContainer;
+import net.zic.zenithlib.value_containers.typed.ValueContainerHelpers;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class ZenithStatHolder implements StatProvider{
     private final LivingEntity attachedEntity;
@@ -67,17 +66,19 @@ public class ZenithStatHolder implements StatProvider{
     public void updateStat(Stat stat){
         String processId = "small_stat_update"+random.nextLong();
         startProcess(processId);
-        StatInstance newStatInstance = new StatInstance(stat,0);
+        List<ValueContainer<Double>> containers = new ArrayList<>();
         for(StatProvider provider : providers){
-            StatInstance instance = provider.getStatInstance(stat);
+            ValueContainer<Double> instance = provider.getStatInstance(stat);
             if(instance == null) continue;
-            newStatInstance.setBaseValue(newStatInstance.getBaseValue()+instance.getBaseValue());
-            for(ValueContainerModifier modifier :instance.getAllModifiers()){
-                newStatInstance.addModifierNoCacheUpdate(modifier);
-            }
+            containers.add(instance);
         }
-        newStatInstance.calculateCachedVal();
-        cachedStatSheet.setStat(newStatInstance);
+        ValueContainer<Double> container = ValueContainer.from(
+                ZenithRegistries.STAT_REGISTRY.getKey(stat),
+                containers
+        );
+        if(container == null) cachedStatSheet.removeStat(stat);
+        else cachedStatSheet.setStat(container);
+
         resolveProcess(process);
     }
 
@@ -94,7 +95,7 @@ public class ZenithStatHolder implements StatProvider{
     }
 
     @Override
-    public StatInstance getStatInstance(Stat stat) {
+    public ValueContainer<Double> getStatInstance(Stat stat) {
         return cachedStatSheet.getStatInstance(stat);
     }
 
@@ -114,7 +115,7 @@ public class ZenithStatHolder implements StatProvider{
         @Override
         public void write(@NonNull RegistryFriendlyByteBuf buf, ZenithStatHolder attachment, boolean initialSync) {
 
-            ByteBufHelpers.encodeCollection(attachment.cachedStatSheet.getAllInstances(), buf, StatInstance::encode);
+            ByteBufHelpers.encodeCollection(attachment.cachedStatSheet.getAllInstances(), buf, (val,byteBuf)->ValueContainer.encode(val,byteBuf,Codec.DOUBLE));
         }
 
         @Override
@@ -122,8 +123,9 @@ public class ZenithStatHolder implements StatProvider{
             if(!(holder instanceof LivingEntity entity)) return null;
             if(previousValue == null) previousValue = new ZenithStatHolder(entity);
 
-            List<StatInstance> instances = ByteBufHelpers.decodeArray(buf, StatInstance::decode);
-            for(StatInstance instance : instances) previousValue.cachedStatSheet.setStat(instance);
+            List<ValueContainer<Double>> instances = ByteBufHelpers.<ValueContainer<Double>>decodeArray(buf,
+                    (byteBuf)->ValueContainer.decode(ValueContainerHelpers::doubleValueContainer,byteBuf, Codec.DOUBLE));
+            for(ValueContainer<Double> instance : instances) previousValue.cachedStatSheet.setStat(instance);
 
             return previousValue;
         }

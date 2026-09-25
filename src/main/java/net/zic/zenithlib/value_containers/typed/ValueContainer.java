@@ -175,6 +175,17 @@ public class ValueContainer<T extends Number>{
         return containerId;
     }
 
+    public List<Modifier<T>> getFlatModifiers(){
+        List<Modifier<T>> flatModifiers = new ArrayList<>();
+        for(OperationGroup<T> operationGroup : operationGroups.values()) flatModifiers.addAll(operationGroup.flatModifiers.values());
+        return flatModifiers;
+    }
+    public List<Modifier<Double>> getMultiplierModifiers(){
+        List<Modifier<Double>> multiplierModifiers = new ArrayList<>();
+        for(OperationGroup<T> operationGroup : operationGroups.values()) multiplierModifiers.addAll(operationGroup.multiplierModifiers.values());
+        return multiplierModifiers;
+    }
+
 
     public Encoder<T> getEncoder(){return encoder;}
     public Decoder<T> getDecoder(){return decoder;}
@@ -214,5 +225,29 @@ public class ValueContainer<T extends Number>{
 
         return container;
 
+    }
+
+    public static <T extends Number> ValueContainer<T> from(Identifier containerId,List<ValueContainer<T>> containers){
+        if(containers.isEmpty()) return null;
+        T baseValue = containers.getFirst().defaultValue;
+        BiFunction<T,T,T> adder = containers.getFirst().adder;
+        BiFunction<T,Double,T> multiplier = containers.getFirst().multiplier;
+        Encoder<T> encoder = containers.getFirst().encoder;
+        Decoder<T> decoder = containers.getFirst().decoder;
+
+        List<Modifier<T>> flatModifiers = new ArrayList<>();
+        List<Modifier<Double>> multiplierModifiers = new ArrayList<>();
+        for(ValueContainer<T> container : containers){
+            baseValue = adder.apply(baseValue,container.getBaseValue());
+            flatModifiers.addAll(container.getFlatModifiers());
+            multiplierModifiers.addAll(container.getMultiplierModifiers());
+        }
+
+        ValueContainer<T> container = new ValueContainer<>(containerId,baseValue,adder,multiplier,encoder,decoder,containers.getFirst().defaultValue);
+        for (Modifier<T> flatModifier : flatModifiers) container.addFlatModifier(flatModifier,false);
+        for(Modifier<Double> multiplierModifier:multiplierModifiers) container.addMultiplierModifier(multiplierModifier,false);
+
+        container.calculateValue();
+        return container;
     }
 }
