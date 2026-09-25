@@ -101,7 +101,7 @@ public class ValueContainer<T extends Number>{
     }
     public void addBonusModifier(BonusModifier<T> modifier,boolean recalculate){
         if(modifiers.containsKey(modifier.getId())) return;
-
+        modifiers.put(modifier.getId(),modifier);
         operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>()).addBonusModifier(modifier);
         if(recalculate) calculateValue();
     }
