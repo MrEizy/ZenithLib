@@ -2,6 +2,7 @@ package net.zic.zenithlib.value_containers.typed;
 
 
 import net.minecraft.resources.Identifier;
+import net.zic.zenithlib.ZenithLib;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -15,20 +16,26 @@ import java.util.function.BiFunction;
 
  */
 public class ValueContainer<T extends Number>{
-    private T baseValue;
+    private T cachedBaseValue;
     private T calculatedValue;
 
     private final Identifier containerId;
     private final BiFunction<T,T,T> adder;
     private final BiFunction<T,Double,T> multiplier;
+    private final T defaultValue;
     private final Map<Integer,OperationGroup<T>> operationGroups = new HashMap<>();
     private final Map<Identifier,Modifier> modifiers = new HashMap<>();
 
-    public ValueContainer(Identifier containerId,T baseValue,BiFunction<T, T, T> adder, BiFunction<T, Double, T> multiplier) {
+    public ValueContainer(Identifier containerId, T baseValue, BiFunction<T, T, T> adder, BiFunction<T, Double, T> multiplier, T defaultValue) {
         this.containerId = containerId;
-        this.baseValue = baseValue;
         this.adder = adder;
         this.multiplier = multiplier;
+        this.defaultValue = defaultValue;
+        addBonusModifier(Modifier.bonus(
+                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"bases"),
+                0,
+                baseValue
+        ));
     }
 
     //TODO consider throwing error if they try to replace an existing modifier?
@@ -111,34 +118,34 @@ public class ValueContainer<T extends Number>{
         //TODO consider just using a TreeMap
         List<Integer> groups = operationGroups.keySet().stream().sorted().toList();
 
-        calculatedValue = baseValue;
+        calculatedValue = defaultValue;
 
         for(Integer operationGroup : groups){
             OperationGroup<T> group = operationGroups.get(operationGroup);
+
+            T bonus = group.getBonus(adder);
+            if(bonus != null){
+                if(operationGroup == 0) cachedBaseValue = bonus;
+                calculatedValue = adder.apply(calculatedValue,bonus);
+            }else if (operationGroup == 0) cachedBaseValue = defaultValue;
 
             double modifier = group.getMultiplier();
 
             calculatedValue = multiplier.apply(calculatedValue,modifier);
 
-            T bonus = group.getBonus(adder);
-            if(bonus != null){
-                calculatedValue = adder.apply(calculatedValue,bonus);
-            }
+
 
         }
 
     }
 
-    public void setBaseValue(T baseValue){
-        this.baseValue = baseValue;
-        calculateValue();;
-    }
+
 
     public T getValue(){
         return calculatedValue;
     }
     public T getBaseValue(){
-        return baseValue;
+        return cachedBaseValue;
     }
 
     public Identifier getContainerId() {
