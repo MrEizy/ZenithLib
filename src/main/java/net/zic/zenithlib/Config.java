@@ -4,12 +4,25 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.List;
+
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Neo's config APIs
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
+
     private static final ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
 
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> SUPPRESSABLE_ATTRIBUTES = SERVER_BUILDER
+            .translation("config.zenith_lib.attributes.suppression.supressable")
+            .defineListAllowEmpty(
+            "attributes.suppression.supressable",List.of("minecraft:max_health"),()->"namespace:attribute",(raw)-> raw instanceof String rawString && BuiltInRegistries.ATTRIBUTE.containsKey(Identifier.parse(rawString))
+            );
+    public static final ModConfigSpec.ConfigValue<Integer> SUPPRESSION_OPERATION_GROUP = SERVER_BUILDER
+            .translation("config.zenith_lib.attributes.suppression.operation_group")
+            .define("attributes.suppression.operation_group",10);
 
     public static final ModConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
             .comment("Whether to log the dirt block on common setup")
@@ -54,7 +67,7 @@ public class Config {
             .defineInRange("tooltips.animations.particleBudget", 32, 0, 128);
 
     public static final ModConfigSpec CLIENT_SPEC = CLIENT_BUILDER.build();
-
+    public static final ModConfigSpec SERVER_SPEC = SERVER_BUILDER.build();
     private static boolean validateItemName(final Object obj) {
         return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(Identifier.parse(itemName));
     }

@@ -41,6 +41,7 @@ public class ZenithLib {
         modEventBus.addListener(this::registerKeyBindings);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
     }
 
 
