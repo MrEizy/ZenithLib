@@ -40,6 +40,8 @@ public class Stat {
     public ValueContainer<Double> statInstance(double base){
         return ZenithStatHelper.statInstance(this,base);
     }
-
+    public ValueContainer<Double> statInstance(){
+        return ZenithStatHelper.statInstance(this);
+    }
 
 }

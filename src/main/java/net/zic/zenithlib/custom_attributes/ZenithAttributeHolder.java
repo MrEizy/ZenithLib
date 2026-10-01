@@ -2,7 +2,6 @@ package net.zic.zenithlib.custom_attributes;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,42 +12,26 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.attachment.AttachmentSyncHandler;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.neoforged.neoforge.attachment.IAttachmentSerializer;
-import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.network.ByteBufHelpers;
 import net.zic.zenithlib.stats.StatProvider;
-import net.zic.zenithlib.value_containers.ValueContainerModifier;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Random;
 
-/**
- * This is our custom attribute holder that all mods using this mod will include
- *
- * this way no scenario will pop up where a single entity has multiple sources of attributes
- * so mods should only be modifying this through modifiers or scaling with custom stats
- *
- * when trying to access an attribute if they do not have it, it will default to 0.
- * if they try to add a scaling and it does not exist it will add it
- * TO CONSIDER (create some sort of on First created event so mods can hook in and provide default attribtues?)
- */
 public class ZenithAttributeHolder {
-
     private final LivingEntity attachedEntity;
     private final HashMap<Holder<Attribute>, ZenithAttribute> attributes = new HashMap<>();
-
     private final HashMap<Holder<Attribute>,Double> cachedSuppressionValues = new HashMap<>();
+
 
     private String process = null;
     private final Random random = new Random();
+
     public ZenithAttributeHolder(LivingEntity attachedEntity) {
         this.attachedEntity = attachedEntity;
-    }
-
-    public static Holder<Attribute> getAttribute(Identifier attribute){
-        if(!BuiltInRegistries.ATTRIBUTE.containsKey(attribute)) return null;
-        return BuiltInRegistries.ATTRIBUTE.wrapAsHolder(BuiltInRegistries.ATTRIBUTE.getValue(attribute));
     }
 
     public void startProcess(String process){
@@ -62,77 +45,13 @@ public class ZenithAttributeHolder {
         return true;
     }
     public void sync(){
-        if(attachedEntity == null) return;
+        if(attachedEntity == null || attachedEntity.level().isClientSide() ||( attachedEntity instanceof ServerPlayer serverPlayer && serverPlayer.connection == null)) return;
+
         attachedEntity.syncData(ZenithAttachments.ATTRIBUTE_HOLDER);
     }
     protected void startAndResolve(String process){
         startProcess(process);
         resolveProcess(process);
-    }
-
-    public void addAttribute(Holder<Attribute> attributeHolder) {
-        if (hasAttribute(attributeHolder)) return;
-        attributes.put(attributeHolder, new ZenithAttribute(attributeHolder, attachedEntity));
-        startAndResolve("small_attribute_modification"+random.nextLong());
-    }
-    public void addSuppressedAttribute(Holder<Attribute> attributeHolder) {
-        if (!hasAttribute(attributeHolder)) {
-            SuppressedZenithAttribute attribute = new SuppressedZenithAttribute(attributeHolder, attachedEntity);
-            if (cachedSuppressionValues.containsKey(attributeHolder)) {
-                attribute.setSuppression(cachedSuppressionValues.remove(attributeHolder));
-            }
-            attributes.put(attributeHolder, attribute);
-            startAndResolve("small_attribute_modification"+random.nextLong());
-        } else makeAttributeSuppressable(attributeHolder);
-
-    }
-
-    public void removeAttribute(Holder<Attribute> attributeHolder) {
-        attributes.remove(attributeHolder);
-
-    }
-
-    public ZenithAttribute getAttribute(Holder<Attribute> attributeHolder) {
-        return attributes.get(attributeHolder);
-    }
-
-    public boolean hasAttribute(Holder<Attribute> attributeHolder) {
-        return attributes.containsKey(attributeHolder);
-    }
-
-    public boolean isSuppressable(Holder<Attribute> attributeHolder){
-        if(!attributes.containsKey(attributeHolder)) return false;
-        return getAttribute(attributeHolder) instanceof SuppressedZenithAttribute;
-    }
-    public void makeAttributeSuppressable(Holder<Attribute> attributeHolder){
-        if(!hasAttribute(attributeHolder) || isSuppressable(attributeHolder)) return;
-        ZenithAttribute attribute = getAttribute(attributeHolder);
-
-        SuppressedZenithAttribute suppressedAttribute = new SuppressedZenithAttribute(attribute.getIdentifier());
-        if(cachedSuppressionValues.containsKey(attributeHolder)){
-            suppressedAttribute.setSuppression(cachedSuppressionValues.remove(attributeHolder));
-        }
-        for (ValueContainerModifier modifier : attribute.getAllModifiers()) suppressedAttribute.addModifierNoCacheUpdate(modifier);
-        suppressedAttribute.scaling.putAll(attribute.getScaling());
-
-        suppressedAttribute.calculateCachedVal();
-        attributes.put(attributeHolder,suppressedAttribute);
-        startAndResolve("small_attribute_modification"+random.nextLong());
-
-    }
-    public void setSuppression(Holder<Attribute> attributeHolder,double suppression){
-        if(!hasAttribute(attributeHolder) || !isSuppressable(attributeHolder)) return;
-
-        ((SuppressedZenithAttribute) getAttribute(attributeHolder)).setSuppression(suppression);
-        startAndResolve("small_attribute_modification"+random.nextLong());
-    }
-
-    public Collection<Holder<Attribute>> getSuppressedAttributes(){
-        ArrayList<Holder<Attribute>> suppressed = new ArrayList<>();
-        for(Holder<Attribute> attribute : attributes.keySet()){
-            if(isSuppressable(attribute)) suppressed.add(attribute);
-        }
-        return suppressed;
     }
 
     public void update(StatProvider provider) {
@@ -143,20 +62,60 @@ public class ZenithAttributeHolder {
     }
 
 
+    public void addAttribute(Holder<Attribute> attributeHolder) {
+        if (attributes.containsKey(attributeHolder)) return;
+
+        ZenithAttribute zenithAttribute =  new ZenithAttribute(attributeHolder, attachedEntity);
+        attributes.put(attributeHolder, zenithAttribute);
+
+        if(cachedSuppressionValues.containsKey(zenithAttribute.getAttribute())) suppress(zenithAttribute.getAttribute(),cachedSuppressionValues.remove(zenithAttribute.getAttribute()));
+
+        startAndResolve("small_attribute_modification"+random.nextLong());
+
+    }
+    public void removeAttribute(Holder<Attribute> attributeHolder) {
+        attributes.remove(attributeHolder);
+
+    }
+    public ZenithAttribute getAttribute(Holder<Attribute> attribute) {
+        if(attachedEntity != null && attachedEntity.getAttribute(attribute) != null && !attributes.containsKey(attribute)) addAttribute(attribute);
+        return attributes.get(attribute);
+    }
+
+    public boolean hasAttribute(Holder<Attribute> attribute) {
+        return getAttribute(attribute) != null;
+    }
+
+
+    public boolean isSuppressable(Holder<Attribute> attribute){
+        return SuppressedAttributeHelper.isSuppressible(attribute);
+    }
+
+    public boolean suppress(Identifier attribute,double suppression){
+        return suppress(SuppressedAttributeHelper.getAttribute(attribute),suppression);
+    }
+    public boolean suppress(Holder<Attribute> attribute,double suppression){
+        if(!hasAttribute(attribute)) return false;
+        if(!isSuppressable(attribute)) return false;
+        SuppressedAttributeHelper.applySuppression(getAttribute(attribute), suppression);
+        return true;
+    }
+    public double getSuppression(Holder<Attribute> attribute){
+        if(!hasAttribute(attribute)) return 1;
+        if(!isSuppressable(attribute)) return 1;
+        return SuppressedAttributeHelper.getSuppression(getAttribute(attribute));
+    }
 
     public void attachEntity() {
         attributes.forEach(((attributeHolder, zenithAttribute) -> zenithAttribute.setAttachedEntity(attachedEntity)));
     }
-
-
     public void encode(ByteBuf buf) {
-        ByteBufHelpers.encodeCollection(attributes.values(), buf, SuppressedZenithAttribute::encode);
+        ByteBufHelpers.encodeCollection(attributes.values(), buf, ZenithAttribute::encode);
     }
-
-
     public void decode(ByteBuf buf) {
         attributes.clear();
-        ByteBufHelpers.decodeArray(buf, SuppressedZenithAttribute::decode).forEach(container -> attributes.put(container.getAttribute(), container));
+        ByteBufHelpers.decodeArray(buf, ZenithAttribute::decode).forEach(
+                container -> attributes.put(container.getAttribute(), container));
         attachEntity();
     }
 
@@ -192,12 +151,15 @@ public class ZenithAttributeHolder {
             ZenithAttributeHolder attributeHolder = new ZenithAttributeHolder(entity);
             ValueInput.ValueInputList suppressableAttributes = input.childrenListOrEmpty("suppressed_attributes");
             for(ValueInput suppressedInput : suppressableAttributes){
-                SuppressedZenithAttribute  attribute = SuppressedZenithAttribute.load(suppressedInput);
-                try {
-                    attributeHolder.cachedSuppressionValues.put(attribute.getAttribute(),attribute.getSuppression());
-                } catch (Exception e){
-                    ZenithLib.LOGGER.error("unable load suppression value for attribute {}",attribute.getIdentifier());
-                }
+
+                Identifier attribute = Identifier.parse(suppressedInput.getStringOr("attribute","none"));
+                double suppression = suppressedInput.getDoubleOr("suppression",1);
+
+                ZenithAttribute attributeWrapper = new ZenithAttribute(attribute);
+                if(attributeWrapper.getAttribute() == null || !SuppressedAttributeHelper.isSuppressible(attribute)) continue;
+
+                attributeHolder.cachedSuppressionValues.put(attributeWrapper.getAttribute(),suppression);
+
             }
 
             return attributeHolder;
@@ -207,7 +169,11 @@ public class ZenithAttributeHolder {
         public boolean write(ZenithAttributeHolder attachment, ValueOutput output) {
             ValueOutput.ValueOutputList outputList = output.childrenList("suppressed_attributes");
             for(ZenithAttribute attribute:attachment.attributes.values()){
-                if(attribute instanceof SuppressedZenithAttribute suppressedAttribute) SuppressedZenithAttribute.write(suppressedAttribute,outputList.addChild());
+                if(attachment.isSuppressable(attribute.getAttribute())) {
+                    ValueOutput suppressionOutput = outputList.addChild();
+                    suppressionOutput.putString("attribute",attribute.getContainerId().toString());
+                    suppressionOutput.putDouble("suppression",SuppressedAttributeHelper.getSuppression(attribute));
+                }
             }
             return true;
         }

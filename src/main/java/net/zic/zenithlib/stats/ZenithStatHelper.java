@@ -12,6 +12,9 @@ public class ZenithStatHelper {
     public static ValueContainer<Double> statInstance(Stat stat,double baseValue){
         return ValueContainerHelpers.doubleValueContainer(ZenithRegistries.STAT_REGISTRY.getKey(stat),baseValue);
     }
+    public static ValueContainer<Double> statInstance(Stat stat){
+        return ValueContainerHelpers.doubleValueContainer(ZenithRegistries.STAT_REGISTRY.getKey(stat));
+    }
     public static Stat stat(ValueContainer<Double> container){
         return ZenithRegistries.STAT_REGISTRY.getValue(container.getContainerId());
     }

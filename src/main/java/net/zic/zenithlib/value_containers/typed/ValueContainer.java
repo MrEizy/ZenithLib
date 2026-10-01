@@ -24,8 +24,8 @@ import java.util.function.Function;
 
  */
 public class ValueContainer<T extends Number>{
-    private T calculatedBaseValue;
-    private T calculatedValue;
+    T calculatedBaseValue;
+    T calculatedValue;
 
     private final Identifier containerId;
     private final BiFunction<T,T,T> adder;
@@ -34,7 +34,8 @@ public class ValueContainer<T extends Number>{
     private final Decoder<T> decoder;
     private final T defaultValue;
     private final Map<Integer,OperationGroup<T>> operationGroups = new HashMap<>();
-    private final Map<Identifier, Modifier<?>> modifiers = new HashMap<>();
+    private final Map<Identifier, Modifier<T>> flatModifiers = new HashMap<>();
+    private final Map<Identifier, Modifier<Double>> multiplierModifiers = new HashMap<>();
 
     public ValueContainer(Identifier containerId, T baseValue, BiFunction<T, T, T> adder, BiFunction<T, Double, T> multiplier, Encoder<T> encoder, Decoder<T> decoder, T defaultValue) {
         this.containerId = containerId;
@@ -106,14 +107,45 @@ public class ValueContainer<T extends Number>{
         public double getMultiplier(){
             double multiplier = 1;
             for(Identifier group : getMultiplierGroups()) multiplier *= getGroupMultiplier(group);
-            return multiplier;
+            return Math.max(multiplier,0);
         }
     }
 
-    public Modifier<?> removeModifier(Identifier id){
-        if(!modifiers.containsKey(id)) return null;
-        Modifier<?> modifier = modifiers.remove(id);
+    public Modifier<T> removeFlatModifier(Identifier id){
+        return removeFlatModifier(id,true);
+    }
+    public Modifier<T> removeFlatModifier(Identifier id,boolean recalculate){
+        if(!flatModifiers.containsKey(id)) return null;
+        Modifier<T> modifier = flatModifiers.remove(id);
+
         operationGroups.get(modifier.operationGroup()).removeModifier(id);
+        if(recalculate) calculateValue();
+        return modifier;
+    }
+
+    public Modifier<Double> removeMultiplierModifier(Identifier id){
+        return removeMultiplierModifier(id,true);
+    }
+    public Modifier<Double> removeMultiplierModifier(Identifier id,boolean recalculate){
+        if(!multiplierModifiers.containsKey(id)) return null;
+        Modifier<Double> modifier = multiplierModifiers.remove(id);
+
+        operationGroups.get(modifier.operationGroup()).removeModifier(id);
+        if(recalculate) calculateValue();
+        return modifier;
+    }
+
+
+    public Modifier<?> removeModifier(Identifier id){
+        return removeModifier(id,true);
+    }
+    public Modifier<?> removeModifier(Identifier id,boolean recalculate){
+        if(!flatModifiers.containsKey(id) && ! multiplierModifiers.containsKey(id)) return null;
+        Modifier<?> modifier = flatModifiers.remove(id);
+        if(modifier == null) modifier = multiplierModifiers.remove(id);
+
+        operationGroups.get(modifier.operationGroup()).removeModifier(id);
+        if(recalculate) calculateValue();
         return modifier;
     }
 
@@ -122,8 +154,10 @@ public class ValueContainer<T extends Number>{
     }
     public void addFlatModifier(Modifier<T> modifier, boolean recalculate){
         if(!modifier.type().equals("flat")) return;
-        if(modifiers.containsKey(modifier.id())) return;
-        modifiers.put(modifier.id(),modifier);
+        if(flatModifiers.containsKey(modifier.id()) || multiplierModifiers.containsKey(modifier.id())) return;
+
+        flatModifiers.put(modifier.id(),modifier);
+
         operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>()).addFlatModifier(modifier);
         if(recalculate) calculateValue();
     }
@@ -132,8 +166,10 @@ public class ValueContainer<T extends Number>{
     }
     public void addMultiplierModifier(Modifier<Double> modifier, boolean recalculate){
         if(!modifier.type().equals("multiplier")) return;
-        if(modifiers.containsKey(modifier.id())) return;
-        modifiers.put(modifier.id(),modifier);
+        if(flatModifiers.containsKey(modifier.id()) || multiplierModifiers.containsKey(modifier.id())) return;
+
+        multiplierModifiers.put(modifier.id(),modifier);
+
         operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>()).addMultiplierModifier(modifier);
         if(recalculate) calculateValue();
     }
@@ -175,6 +211,17 @@ public class ValueContainer<T extends Number>{
         return containerId;
     }
 
+    public boolean hasModifier(Identifier modifier){
+        return flatModifiers.containsKey(modifier) || multiplierModifiers.containsKey(modifier);
+    }
+
+    public Modifier<T> getFlatModifier(Identifier modifier){
+        return flatModifiers.get(modifier);
+    }
+    public Modifier<Double> getMultiplierModifier(Identifier modifier){
+        return multiplierModifiers.get(modifier);
+    }
+
     public List<Modifier<T>> getFlatModifiers(){
         List<Modifier<T>> flatModifiers = new ArrayList<>();
         for(OperationGroup<T> operationGroup : operationGroups.values()) flatModifiers.addAll(operationGroup.flatModifiers.values());
@@ -189,6 +236,8 @@ public class ValueContainer<T extends Number>{
 
     public Encoder<T> getEncoder(){return encoder;}
     public Decoder<T> getDecoder(){return decoder;}
+
+
     public static <T extends Number> void encode(ValueContainer<T> container, ByteBuf buf,Codec<T> valueCodec){
         StreamCodec<ByteBuf,ModifierHolder<T>> STREAM_CODEC = ByteBufCodecs.fromCodec(
                 ValueContainerCodecHelper.modifierHolderCodec(valueCodec)
@@ -206,12 +255,12 @@ public class ValueContainer<T extends Number>{
             STREAM_CODEC.encode(buf,holder);
         }
     }
-    public static <T extends Number> ValueContainer<T> decode(Function<Identifier,ValueContainer<T>> containerProvider, ByteBuf buf, Codec<T> valueCodec){
+    public static <T extends Number,S extends ValueContainer<T>> S decode(Function<Identifier,S> provider, ByteBuf buf, Codec<T> valueCodec){
         StreamCodec<ByteBuf,ModifierHolder<T>> STREAM_CODEC = ByteBufCodecs.fromCodec(
                 ValueContainerCodecHelper.modifierHolderCodec(valueCodec)
         );
         Identifier identifier = ByteBufHelpers.decodeIdentifier(buf);
-        ValueContainer<T> container = containerProvider.apply(identifier);
+        S container = provider.apply(identifier);
         container.calculatedBaseValue = container.getDecoder().decode(buf);
         container.calculatedValue = container.getDecoder().decode(buf);
         int size = buf.readInt();
@@ -222,10 +271,15 @@ public class ValueContainer<T extends Number>{
             for(Modifier<T> flat : holder.flat()) container.addFlatModifier(flat,false);
             for(Modifier<Double> multiplier : holder.multiplier()) container.addMultiplierModifier(multiplier,false);
         }
-
         return container;
+    }
+    public static <T extends Number> ValueContainer<T> normalDecode(Function<Identifier,ValueContainer<T>> containerProvider, ByteBuf buf, Codec<T> valueCodec){
+        return decode(containerProvider,buf,valueCodec);
 
     }
+
+
+
 
     public static <T extends Number> ValueContainer<T> from(Identifier containerId,List<ValueContainer<T>> containers){
         if(containers.isEmpty()) return null;

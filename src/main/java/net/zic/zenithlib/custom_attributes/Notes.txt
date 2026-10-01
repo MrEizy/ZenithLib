@@ -1,6 +1,6 @@
-add a suppressed attribute variant
-this will have a static encode/decode method, which will provide a regular attribute if it is not suppressed
+Suppressed attributes will be handled differently from now on.
 
-update how stat scaling is handled, assume a single entity may have multiple stat sheets
+Zenith lib will not add a way to suppress them by default.
+instead suppression will be handled through an operation group (like 10 or something)
 
-I might need to make a server and client version of attributeHolder, since the client version holds 0 logic
+in order to handle which can and cannot be suppressed a Config should be used, which is checked when trying to supress stats

@@ -1,160 +1,131 @@
 package net.zic.zenithlib.custom_attributes;
 
+import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.zic.zenithlib.network.ByteBufHelpers;
-import net.zic.zenithlib.common.ZenithRegistries;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.stats.Stat;
 import net.zic.zenithlib.stats.StatProvider;
-import net.zic.zenithlib.value_containers.ModifierOperation;
-import net.zic.zenithlib.value_containers.ValueContainer;
-import net.zic.zenithlib.value_containers.ValueContainerModifier;
+import net.zic.zenithlib.value_containers.typed.Modifier;
+import net.zic.zenithlib.value_containers.typed.ValueContainer;
+import net.zic.zenithlib.value_containers.typed.ValueContainerHelpers;
 
-import java.util.*;
 
-/**
- * a zenith attribute scales of 2 things, the attribute it wraps and the stats it scales off
- *
- * combined with the zenithAttribute Holder and mixins we can replace base attributes
- *
- * how it works.
- *
- * you pick an attribute. this makes up part of the base value
- *
- * then we add stat scaling. here we either set the base value or a multiplier of the base value
- *
- * those 2 combined make the base value
- *
- * we then apply any modifiers added on to the Zenith attribute
- *
- */
-public class ZenithAttribute extends ValueContainer {
+import java.util.HashMap;
+import java.util.Map;
+
+public class ZenithAttribute extends ValueContainer<Double> {
     private LivingEntity attachedEntity;
 
+    private static final Identifier statBonusModifier = Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"stat_bonus");
+    private static final Identifier attributeValueModifier = Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"attribute_value");
 
-    final HashMap<Stat,ValueContainer> scaling = new HashMap<>();
+    final HashMap<Stat, ValueContainer<Double>> scaling = new HashMap<>();
 
-    double cachedBaseStatBonus;
-    double cachedAttributeValue;
 
-    public ZenithAttribute(Holder<Attribute> attribute, LivingEntity attachedEntity) {
-        super(BuiltInRegistries.ATTRIBUTE.getKey(attribute.value()),0);
-        this.attachedEntity = attachedEntity;
-        validateAttributeValue();
-
-    }
-    protected ZenithAttribute(Identifier identifier) {
-        super(identifier,0);
-
+    public ZenithAttribute(Holder<Attribute> attribute){
+        this(BuiltInRegistries.ATTRIBUTE.getKey(attribute.value()));
     }
 
-    public void setAttachedEntity(LivingEntity entity){
-        this.attachedEntity = entity;
-        validateAttributeValue();
+    public ZenithAttribute(Identifier containerId) {
+        super(containerId, Double::sum, ValueContainerHelpers.DOUBLE_MUL, ValueContainerHelpers.DOUBLE_ENCODER, ValueContainerHelpers.DOUBLE_DECODER, 0d);
     }
-    public Holder<Attribute> getAttribute(){
-        return BuiltInRegistries.ATTRIBUTE.get(getIdentifier()).get();
+
+    public ZenithAttribute(Holder<Attribute> attribute, LivingEntity attachedEntity){
+        this(attribute);
+        setAttachedEntity(attachedEntity);
+    }
+    public ZenithAttribute(Identifier containerId, LivingEntity attachedEntity){
+        this(containerId);
+        setAttachedEntity(attachedEntity);
+    }
+    private double getStatBonus(){
+        return getFlatModifier(statBonusModifier) == null ? 0: getFlatModifier(statBonusModifier).value();
+    }
+    private double getAttributeValue(){
+        return getFlatModifier(attributeValueModifier) == null ? 0  : getFlatModifier(attributeValueModifier).value();
+    }
+
+    private void setStatBonus(double value){
+        removeModifier(statBonusModifier);
+        addFlatModifier(Modifier.base(statBonusModifier,value));
+        calculateValue();
+    }
+    private void setAttributeValue(double value){
+        removeModifier(attributeValueModifier);
+        addFlatModifier(Modifier.base(attributeValueModifier,value));
+        calculateValue();
     }
 
 
-    public void addStatScaling(Stat stat,Identifier identifier,double value){
-        if(!scaling.containsKey(stat)){
-            scaling.put(stat,new  ValueContainer(ZenithRegistries.STAT_REGISTRY.getKey(stat),0));
+    public void validateAttributeValue(){
+        if(attachedEntity == null) {
+            setAttributeValue(0);
+            return;
         }
-
-        scaling.get(stat).addModifier(new ValueContainerModifier(value, ModifierOperation.ADD_BASE,identifier));
-    }
-    //if we scale of 200% Vit and give it a 2x bonus it now scales of 400%
-    public void addStatScalingMultiplier(Stat stat,Identifier identifier,double value){
-        if(!scaling.containsKey(stat)){
-            scaling.put(stat,new  ValueContainer(ZenithRegistries.STAT_REGISTRY.getKey(stat),0));
-        }
-
-        scaling.get(stat).addModifier(new ValueContainerModifier(value, ModifierOperation.MULTIPLY_FINAL,identifier));
-    }
-    //if we scale of 200% Vit and give it a x1.2 in the same group as x1.4 it is now a x1.8 bonus not  (all multipliers have +1 added to em)
-    public void addStatScalingMultiplier(Stat stat,Identifier identifier,Identifier group,double value){
-        if(!scaling.containsKey(stat)){
-            scaling.put(stat,new  ValueContainer(ZenithRegistries.STAT_REGISTRY.getKey(stat),0));
-        }
-
-        scaling.get(stat).addModifier(new ValueContainerModifier(value, ModifierOperation.MULTIPLY_FINAL,identifier,group));
-    }
-    //removes both multiplier and base
-    public void removeScaling(Stat stat,Identifier identifier){
-        if(!scaling.containsKey(stat)) return;
-        scaling.get(stat).removeModifier(identifier);
-
-        //trim empty scaling
-        if(scaling.get(stat).getAllModifiers().isEmpty()) scaling.remove(stat);
+        AttributeInstance instance = attachedEntity.getAttribute(getAttribute());
+        double attributeValue = instance == null ? 0 : instance.getValue();
+        if(getAttributeValue() != attributeValue) setAttributeValue(attributeValue);
     }
 
-    public Map<Stat,ValueContainer> getScaling(){
-        return scaling;
-    }
     public void update(StatProvider provider){
         double baseVal = 0;
         for(Stat stat : scaling.keySet()){
             baseVal += provider.getStat(stat)*scaling.get(stat).getValue();
         }
-
-        if(cachedBaseStatBonus == baseVal) return;
-
-        cachedBaseStatBonus = baseVal;
-        calculateCachedVal();
+        if(getStatBonus() != baseVal) setStatBonus(baseVal);
     }
 
 
-    @Override
-    public double getBaseValue() {
-        validateAttributeValue();
-        return super.getBaseValue();
+    public Holder<Attribute> getAttribute(){
+        return attachedEntity == null || !BuiltInRegistries.ATTRIBUTE.containsKey(getContainerId()) ? null : BuiltInRegistries.ATTRIBUTE.get(getContainerId()).get();
     }
 
+    public Map<Stat, ValueContainer<Double>> getScaling(){
+        return scaling;
+    }
+
+    public void addFlatScaling(Stat stat,Modifier<Double> modifier){
+        scaling.computeIfAbsent(stat,key->stat.statInstance()).addFlatModifier(modifier);
+    }
+    public void addMultiplierScaling(Stat stat,Modifier<Double> modifier){
+        scaling.computeIfAbsent(stat,key->stat.statInstance()).addMultiplierModifier(modifier);
+    }
+
+    public void removeStatScaling(Stat stat,Identifier modifier){
+        if(!scaling.containsKey(stat)) return;
+        scaling.get(stat).removeModifier(modifier);
+    }
+    public void setAttachedEntity(LivingEntity entity){
+        setAttachedEntity(entity,true);
+    }
+    public void setAttachedEntity(LivingEntity entity,boolean update){
+        this.attachedEntity = entity;
+        if(update) validateAttributeValue();
+    }
     @Override
-    public double getValue() {
+    public Double getValue() {
         validateAttributeValue();
         return super.getValue();
     }
 
-    public void validateAttributeValue(){
-        if(attachedEntity == null) return;
-        var inst = attachedEntity.getAttribute(getAttribute());
-        double target = (inst != null) ? inst.getValue() : 0; //treat it as if they do not have it
-        if(target != cachedAttributeValue) {
-            cachedAttributeValue = target;
-            calculateCachedVal();
-        }
-    }
     @Override
-    public void calculateCachedVal() {
-        if(cachedAttributeValue+ cachedBaseStatBonus != getBaseValue()) setBaseValue(cachedAttributeValue+cachedBaseStatBonus);
-        super.calculateCachedVal();
+    public Double getBaseValue() {
+        validateAttributeValue();
+        return super.getBaseValue();
     }
 
-
-    public void encode(ByteBuf buf){
-        ByteBufHelpers.encodeIdentifier(getIdentifier(),buf);
-        ByteBufHelpers.encodeCollection(getAllModifiers(),buf,ValueContainerModifier::encode);
-        ByteBufHelpers.encodeCollection(scaling.values(),buf,(val,buffer)->ValueContainer.encode(buffer,val));
-
+    public static void encode(ZenithAttribute attributeContainer, ByteBuf buf){
+        ValueContainer.encode(attributeContainer,buf, Codec.DOUBLE);
     }
-    //you need to make sure to attach the correct entity and then call update()
+
     public static ZenithAttribute decode(ByteBuf buf){
-        Identifier identifier = ByteBufHelpers.decodeIdentifier(buf);
-        List<ValueContainerModifier> modifiers = ByteBufHelpers.decodeArray(buf, ValueContainerModifier::decode);
-        List<ValueContainer> scaling = ByteBufHelpers.decodeArray(buf, ValueContainer::decode);
-
-        ZenithAttribute attribute = new ZenithAttribute(identifier);
-
-        modifiers.forEach(attribute::addModifier);
-        scaling.forEach(container -> attribute.scaling.put(ZenithRegistries.STAT_REGISTRY.getValue(container.getIdentifier()),container));
-
-        attribute.calculateCachedVal();
-        return attribute;
+        return ValueContainer.decode(ZenithAttribute::new,buf,Codec.DOUBLE);
     }
+
 }

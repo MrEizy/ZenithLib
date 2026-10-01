@@ -4,6 +4,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.zic.zenithlib.command.RandomTeleportCommand;
+import net.zic.zenithlib.command.ZenithAttributeCommands;
 import net.zic.zenithlib.command.ZenithInspectCommand;
 import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.datagen.ZenithLibDataGenerators;
@@ -49,6 +50,7 @@ public class ZenithLib {
     public void onRegisterCommands(RegisterCommandsEvent event) {
         RandomTeleportCommand.onRegisterCommands(event);
         ZenithInspectCommand.onRegisterCommands(event);
+        ZenithAttributeCommands.registerCommands(event.getDispatcher());
     }
 
 

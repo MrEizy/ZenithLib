@@ -28,7 +28,7 @@ public class LivingEntityMixin {
 
         if(self.hasData(ZenithAttachments.ATTRIBUTE_HOLDER)){
             ZenithAttributeHolder holder = self.getData(ZenithAttachments.ATTRIBUTE_HOLDER);
-            if(holder.hasAttribute(Attributes.MOVEMENT_SPEED)) cir.setReturnValue((float) holder.getAttribute(Attributes.MOVEMENT_SPEED).getValue());
+            if(holder.hasAttribute(Attributes.MOVEMENT_SPEED)) cir.setReturnValue(holder.getAttribute(Attributes.MOVEMENT_SPEED).getValue().floatValue());
         }
 
     }

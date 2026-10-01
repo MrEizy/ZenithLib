@@ -22,6 +22,7 @@ public class Config {
             );
     public static final ModConfigSpec.ConfigValue<Integer> SUPPRESSION_OPERATION_GROUP = SERVER_BUILDER
             .translation("config.zenith_lib.attributes.suppression.operation_group")
+            .worldRestart()
             .define("attributes.suppression.operation_group",10);
 
     public static final ModConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
