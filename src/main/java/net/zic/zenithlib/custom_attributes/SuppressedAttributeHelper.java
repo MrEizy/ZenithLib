@@ -42,7 +42,7 @@ public class SuppressedAttributeHelper {
     public static double getSuppression(ZenithAttribute attribute){
         if(!attribute.hasModifier(SUPPRESSION_ID)) return 1;
         Modifier<Double> modifier = attribute.getMultiplierModifier(SUPPRESSION_ID);
-        return modifier == null ? 1 : modifier.value();
+        return modifier == null ? 1 : 1+modifier.value();
     }
 
     /**

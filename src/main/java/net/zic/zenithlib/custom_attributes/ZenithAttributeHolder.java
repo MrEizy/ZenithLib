@@ -158,8 +158,8 @@ public class ZenithAttributeHolder {
                 ZenithAttribute attributeWrapper = new ZenithAttribute(attribute);
                 if(attributeWrapper.getAttribute() == null || !SuppressedAttributeHelper.isSuppressible(attribute)) continue;
 
-                attributeHolder.cachedSuppressionValues.put(attributeWrapper.getAttribute(),suppression);
-
+                if(!attributeHolder.hasAttribute(attributeWrapper.getAttribute())) attributeHolder.cachedSuppressionValues.put(attributeWrapper.getAttribute(),suppression);
+                else attributeHolder.suppress(attributeWrapper.getAttribute(),suppression);
             }
 
             return attributeHolder;
@@ -170,6 +170,7 @@ public class ZenithAttributeHolder {
             ValueOutput.ValueOutputList outputList = output.childrenList("suppressed_attributes");
             for(ZenithAttribute attribute:attachment.attributes.values()){
                 if(attachment.isSuppressable(attribute.getAttribute())) {
+
                     ValueOutput suppressionOutput = outputList.addChild();
                     suppressionOutput.putString("attribute",attribute.getContainerId().toString());
                     suppressionOutput.putDouble("suppression",SuppressedAttributeHelper.getSuppression(attribute));

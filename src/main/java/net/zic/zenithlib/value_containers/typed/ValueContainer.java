@@ -14,6 +14,7 @@ import net.zic.zenithlib.network.Encoder;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /*
     TODO
@@ -172,6 +173,11 @@ public class ValueContainer<T extends Number>{
 
         operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>()).addMultiplierModifier(modifier);
         if(recalculate) calculateValue();
+    }
+
+    //allows you to calculate a value while excluding specific modifiers
+    public T calculateValue(Predicate<Modifier<?>> predicate){
+        return defaultValue;//TODO
     }
 
     public void calculateValue(){

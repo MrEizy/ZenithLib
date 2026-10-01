@@ -83,7 +83,7 @@ public class ZenithAttribute extends ValueContainer<Double> {
 
 
     public Holder<Attribute> getAttribute(){
-        return attachedEntity == null || !BuiltInRegistries.ATTRIBUTE.containsKey(getContainerId()) ? null : BuiltInRegistries.ATTRIBUTE.get(getContainerId()).get();
+        return !BuiltInRegistries.ATTRIBUTE.containsKey(getContainerId()) ? null : BuiltInRegistries.ATTRIBUTE.get(getContainerId()).get();
     }
 
     public Map<Stat, ValueContainer<Double>> getScaling(){
@@ -118,6 +118,14 @@ public class ZenithAttribute extends ValueContainer<Double> {
     public Double getBaseValue() {
         validateAttributeValue();
         return super.getBaseValue();
+    }
+
+    @Override
+    public void calculateValue() {
+        super.calculateValue();
+        if(attachedEntity == null || attachedEntity.getAttribute(getAttribute()) == null) return;
+
+        attachedEntity.getAttribute(getAttribute()).setDirty();
     }
 
     public static void encode(ZenithAttribute attributeContainer, ByteBuf buf){
