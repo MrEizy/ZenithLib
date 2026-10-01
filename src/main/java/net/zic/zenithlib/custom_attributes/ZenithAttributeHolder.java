@@ -19,7 +19,9 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class ZenithAttributeHolder {
     private final LivingEntity attachedEntity;
@@ -27,11 +29,17 @@ public class ZenithAttributeHolder {
     private final HashMap<Holder<Attribute>,Double> cachedSuppressionValues = new HashMap<>();
 
 
+    private final Set<ZenithAttribute> dirtyAttributes = new HashSet<>();
+
     private String process = null;
     private final Random random = new Random();
 
     public ZenithAttributeHolder(LivingEntity attachedEntity) {
         this.attachedEntity = attachedEntity;
+    }
+
+    public LivingEntity getAttachedEntity(){
+        return attachedEntity;
     }
 
     public void startProcess(String process){
@@ -61,14 +69,21 @@ public class ZenithAttributeHolder {
         resolveProcess(processId);
     }
 
+    public void setDirty(Holder<Attribute> attribute){
+        if(!attributes.containsKey(attribute)) return;
+        dirtyAttributes.add(getAttribute(attribute));
+        startAndResolve("dirty_set");//done so if part of large process won't trigger
+    }
 
     public void addAttribute(Holder<Attribute> attributeHolder) {
         if (attributes.containsKey(attributeHolder)) return;
 
-        ZenithAttribute zenithAttribute =  new ZenithAttribute(attributeHolder, attachedEntity);
+        ZenithAttribute zenithAttribute =  new ZenithAttribute(attributeHolder);
         attributes.put(attributeHolder, zenithAttribute);
 
         if(cachedSuppressionValues.containsKey(zenithAttribute.getAttribute())) suppress(zenithAttribute.getAttribute(),cachedSuppressionValues.remove(zenithAttribute.getAttribute()));
+
+        zenithAttribute.setHolder(this);
 
         startAndResolve("small_attribute_modification"+random.nextLong());
 
@@ -106,17 +121,19 @@ public class ZenithAttributeHolder {
         return SuppressedAttributeHelper.getSuppression(getAttribute(attribute));
     }
 
-    public void attachEntity() {
-        attributes.forEach(((attributeHolder, zenithAttribute) -> zenithAttribute.setAttachedEntity(attachedEntity)));
+    public void attachHolder() {
+        attributes.forEach(((attributeHolder, zenithAttribute) -> zenithAttribute.setHolder(this)));
     }
     public void encode(ByteBuf buf) {
-        ByteBufHelpers.encodeCollection(attributes.values(), buf, ZenithAttribute::encode);
+        ByteBufHelpers.encodeCollection(dirtyAttributes, buf, ZenithAttribute::encode);
+        dirtyAttributes.clear();
     }
     public void decode(ByteBuf buf) {
-        attributes.clear();
         ByteBufHelpers.decodeArray(buf, ZenithAttribute::decode).forEach(
-                container -> attributes.put(container.getAttribute(), container));
-        attachEntity();
+                container -> {
+                    attributes.put(container.getAttribute(), container);
+                    container.setHolder(this);
+                });
     }
 
     public static class SyncHandler implements AttachmentSyncHandler<ZenithAttributeHolder> {

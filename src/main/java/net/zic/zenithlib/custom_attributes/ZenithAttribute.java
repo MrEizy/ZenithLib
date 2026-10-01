@@ -9,6 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.zic.zenithlib.ZenithLib;
+import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.stats.Stat;
 import net.zic.zenithlib.stats.StatProvider;
 import net.zic.zenithlib.value_containers.typed.Modifier;
@@ -20,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ZenithAttribute extends ValueContainer<Double> {
-    private LivingEntity attachedEntity;
+    private ZenithAttributeHolder holder;
 
     private static final Identifier statBonusModifier = Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"stat_bonus");
     private static final Identifier attributeValueModifier = Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"attribute_value");
@@ -36,19 +37,28 @@ public class ZenithAttribute extends ValueContainer<Double> {
         super(containerId, Double::sum, ValueContainerHelpers.DOUBLE_MUL, ValueContainerHelpers.DOUBLE_ENCODER, ValueContainerHelpers.DOUBLE_DECODER, 0d);
     }
 
-    public ZenithAttribute(Holder<Attribute> attribute, LivingEntity attachedEntity){
+    public ZenithAttribute(Holder<Attribute> attribute, ZenithAttributeHolder holder){
         this(attribute);
-        setAttachedEntity(attachedEntity);
+        setHolder(holder);
+
     }
-    public ZenithAttribute(Identifier containerId, LivingEntity attachedEntity){
+    public ZenithAttribute(Identifier containerId, ZenithAttributeHolder holder){
         this(containerId);
-        setAttachedEntity(attachedEntity);
+        setHolder(holder);
     }
     private double getStatBonus(){
         return getFlatModifier(statBonusModifier) == null ? 0: getFlatModifier(statBonusModifier).value();
     }
     private double getAttributeValue(){
         return getFlatModifier(attributeValueModifier) == null ? 0  : getFlatModifier(attributeValueModifier).value();
+    }
+
+    public LivingEntity getAttachedEntity(){
+        return holder.getAttachedEntity();
+    }
+    //should never happen but here because im paranoid
+    public void attachedEntityChanged(){
+        validateAttributeValue();
     }
 
     private void setStatBonus(double value){
@@ -64,11 +74,11 @@ public class ZenithAttribute extends ValueContainer<Double> {
 
 
     public void validateAttributeValue(){
-        if(attachedEntity == null) {
+        if(getAttachedEntity() == null) {
             setAttributeValue(0);
             return;
         }
-        AttributeInstance instance = attachedEntity.getAttribute(getAttribute());
+        AttributeInstance instance = getAttachedEntity().getAttribute(getAttribute());
         double attributeValue = instance == null ? 0 : instance.getValue();
         if(getAttributeValue() != attributeValue) setAttributeValue(attributeValue);
     }
@@ -101,13 +111,14 @@ public class ZenithAttribute extends ValueContainer<Double> {
         if(!scaling.containsKey(stat)) return;
         scaling.get(stat).removeModifier(modifier);
     }
-    public void setAttachedEntity(LivingEntity entity){
-        setAttachedEntity(entity,true);
+    public void setHolder(ZenithAttributeHolder holder){
+        setHolder(holder,true);
     }
-    public void setAttachedEntity(LivingEntity entity,boolean update){
-        this.attachedEntity = entity;
+    public void setHolder(ZenithAttributeHolder holder,boolean update){
+        this.holder = holder;
         if(update) validateAttributeValue();
     }
+
     @Override
     public Double getValue() {
         validateAttributeValue();
@@ -123,9 +134,21 @@ public class ZenithAttribute extends ValueContainer<Double> {
     @Override
     public void calculateValue() {
         super.calculateValue();
-        if(attachedEntity == null || attachedEntity.getAttribute(getAttribute()) == null) return;
+        setDirty();
 
-        attachedEntity.getAttribute(getAttribute()).setDirty();
+
+
+    }
+
+    private void setDirty(){
+        if(getAttachedEntity() == null) return;
+
+
+        holder.setDirty(getAttribute());
+
+        if(getAttachedEntity().getAttribute(getAttribute()) == null) return;
+
+        getAttachedEntity().getAttribute(getAttribute()).setDirty();
     }
 
     public static void encode(ZenithAttribute attributeContainer, ByteBuf buf){
