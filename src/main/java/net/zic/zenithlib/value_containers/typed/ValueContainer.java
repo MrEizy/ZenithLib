@@ -1,6 +1,7 @@
 package net.zic.zenithlib.value_containers.typed;
 
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -63,10 +64,15 @@ public class ValueContainer<T extends Number>{
     }
     //TODO consider throwing error if they try to replace an existing modifier?
     private static class OperationGroup<T extends Number>{
+        private final T defaultValue;
         private final Map<Identifier, Modifier<T>> flatModifiers = new HashMap<>();
 
         private final Map<Identifier, Modifier<Double>> multiplierModifiers = new HashMap<>();
         private final Map<Identifier,Set<Modifier<Double>>> groupedMultiplierModifiers =  new HashMap<>();
+
+        private OperationGroup(T defaultValue) {
+            this.defaultValue = defaultValue;
+        }
 
         public void addFlatModifier(Modifier<T> modifier){
             flatModifiers.put(modifier.id(),modifier);
@@ -86,28 +92,39 @@ public class ValueContainer<T extends Number>{
             }
         }
         public T getBonus(BiFunction<T,T,T> adder){
+            return getBonus(adder,(v)->true);
+        }
+        public T getBonus(BiFunction<T,T,T> adder,Predicate<Modifier<T>> predicate){
             if(flatModifiers.isEmpty()) return null;
             List<Modifier<T>> raw = flatModifiers.values().stream().toList();
-            T sum = raw.getFirst().value();
-            for(int i =1;i<flatModifiers.size();i++){
+            T sum = defaultValue;
+            for(int i =0;i<flatModifiers.size();i++){
+                if(!predicate.test(raw.get(i))) continue;
+
                 sum = adder.apply(sum,raw.get(i).value());
             }
             return sum;
         }
+
         public Collection<Identifier> getMultiplierGroups(){
             return groupedMultiplierModifiers.keySet();
         }
-        public double getGroupMultiplier(Identifier group){
+
+        public double getGroupMultiplier(Identifier group,Predicate<Modifier<Double>> predicate){
             Set<Modifier<Double>> modifiers = groupedMultiplierModifiers.getOrDefault(group,Set.of());
             double multiplier = 1;
             for(Modifier<Double> modifier : modifiers){
+                if(!predicate.test(modifier)) continue;
                 multiplier += modifier.value();
             }
             return Math.max(multiplier,0);
         }
         public double getMultiplier(){
+            return getMultiplier((v)->true);
+        }
+        public double getMultiplier(Predicate<Modifier<Double>> predicate){
             double multiplier = 1;
-            for(Identifier group : getMultiplierGroups()) multiplier *= getGroupMultiplier(group);
+            for(Identifier group : getMultiplierGroups()) multiplier *= getGroupMultiplier(group,predicate);
             return Math.max(multiplier,0);
         }
     }
@@ -159,7 +176,7 @@ public class ValueContainer<T extends Number>{
 
         flatModifiers.put(modifier.id(),modifier);
 
-        operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>()).addFlatModifier(modifier);
+        operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>(defaultValue)).addFlatModifier(modifier);
         if(recalculate) calculateValue();
     }
     public void addMultiplierModifier(Modifier<Double> modifier){
@@ -171,36 +188,39 @@ public class ValueContainer<T extends Number>{
 
         multiplierModifiers.put(modifier.id(),modifier);
 
-        operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>()).addMultiplierModifier(modifier);
+        operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>(defaultValue)).addMultiplierModifier(modifier);
         if(recalculate) calculateValue();
     }
 
     //allows you to calculate a value while excluding specific modifiers
-    public T calculateValue(Predicate<Modifier<?>> predicate){
-        return defaultValue;//TODO
-    }
-
-    public void calculateValue(){
+    public Pair<T,T> calculateValue(Predicate<Modifier<T>> flatPredicate, Predicate<Modifier<Double>> multiplierPredicate){
         List<Integer> groups = operationGroups.keySet().stream().sorted().toList();
 
-        calculatedValue = defaultValue;
-
+        T value = defaultValue;
+        T baseValue = defaultValue;
         for(Integer operationGroup : groups){
             OperationGroup<T> group = operationGroups.get(operationGroup);
 
-            T bonus = group.getBonus(adder);
+            T bonus = group.getBonus(adder,flatPredicate);
             if(bonus != null){
-                if(operationGroup == 0) calculatedBaseValue = bonus;
-                calculatedValue = adder.apply(calculatedValue,bonus);
-            }else if (operationGroup == 0) calculatedBaseValue = defaultValue;
+                if(operationGroup == 0) baseValue = bonus;
+                value = adder.apply(value,bonus);
+            }else if (operationGroup == 0) baseValue = defaultValue;
 
-            double modifier = group.getMultiplier();
+            double modifier = group.getMultiplier(multiplierPredicate);
 
-            calculatedValue = multiplier.apply(calculatedValue,modifier);
-
-
+            value = multiplier.apply(value,modifier);
 
         }
+
+
+        return new Pair<>(value,baseValue);
+    }
+
+    public void calculateValue(){
+        Pair<T,T> result = calculateValue((v)->true,(v)->true);
+        calculatedValue = result.getFirst();
+        calculatedBaseValue = result.getSecond();
 
     }
 

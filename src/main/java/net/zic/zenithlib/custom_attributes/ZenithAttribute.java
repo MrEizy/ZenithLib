@@ -1,5 +1,6 @@
 package net.zic.zenithlib.custom_attributes;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
@@ -10,14 +11,18 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.common.ZenithAttachments;
+import net.zic.zenithlib.configuration.attribute_scaling.LivingEntityScaling;
 import net.zic.zenithlib.stats.Stat;
 import net.zic.zenithlib.stats.StatProvider;
+import net.zic.zenithlib.stats.ZenithStatHelper;
 import net.zic.zenithlib.value_containers.typed.Modifier;
 import net.zic.zenithlib.value_containers.typed.ValueContainer;
 import net.zic.zenithlib.value_containers.typed.ValueContainerHelpers;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ZenithAttribute extends ValueContainer<Double> {
@@ -26,8 +31,7 @@ public class ZenithAttribute extends ValueContainer<Double> {
     private static final Identifier statBonusModifier = Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"stat_bonus");
     private static final Identifier attributeValueModifier = Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"attribute_value");
 
-    final HashMap<Stat, ValueContainer<Double>> scaling = new HashMap<>();
-
+    final Map<Stat, ValueContainer<Double>> scaling = new HashMap<>();
 
     public ZenithAttribute(Holder<Attribute> attribute){
         this(BuiltInRegistries.ATTRIBUTE.getKey(attribute.value()));
@@ -46,8 +50,16 @@ public class ZenithAttribute extends ValueContainer<Double> {
         this(containerId);
         setHolder(holder);
     }
-    private double getStatBonus(){
+    public double getStatBonus(){
         return getFlatModifier(statBonusModifier) == null ? 0: getFlatModifier(statBonusModifier).value();
+    }
+    public List<Pair<Stat,Double>> getStatBonuses(){
+        List<Pair<Stat,Double>> result = new ArrayList<>();
+        for(Stat stat : scaling.keySet()) result.add(new Pair<>(stat,getStatBonus(stat)));
+        return result;
+    }
+    public double getStatBonus(Stat stat){
+        return scaling.containsKey(stat) ? scaling.get(stat).getValue() : 0;
     }
     private double getAttributeValue(){
         return getFlatModifier(attributeValueModifier) == null ? 0  : getFlatModifier(attributeValueModifier).value();
@@ -58,18 +70,29 @@ public class ZenithAttribute extends ValueContainer<Double> {
     }
     //should never happen but here because im paranoid
     public void attachedEntityChanged(){
+        if(getAttachedEntity() != null) LivingEntityScaling.apply(getAttachedEntity(),this,true);
         validateAttributeValue();
     }
 
     private void setStatBonus(double value){
         removeModifier(statBonusModifier);
         addFlatModifier(Modifier.base(statBonusModifier,value));
-        calculateValue();
+
+    }
+    public void calculateStatValue(Stat stat){
+        if(!scaling.containsKey(stat)) return;
+        scaling.get(stat).calculateValue();
+    }
+    public void updateStatBonus(){
+        double total = 0;
+        for(ValueContainer<Double> scalingContainer : scaling.values()){
+            total += scalingContainer.getValue();
+        }
+        if(getStatBonus() != total) setStatBonus(total);
     }
     private void setAttributeValue(double value){
         removeModifier(attributeValueModifier);
         addFlatModifier(Modifier.base(attributeValueModifier,value));
-        calculateValue();
     }
 
 
@@ -84,11 +107,15 @@ public class ZenithAttribute extends ValueContainer<Double> {
     }
 
     public void update(StatProvider provider){
-        double baseVal = 0;
+
         for(Stat stat : scaling.keySet()){
-            baseVal += provider.getStat(stat)*scaling.get(stat).getValue();
+            double base = provider.getStat(stat);
+            Modifier<Double> baseModifier = Modifier.base(statBonusModifier,base);
+            ValueContainer<Double> container = scaling.computeIfAbsent(stat,(key)-> ZenithStatHelper.statInstance(stat));
+            container.removeModifier(baseModifier.id());
+            container.addFlatModifier(baseModifier,true);;
         }
-        if(getStatBonus() != baseVal) setStatBonus(baseVal);
+        updateStatBonus();
     }
 
 
@@ -101,21 +128,31 @@ public class ZenithAttribute extends ValueContainer<Double> {
     }
 
     public void addFlatScaling(Stat stat,Modifier<Double> modifier){
-        scaling.computeIfAbsent(stat,key->stat.statInstance()).addFlatModifier(modifier);
+        addFlatScaling(stat,modifier,true);
+    }
+    public void addFlatScaling(Stat stat,Modifier<Double> modifier,boolean recalculate){
+        scaling.computeIfAbsent(stat,key->stat.statInstance()).addFlatModifier(modifier,recalculate);
     }
     public void addMultiplierScaling(Stat stat,Modifier<Double> modifier){
+        addMultiplierScaling(stat,modifier,true);
+    }
+    public void addMultiplierScaling(Stat stat,Modifier<Double> modifier,boolean recalculate){
         scaling.computeIfAbsent(stat,key->stat.statInstance()).addMultiplierModifier(modifier);
     }
 
     public void removeStatScaling(Stat stat,Identifier modifier){
+        removeStatScaling(stat,modifier,true);
+    }
+    public void removeStatScaling(Stat stat,Identifier modifier,boolean recalculate){
         if(!scaling.containsKey(stat)) return;
-        scaling.get(stat).removeModifier(modifier);
+        scaling.get(stat).removeModifier(modifier,recalculate);
     }
     public void setHolder(ZenithAttributeHolder holder){
         setHolder(holder,true);
     }
     public void setHolder(ZenithAttributeHolder holder,boolean update){
         this.holder = holder;
+        if(getAttachedEntity() != null) LivingEntityScaling.apply(getAttachedEntity(),this,update);
         if(update) validateAttributeValue();
     }
 

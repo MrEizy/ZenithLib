@@ -1,5 +1,6 @@
 package net.zic.zenithlib.stats;
 
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.common.ZenithRegistries;
@@ -17,6 +18,9 @@ public class ZenithStatHelper {
     }
     public static Stat stat(ValueContainer<Double> container){
         return ZenithRegistries.STAT_REGISTRY.getValue(container.getContainerId());
+    }
+    public static Stat stat(Identifier id){
+        return ZenithRegistries.STAT_REGISTRY.getValue(id);
     }
     public static void updateStats(Collection<Stat> dirtyStats, LivingEntity targetEntity){
         if(targetEntity == null) return;

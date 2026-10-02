@@ -27,9 +27,9 @@ public class ZenithAttributeCommands {
                         .requires(Commands.hasPermission(Commands.LEVEL_ALL))
                         .then(Commands.argument("attribute", IdentifierArgument.id())
                             .suggests((context, builder) ->
-                                        SharedSuggestionProvider.suggestResource(
-                                                SuppressedAttributeHelper.getSuppressedAttributes(),
-                                                builder))
+                                    SharedSuggestionProvider.suggestResource(
+                                            SuppressedAttributeHelper.getSuppressedAttributes(),
+                                            builder))
 
                             .then(Commands.literal("set")
                                     .then(Commands.argument("value", DoubleArgumentType.doubleArg(0,1))
