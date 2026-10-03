@@ -72,7 +72,7 @@ public class ZenithStatHolder implements StatProvider{
             containers.add(instance);
         }
         ValueContainer<Double> container = ValueContainer.from(
-                ZenithRegistries.STAT_REGISTRY.getKey(stat),
+                base->ValueContainerHelpers.doubleValueContainer(ZenithRegistries.STAT_REGISTRY.getKey(stat),base),
                 containers
         );
         if(container == null) cachedStatSheet.removeStat(stat);

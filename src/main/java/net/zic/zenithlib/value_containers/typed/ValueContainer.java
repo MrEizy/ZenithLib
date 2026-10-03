@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /*
     TODO
@@ -305,9 +306,15 @@ public class ValueContainer<T extends Number>{
     }
 
 
-
-
-    public static <T extends Number> ValueContainer<T> from(Identifier containerId,List<ValueContainer<T>> containers){
+    /**
+     *
+     * @param provider takes in a double(base value) and expects a value container
+     * @param containers the value containers to combine
+     * @return a new value container with all the modifiers of other containers combined
+     * @param <T>
+     * @param <S>
+     */
+    public static <T extends Number,S extends ValueContainer<T>> S from(Function<T,S> provider, List<ValueContainer<T>> containers) {
         if(containers.isEmpty()) return null;
         T baseValue = containers.getFirst().defaultValue;
         BiFunction<T,T,T> adder = containers.getFirst().adder;
@@ -323,11 +330,12 @@ public class ValueContainer<T extends Number>{
             multiplierModifiers.addAll(container.getMultiplierModifiers());
         }
 
-        ValueContainer<T> container = new ValueContainer<>(containerId,baseValue,adder,multiplier,encoder,decoder,containers.getFirst().defaultValue);
+        S container = provider.apply(baseValue);
         for (Modifier<T> flatModifier : flatModifiers) container.addFlatModifier(flatModifier,false);
         for(Modifier<Double> multiplierModifier:multiplierModifiers) container.addMultiplierModifier(multiplierModifier,false);
 
         container.calculateValue();
         return container;
     }
+
 }
