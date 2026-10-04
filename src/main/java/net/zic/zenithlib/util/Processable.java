@@ -27,10 +27,10 @@ public abstract class Processable {
         return true;
     }
 
-    public void startAndResolveProcess(){
+    public boolean startAndResolveProcess(){
         String id = UUID.randomUUID().toString();
         startProcess(id);
-        resolveProcess(id);
+        return resolveProcess(id);
     }
 
 }
