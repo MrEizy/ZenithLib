@@ -236,15 +236,15 @@ public class ValueContainer<T extends Number> extends Processable {
         return multiplierModifiers.get(modifier);
     }
 
+    public boolean isEmpty(){
+        return flatModifiers.isEmpty() && multiplierModifiers.isEmpty();
+    }
+
     public List<Modifier<T>> getFlatModifiers(){
-        List<Modifier<T>> flatModifiers = new ArrayList<>();
-        for(OperationGroup<T> operationGroup : operationGroups.values()) flatModifiers.addAll(operationGroup.flatModifiers.values());
-        return flatModifiers;
+        return List.copyOf(flatModifiers.values());
     }
     public List<Modifier<Double>> getMultiplierModifiers(){
-        List<Modifier<Double>> multiplierModifiers = new ArrayList<>();
-        for(OperationGroup<T> operationGroup : operationGroups.values()) multiplierModifiers.addAll(operationGroup.multiplierModifiers.values());
-        return multiplierModifiers;
+        return List.copyOf(multiplierModifiers.values());
     }
 
 

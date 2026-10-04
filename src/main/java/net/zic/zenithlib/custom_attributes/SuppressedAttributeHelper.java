@@ -55,8 +55,10 @@ public class SuppressedAttributeHelper {
     }
 
     public static void applySuppression(ZenithAttribute attribute, double suppression){
-        attribute.removeModifier(SUPPRESSION_ID,false);
+        attribute.startProcess("applying_suppression");
+        attribute.removeModifier(SUPPRESSION_ID);
         attribute.addMultiplierModifier(createSuppression(suppression));
+        attribute.resolveProcess("applying_suppression");
     }
 
 }

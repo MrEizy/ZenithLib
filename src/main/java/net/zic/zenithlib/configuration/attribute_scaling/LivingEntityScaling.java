@@ -25,14 +25,15 @@ public record LivingEntityScaling(Map<Holder<Attribute>, AttributeScaling> attri
             AttributeScaling.CODEC
     ).xmap(LivingEntityScaling::new,LivingEntityScaling::attributes);
 
-    public static void apply(LivingEntity entity,ZenithAttribute attribute,boolean update){
+    public static void apply(LivingEntity entity,ZenithAttribute attribute){
         LivingEntityScaling scaling = entity.getData(ZenithDataMaps.ATTRIBUTE_SCALING_CONFIG);
-        if(scaling != null) scaling.applyScaling(entity,attribute,update);
+        if(scaling != null) scaling.applyScaling(entity,attribute);
     }
     //this is called by the attribute itself
-    private void applyScaling(LivingEntity entity, ZenithAttribute attribute,boolean update){
+    private void applyScaling(LivingEntity entity, ZenithAttribute attribute){
         if(!attributes.containsKey(attribute.getAttribute())) return;
         AttributeScaling scaling = attributes.get(attribute.getAttribute());
+        attribute.startProcess("applying_scaling");
         for(Stat stat : scaling.scaling().keySet()){
 
             ModifierHolder<Double> holder = scaling.scaling().get(stat);
@@ -40,16 +41,17 @@ public record LivingEntityScaling(Map<Holder<Attribute>, AttributeScaling> attri
             for(Modifier<Double> mulitplierModifier : holder.multiplier()) addMultiplierModifier(attribute,stat,mulitplierModifier);
             attribute.calculateStatValue(stat);
         }
-        if(update) attribute.updateStatBonus();
+        attribute.updateStatBonus();
+        attribute.resolveProcess("applying_scaling");
     }
 
     public void addFlatModifier(ZenithAttribute container, Stat stat,Modifier<Double> modifier){
-        container.removeStatScaling(stat,modifier.id(),false);
-        container.addFlatScaling(stat,modifier,false);
+        container.removeStatScaling(stat,modifier.id());
+        container.addFlatScaling(stat,modifier);
     }
     public void addMultiplierModifier(ZenithAttribute container,Stat stat,Modifier<Double> modifier){
-        container.removeStatScaling(stat,modifier.id(),false);
-        container.addMultiplierScaling(stat,modifier,false);
+        container.removeStatScaling(stat,modifier.id());
+        container.addMultiplierScaling(stat,modifier);
     }
 
 }

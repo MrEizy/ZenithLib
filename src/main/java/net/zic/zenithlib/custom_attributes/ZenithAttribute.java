@@ -20,10 +20,8 @@ import net.zic.zenithlib.value_containers.typed.ValueContainer;
 import net.zic.zenithlib.value_containers.typed.ValueContainerHelpers;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 
 public class ZenithAttribute extends ValueContainer<Double> {
     private ZenithAttributeHolder holder;
@@ -70,7 +68,7 @@ public class ZenithAttribute extends ValueContainer<Double> {
     }
     //should never happen but here because im paranoid
     public void attachedEntityChanged(){
-        if(getAttachedEntity() != null) LivingEntityScaling.apply(getAttachedEntity(),this,true);
+        if(getAttachedEntity() != null) LivingEntityScaling.apply(getAttachedEntity(),this);
         validateAttributeValue();
     }
 
@@ -138,15 +136,14 @@ public class ZenithAttribute extends ValueContainer<Double> {
     public void removeStatScaling(Stat stat,Identifier modifier){
         if(!scaling.containsKey(stat)) return;
         scaling.get(stat).removeModifier(modifier);
+        if(scaling.get(stat).isEmpty()) scaling.remove(stat);
         updateStatBonus();
     }
+
     public void setHolder(ZenithAttributeHolder holder){
-        setHolder(holder,true);
-    }
-    public void setHolder(ZenithAttributeHolder holder,boolean update){
         this.holder = holder;
-        if(getAttachedEntity() != null) LivingEntityScaling.apply(getAttachedEntity(),this,update);
-        if(update) validateAttributeValue();
+        if(getAttachedEntity() != null) LivingEntityScaling.apply(getAttachedEntity(),this);
+        validateAttributeValue();
     }
 
     @Override
