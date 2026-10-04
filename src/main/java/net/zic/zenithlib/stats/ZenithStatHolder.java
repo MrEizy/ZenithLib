@@ -10,6 +10,7 @@ import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.common.ZenithRegistries;
 import net.zic.zenithlib.custom_attributes.ZenithAttributeHolder;
 import net.zic.zenithlib.network.ByteBufHelpers;
+import net.zic.zenithlib.util.Processable;
 import net.zic.zenithlib.value_containers.typed.ValueContainer;
 import net.zic.zenithlib.value_containers.typed.ValueContainerHelpers;
 import org.jspecify.annotations.NonNull;
@@ -17,28 +18,19 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
-public class ZenithStatHolder implements StatProvider{
+public class ZenithStatHolder extends Processable implements StatProvider{
     private final LivingEntity attachedEntity;
     private final HashSet<StatProvider> providers = new HashSet<>();
 
     private final StatSheet cachedStatSheet = new StatSheet();
-    private String process = null;
-    private final Random random  = new Random();
     public ZenithStatHolder(LivingEntity attachedEntity) {
         this.attachedEntity = attachedEntity;
+        setOnResolved(this::onChanged);
     }
 
-    public void startProcess(String process){
-        if(this.process == null) this.process = process;
-    }
-    public boolean resolveProcess(String process){
-
-        if(this.process == null) return false;
-        if(!this.process.equals(process)) return false;
-        this.process = null;
-        updateAttributes();
+    private void onChanged(){
         sync();
-        return true;
+        updateAttributes();
     }
     public void sync(){
         if(attachedEntity == null) return;
@@ -63,7 +55,7 @@ public class ZenithStatHolder implements StatProvider{
     }
 
     public void updateStat(Stat stat){
-        String processId = "small_stat_update"+random.nextLong();
+        String processId = "small_stat_update:"+UUID.randomUUID();
         startProcess(processId);
         List<ValueContainer<Double>> containers = new ArrayList<>();
         for(StatProvider provider : providers){
@@ -78,11 +70,11 @@ public class ZenithStatHolder implements StatProvider{
         if(container == null) cachedStatSheet.removeStat(stat);
         else cachedStatSheet.setStat(container);
 
-        resolveProcess(process);
+        resolveProcess(processId);
     }
 
     public void updateStats(Collection<Stat> stats){
-        String processId = "bulk_stat_update"+random.nextLong();
+        String processId = "bulk_stat_update"+UUID.randomUUID();
         startProcess(processId);
         for(Stat stat:stats) updateStat(stat);
         resolveProcess(processId);

@@ -16,7 +16,7 @@ public class RangedValueContainer<T extends Number> extends ValueContainer<T> {
 
     private T minValue;
     private T maxValue;
-    private BiFunction<T,T,Integer> comparator;
+    private final BiFunction<T,T,Integer> comparator;
     public RangedValueContainer(
             Identifier containerId,
             BiFunction<T, T, T> adder,

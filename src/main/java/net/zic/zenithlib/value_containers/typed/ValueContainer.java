@@ -11,6 +11,7 @@ import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.network.ByteBufHelpers;
 import net.zic.zenithlib.network.Decoder;
 import net.zic.zenithlib.network.Encoder;
+import net.zic.zenithlib.util.Processable;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -26,7 +27,7 @@ import java.util.function.Supplier;
         so i think we will throw an error?
 
  */
-public class ValueContainer<T extends Number>{
+public class ValueContainer<T extends Number> extends Processable {
     T calculatedBaseValue;
     T calculatedValue;
 
@@ -52,6 +53,7 @@ public class ValueContainer<T extends Number>{
                 0,
                 baseValue
         ));
+        setOnResolved(this::calculateValue);
     }
     public ValueContainer(Identifier containerId, BiFunction<T, T, T> adder, BiFunction<T, Double, T> multiplier, Encoder<T> encoder, Decoder<T> decoder, T defaultValue) {
         this.containerId = containerId;
@@ -62,8 +64,9 @@ public class ValueContainer<T extends Number>{
         this.defaultValue = defaultValue;
         this.calculatedValue = defaultValue;
         this.calculatedBaseValue = defaultValue;
+        setOnResolved(this::calculateValue);
     }
-    //TODO consider throwing error if they try to replace an existing modifier?
+
     private static class OperationGroup<T extends Number>{
         private final T defaultValue;
         private final Map<Identifier, Modifier<T>> flatModifiers = new HashMap<>();
@@ -92,10 +95,10 @@ public class ValueContainer<T extends Number>{
                 });
             }
         }
-        public T getBonus(BiFunction<T,T,T> adder){
-            return getBonus(adder,(v)->true);
+        public T getFlat(BiFunction<T,T,T> adder){
+            return getFlat(adder,(v)->true);
         }
-        public T getBonus(BiFunction<T,T,T> adder,Predicate<Modifier<T>> predicate){
+        public T getFlat(BiFunction<T,T,T> adder,Predicate<Modifier<T>> predicate){
             if(flatModifiers.isEmpty()) return null;
             List<Modifier<T>> raw = flatModifiers.values().stream().toList();
             T sum = defaultValue;
@@ -130,67 +133,51 @@ public class ValueContainer<T extends Number>{
         }
     }
 
+
     public Modifier<T> removeFlatModifier(Identifier id){
-        return removeFlatModifier(id,true);
-    }
-    public Modifier<T> removeFlatModifier(Identifier id,boolean recalculate){
         if(!flatModifiers.containsKey(id)) return null;
         Modifier<T> modifier = flatModifiers.remove(id);
 
         operationGroups.get(modifier.operationGroup()).removeModifier(id);
-        if(recalculate) calculateValue();
+        startAndResolveProcess();
         return modifier;
     }
-
     public Modifier<Double> removeMultiplierModifier(Identifier id){
-        return removeMultiplierModifier(id,true);
-    }
-    public Modifier<Double> removeMultiplierModifier(Identifier id,boolean recalculate){
         if(!multiplierModifiers.containsKey(id)) return null;
         Modifier<Double> modifier = multiplierModifiers.remove(id);
 
         operationGroups.get(modifier.operationGroup()).removeModifier(id);
-        if(recalculate) calculateValue();
+        startAndResolveProcess();
         return modifier;
     }
-
-
     public Modifier<?> removeModifier(Identifier id){
-        return removeModifier(id,true);
-    }
-    public Modifier<?> removeModifier(Identifier id,boolean recalculate){
         if(!flatModifiers.containsKey(id) && ! multiplierModifiers.containsKey(id)) return null;
         Modifier<?> modifier = flatModifiers.remove(id);
         if(modifier == null) modifier = multiplierModifiers.remove(id);
 
         operationGroups.get(modifier.operationGroup()).removeModifier(id);
-        if(recalculate) calculateValue();
+        startAndResolveProcess();
         return modifier;
     }
 
-    public void addFlatModifier(Modifier<T> modifier) {
-        addFlatModifier(modifier,true);
-    }
-    public void addFlatModifier(Modifier<T> modifier, boolean recalculate){
+    public void addFlatModifier(Modifier<T> modifier){
         if(!modifier.type().equals("flat")) return;
         if(flatModifiers.containsKey(modifier.id()) || multiplierModifiers.containsKey(modifier.id())) return;
 
         flatModifiers.put(modifier.id(),modifier);
 
         operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>(defaultValue)).addFlatModifier(modifier);
-        if(recalculate) calculateValue();
+        startAndResolveProcess();
     }
+
     public void addMultiplierModifier(Modifier<Double> modifier){
-        addMultiplierModifier(modifier,true);
-    }
-    public void addMultiplierModifier(Modifier<Double> modifier, boolean recalculate){
         if(!modifier.type().equals("multiplier")) return;
         if(flatModifiers.containsKey(modifier.id()) || multiplierModifiers.containsKey(modifier.id())) return;
 
         multiplierModifiers.put(modifier.id(),modifier);
 
         operationGroups.computeIfAbsent(modifier.operationGroup(),key->new OperationGroup<>(defaultValue)).addMultiplierModifier(modifier);
-        if(recalculate) calculateValue();
+        startAndResolveProcess();
     }
 
     //allows you to calculate a value while excluding specific modifiers
@@ -202,10 +189,10 @@ public class ValueContainer<T extends Number>{
         for(Integer operationGroup : groups){
             OperationGroup<T> group = operationGroups.get(operationGroup);
 
-            T bonus = group.getBonus(adder,flatPredicate);
-            if(bonus != null){
-                if(operationGroup == 0) baseValue = bonus;
-                value = adder.apply(value,bonus);
+            T flat = group.getFlat(adder,flatPredicate);
+            if(flat != null){
+                if(operationGroup == 0) baseValue = flat;
+                value = adder.apply(value,flat);
             }else if (operationGroup == 0) baseValue = defaultValue;
 
             double modifier = group.getMultiplier(multiplierPredicate);
@@ -291,12 +278,16 @@ public class ValueContainer<T extends Number>{
         container.calculatedBaseValue = container.getDecoder().decode(buf);
         container.calculatedValue = container.getDecoder().decode(buf);
         int size = buf.readInt();
+        //I do this to prevent calculate being called on the client
+        //never needs this directly, if you want to get a different view use calculate with predicate
+        //to get a value without updating
+        container.setOnResolved(Processable.EMPTY_RUNNABLE);
         for(int i =0;i<size;i++){
             int operationGroup = buf.readInt();
             ModifierHolder<T> holder = STREAM_CODEC.decode(buf);
 
-            for(Modifier<T> flat : holder.flat()) container.addFlatModifier(flat,false);
-            for(Modifier<Double> multiplier : holder.multiplier()) container.addMultiplierModifier(multiplier,false);
+            for(Modifier<T> flat : holder.flat()) container.addFlatModifier(flat);
+            for(Modifier<Double> multiplier : holder.multiplier()) container.addMultiplierModifier(multiplier);
         }
         return container;
     }
@@ -311,16 +302,13 @@ public class ValueContainer<T extends Number>{
      * @param provider takes in a double(base value) and expects a value container
      * @param containers the value containers to combine
      * @return a new value container with all the modifiers of other containers combined
-     * @param <T>
-     * @param <S>
+     * @param <T> the data type we store in the container
+     * @param <S> the container type we want from the merge
      */
     public static <T extends Number,S extends ValueContainer<T>> S from(Function<T,S> provider, List<ValueContainer<T>> containers) {
         if(containers.isEmpty()) return null;
         T baseValue = containers.getFirst().defaultValue;
         BiFunction<T,T,T> adder = containers.getFirst().adder;
-        BiFunction<T,Double,T> multiplier = containers.getFirst().multiplier;
-        Encoder<T> encoder = containers.getFirst().encoder;
-        Decoder<T> decoder = containers.getFirst().decoder;
 
         List<Modifier<T>> flatModifiers = new ArrayList<>();
         List<Modifier<Double>> multiplierModifiers = new ArrayList<>();
@@ -331,10 +319,12 @@ public class ValueContainer<T extends Number>{
         }
 
         S container = provider.apply(baseValue);
-        for (Modifier<T> flatModifier : flatModifiers) container.addFlatModifier(flatModifier,false);
-        for(Modifier<Double> multiplierModifier:multiplierModifiers) container.addMultiplierModifier(multiplierModifier,false);
+        container.startProcess("merge_process");
+        for (Modifier<T> flatModifier : flatModifiers) container.addFlatModifier(flatModifier);
+        for(Modifier<Double> multiplierModifier:multiplierModifiers) container.addMultiplierModifier(multiplierModifier);
 
-        container.calculateValue();
+
+        container.resolveProcess("merge_process");
         return container;
     }
 

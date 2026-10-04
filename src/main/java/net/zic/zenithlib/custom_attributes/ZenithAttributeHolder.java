@@ -15,15 +15,13 @@ import net.neoforged.neoforge.attachment.IAttachmentSerializer;
 import net.zic.zenithlib.common.ZenithAttachments;
 import net.zic.zenithlib.network.ByteBufHelpers;
 import net.zic.zenithlib.stats.StatProvider;
+import net.zic.zenithlib.util.Processable;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
-public class ZenithAttributeHolder {
+public class ZenithAttributeHolder extends Processable {
     private final LivingEntity attachedEntity;
     private final HashMap<Holder<Attribute>, ZenithAttribute> attributes = new HashMap<>();
     private final HashMap<Holder<Attribute>,Double> cachedSuppressionValues = new HashMap<>();
@@ -31,39 +29,24 @@ public class ZenithAttributeHolder {
 
     private final Set<ZenithAttribute> dirtyAttributes = new HashSet<>();
 
-    private String process = null;
-    private final Random random = new Random();
-
     public ZenithAttributeHolder(LivingEntity attachedEntity) {
         this.attachedEntity = attachedEntity;
+        setOnResolved(this::sync);
     }
 
     public LivingEntity getAttachedEntity(){
         return attachedEntity;
     }
 
-    public void startProcess(String process){
-        if(this.process == null) this.process = process;
-    }
-    public boolean resolveProcess(String process){
-        if(this.process == null) return false;
-        if(!this.process.equals(process)) return false;
-        this.process = null;
-        sync();
-        return true;
-    }
     public void sync(){
         if(attachedEntity == null || attachedEntity.level().isClientSide() ||( attachedEntity instanceof ServerPlayer serverPlayer && serverPlayer.connection == null)) return;
 
         attachedEntity.syncData(ZenithAttachments.ATTRIBUTE_HOLDER);
     }
-    protected void startAndResolve(String process){
-        startProcess(process);
-        resolveProcess(process);
-    }
+
 
     public void update(StatProvider provider) {
-        String processId = "provider_update"+random.nextLong();
+        String processId = "provider_update"+ UUID.randomUUID();
         startProcess(processId);
         attributes.forEach((holder, attribute) -> attribute.update(provider));
         resolveProcess(processId);
@@ -72,7 +55,7 @@ public class ZenithAttributeHolder {
     public void setDirty(Holder<Attribute> attribute){
         if(!attributes.containsKey(attribute)) return;
         dirtyAttributes.add(getAttribute(attribute));
-        startAndResolve("dirty_set");//done so if part of large process won't trigger
+        startAndResolveProcess();
     }
 
     public void addAttribute(Holder<Attribute> attributeHolder) {
@@ -85,7 +68,7 @@ public class ZenithAttributeHolder {
 
         zenithAttribute.setHolder(this);
 
-        startAndResolve("small_attribute_modification"+random.nextLong());
+        startAndResolveProcess();
 
     }
     public void removeAttribute(Holder<Attribute> attributeHolder) {

@@ -113,7 +113,7 @@ public class ZenithAttribute extends ValueContainer<Double> {
             Modifier<Double> baseModifier = Modifier.base(statBonusModifier,base);
             ValueContainer<Double> container = scaling.computeIfAbsent(stat,(key)-> ZenithStatHelper.statInstance(stat));
             container.removeModifier(baseModifier.id());
-            container.addFlatModifier(baseModifier,true);;
+            container.addFlatModifier(baseModifier);;
         }
         updateStatBonus();
     }
@@ -128,24 +128,17 @@ public class ZenithAttribute extends ValueContainer<Double> {
     }
 
     public void addFlatScaling(Stat stat,Modifier<Double> modifier){
-        addFlatScaling(stat,modifier,true);
-    }
-    public void addFlatScaling(Stat stat,Modifier<Double> modifier,boolean recalculate){
-        scaling.computeIfAbsent(stat,key->stat.statInstance()).addFlatModifier(modifier,recalculate);
+        scaling.computeIfAbsent(stat,key->stat.statInstance()).addFlatModifier(modifier);
+        updateStatBonus();
     }
     public void addMultiplierScaling(Stat stat,Modifier<Double> modifier){
-        addMultiplierScaling(stat,modifier,true);
-    }
-    public void addMultiplierScaling(Stat stat,Modifier<Double> modifier,boolean recalculate){
         scaling.computeIfAbsent(stat,key->stat.statInstance()).addMultiplierModifier(modifier);
+        updateStatBonus();
     }
-
     public void removeStatScaling(Stat stat,Identifier modifier){
-        removeStatScaling(stat,modifier,true);
-    }
-    public void removeStatScaling(Stat stat,Identifier modifier,boolean recalculate){
         if(!scaling.containsKey(stat)) return;
-        scaling.get(stat).removeModifier(modifier,recalculate);
+        scaling.get(stat).removeModifier(modifier);
+        updateStatBonus();
     }
     public void setHolder(ZenithAttributeHolder holder){
         setHolder(holder,true);
