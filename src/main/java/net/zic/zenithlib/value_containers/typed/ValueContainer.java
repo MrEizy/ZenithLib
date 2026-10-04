@@ -14,18 +14,21 @@ import net.zic.zenithlib.network.Encoder;
 import net.zic.zenithlib.util.Processable;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-/*
-    TODO
-        i will prob make it so we store a map of Identifier->Modifier
-        and regardless of operationGroup, group or Modifier type you can only have one
-        with such an id?
-        so i think we will throw an error?
+//TODO consider adding an encode option that does not include modifiers only cachedValues
+// the only reason the client would want modifiers is to be able to view it without them. but not all scenarios
+// might want this support in which case it adds overhead, so add in a no modifier option
 
+/**
+ * A wrapper around some calculated value.
+ * this value is obtained from combining many Modifiers following a set of rules
+ * using operation groups and multiplier groups
+ * @param <T>
  */
 public class ValueContainer<T extends Number> extends Processable {
     T calculatedBaseValue;
@@ -49,7 +52,7 @@ public class ValueContainer<T extends Number> extends Processable {
         this.decoder = decoder;
         this.defaultValue = defaultValue;
         addFlatModifier(Modifier.flat(
-                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"bases"),
+                Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"base"+ThreadLocalRandom.current().nextLong()),
                 0,
                 baseValue
         ));
@@ -298,27 +301,26 @@ public class ValueContainer<T extends Number> extends Processable {
 
 
     /**
-     *
-     * @param provider takes in a double(base value) and expects a value container
+     * attempts to merge multiple containers into 1.
+     * does not currently support merging modifiers with same ID so ensure unique ids(will prob add some sort
+     * of resoultion checker in the future)
+     * @param provider provides the value container we wish to use
      * @param containers the value containers to combine
      * @return a new value container with all the modifiers of other containers combined
      * @param <T> the data type we store in the container
      * @param <S> the container type we want from the merge
      */
-    public static <T extends Number,S extends ValueContainer<T>> S from(Function<T,S> provider, List<ValueContainer<T>> containers) {
+    public static <T extends Number,S extends ValueContainer<T>> S from(Supplier<S> provider, List<ValueContainer<T>> containers) {
         if(containers.isEmpty()) return null;
-        T baseValue = containers.getFirst().defaultValue;
-        BiFunction<T,T,T> adder = containers.getFirst().adder;
 
         List<Modifier<T>> flatModifiers = new ArrayList<>();
         List<Modifier<Double>> multiplierModifiers = new ArrayList<>();
         for(ValueContainer<T> container : containers){
-            baseValue = adder.apply(baseValue,container.getBaseValue());
             flatModifiers.addAll(container.getFlatModifiers());
             multiplierModifiers.addAll(container.getMultiplierModifiers());
         }
 
-        S container = provider.apply(baseValue);
+        S container = provider.get();
         container.startProcess("merge_process");
         for (Modifier<T> flatModifier : flatModifiers) container.addFlatModifier(flatModifier);
         for(Modifier<Double> multiplierModifier:multiplierModifiers) container.addMultiplierModifier(multiplierModifier);

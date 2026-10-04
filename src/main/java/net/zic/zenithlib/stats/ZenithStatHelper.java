@@ -17,10 +17,10 @@ public class ZenithStatHelper {
         return ValueContainerHelpers.doubleValueContainer(ZenithRegistries.STAT_REGISTRY.getKey(stat));
     }
     public static Stat stat(ValueContainer<Double> container){
-        return ZenithRegistries.STAT_REGISTRY.getValue(container.getContainerId());
+        return stat(container.getContainerId());
     }
     public static Stat stat(Identifier id){
-        return ZenithRegistries.STAT_REGISTRY.getValue(id);
+        return ZenithRegistries.STAT_REGISTRY.containsKey(id) ?  ZenithRegistries.STAT_REGISTRY.getValue(id) : null;
     }
     public static void updateStats(Collection<Stat> dirtyStats, LivingEntity targetEntity){
         if(targetEntity == null) return;

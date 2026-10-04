@@ -1,10 +1,9 @@
 package net.zic.zenithlib.stats;
 
+import net.zic.zenithlib.util.Processable;
 import net.zic.zenithlib.value_containers.typed.ValueContainer;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class StatSheet {
 
@@ -21,7 +20,9 @@ public class StatSheet {
     public Map<Stat,ValueContainer<Double>> asMap(){
         return statInstances;
     }
-
+    public ValueContainer<Double> getOrCreateStatInstance(Stat stat){
+        return statInstances.computeIfAbsent(stat,ZenithStatHelper::statInstance);
+    }
     public ValueContainer<Double> getStatInstance(Stat stat){
         return statInstances.get(stat);
     }

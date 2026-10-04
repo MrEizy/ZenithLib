@@ -21,7 +21,7 @@ public abstract class Processable {
         if(this.process == null && process != null) this.process = process;
     }
     public boolean resolveProcess(String process){
-        if(this.process == null || process == null) return false;
+        if(this.process == null || !this.process.equals(process)) return false;
         process = null;
         onResolved.run();
         return true;
