@@ -212,7 +212,6 @@ public class ValueContainer<T extends Number> extends Processable {
         Pair<T,T> result = calculateValue((v)->true,(v)->true);
         calculatedValue = result.getFirst();
         calculatedBaseValue = result.getSecond();
-
     }
 
 

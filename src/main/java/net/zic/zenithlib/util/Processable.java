@@ -22,7 +22,7 @@ public abstract class Processable {
     }
     public boolean resolveProcess(String process){
         if(this.process == null || !this.process.equals(process)) return false;
-        process = null;
+        this.process = null;
         onResolved.run();
         return true;
     }

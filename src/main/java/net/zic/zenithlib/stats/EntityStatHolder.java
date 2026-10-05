@@ -15,7 +15,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
-
+//TODO update to use dirty syncing
 public class EntityStatHolder extends MultiSourceStatHolder {
     private final LivingEntity attachedEntity;
 
