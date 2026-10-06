@@ -27,7 +27,7 @@ public class ValueContainerCodecHelper {
                         Codec.DOUBLE.fieldOf("value").forGetter(Modifier<Double>::value)
                 ).apply(instance, Modifier::multiplier));
     }
-
+    //just ot fix bug
     public static <T extends Number> Codec<ModifierHolder<T>> modifierHolderCodec(Codec<T> valueCodec){
 
         return RecordCodecBuilder.create(
