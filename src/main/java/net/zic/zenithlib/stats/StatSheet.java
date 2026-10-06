@@ -23,8 +23,11 @@ public class StatSheet {
     public ValueContainer<Double> getOrCreateStatInstance(Stat stat){
         return statInstances.computeIfAbsent(stat,ZenithStatHelper::statInstance);
     }
+    public boolean hasStatInstance(Stat stat){
+        return statInstances.containsKey(stat);
+    }
     public ValueContainer<Double> getStatInstance(Stat stat){
-        return statInstances.get(stat);
+        return  statInstances.computeIfAbsent(stat,ZenithStatHelper::statInstance);
     }
     public Collection<Stat> getAllStats() {return statInstances.keySet();}
     public Collection<ValueContainer<Double>> getAllInstances(){
