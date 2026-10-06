@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.Identifier;
 
+import java.util.List;
 import java.util.Map;
 
 public class ValueContainerCodecHelper {
@@ -31,8 +32,8 @@ public class ValueContainerCodecHelper {
 
         return RecordCodecBuilder.create(
                 instance->instance.group(
-                    flatModifierCodec(valueCodec).listOf().fieldOf("flat").forGetter(ModifierHolder::flat),
-                    multiplierModifierCodec().listOf().fieldOf("multiplier").forGetter(ModifierHolder::multiplier)
+                    flatModifierCodec(valueCodec).listOf().optionalFieldOf("flat", List.of()).forGetter(ModifierHolder::flat),
+                    multiplierModifierCodec().listOf().optionalFieldOf("multiplier",List.of()).forGetter(ModifierHolder::multiplier)
                 ).apply(instance,ModifierHolder<T>::new)
         );
 
