@@ -51,6 +51,8 @@ public class ValueContainer<T extends Number> extends Processable {
         this.encoder = encoder;
         this.decoder = decoder;
         this.defaultValue = defaultValue;
+        this.calculatedValue = defaultValue;
+        this.calculatedBaseValue = defaultValue;
         addFlatModifier(Modifier.flat(
                 Identifier.fromNamespaceAndPath(ZenithLib.MOD_ID,"base"+ThreadLocalRandom.current().nextLong()),
                 0,
@@ -217,10 +219,10 @@ public class ValueContainer<T extends Number> extends Processable {
 
 
     public T getValue(){
-        return calculatedValue;
+        return calculatedValue == null ? defaultValue : calculatedValue;
     }
     public T getBaseValue(){
-        return calculatedBaseValue;
+        return calculatedBaseValue == null ? defaultValue : calculatedBaseValue;
     }
 
     public Identifier getContainerId() {
