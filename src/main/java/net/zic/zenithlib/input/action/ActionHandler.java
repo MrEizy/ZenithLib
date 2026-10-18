@@ -30,7 +30,7 @@ public class ActionHandler extends MappingHandler {
 
         ClientPacketDistributor.sendToServer(new ActionChangedPacket(identifier,true));
         if(Minecraft.getInstance() == null || Minecraft.getInstance().player == null) return;
-        PlayerActionManager manager = Minecraft.getInstance().player.getData(ZenithAttachments.ACTION_MANAGER);
+        ActionManager manager = Minecraft.getInstance().player.getData(ZenithAttachments.ACTION_MANAGER);
         manager.actionStart(identifier);
     }
 
@@ -39,7 +39,7 @@ public class ActionHandler extends MappingHandler {
         super.onUp(ticks);
         ClientPacketDistributor.sendToServer(new ActionChangedPacket(identifier,false));
         if(Minecraft.getInstance() == null || Minecraft.getInstance().player == null) return;
-        PlayerActionManager manager = Minecraft.getInstance().player.getData(ZenithAttachments.ACTION_MANAGER);
+        ActionManager manager = Minecraft.getInstance().player.getData(ZenithAttachments.ACTION_MANAGER);
         manager.actionEnd(identifier);
     }
 }

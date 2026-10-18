@@ -6,12 +6,12 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.resources.Identifier;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.network.ByteBufHelpers;
-
+import net.zic.zenithlib.value_containers.typed.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 /**
- * @deprecated scheduled for removal use {@link BonusModifier} or {@link MultiplierModifier}
+ * @deprecated scheduled for removal use {@link Modifier}
  */
 @Deprecated(forRemoval = true)
 public class ValueContainerModifier {

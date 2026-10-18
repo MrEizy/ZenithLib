@@ -3,6 +3,8 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.141'
     id 'idea'
+    id "com.vanniktech.maven.publish" version "0.37.0"
+
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -43,6 +45,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
+
 
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
@@ -164,20 +167,41 @@ sourceSets.main.resources.srcDir generateModMetadata
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
-// Example configuration to allow publishing using the maven-publish plugin
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            from components.java
+
+mavenPublishing {
+    coordinates(
+            project.property("publish_id"),
+            project.property("mod_id"),
+            project.property("mod_version")
+    )
+
+
+    pom {
+        name = project.property("mod_name")
+        description = project.property("mod_description")
+        inceptionYear = "2025"
+        url = "https://github.com/MrEizy/ZenithLib"
+        licenses {
+            license {
+                name = project.property("mod_license")
+                url = "https://github.com/MrEizy/ZenithLib/blob/main/LICENSE.md"
+                distribution = "repo"
+            }
         }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/repo"
+        developers {
+            developer {
+                id = "oliver"
+                name = "Oliver"
+                url = "https://github.com/OliverHesse"
+            }
+        }
+        scm {
+            url = "https://github.com/MrEizy/ZenithLib"
+            connection = "scm:git:git://github.com/MrEizy/ZenithLib.git"
+            developerConnection = "scm:git:ssh://git@github.com/MrEizy/ZenithLib.git"
         }
     }
 }
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }

@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.HashSet;
-
+@Deprecated
 public class PlayerActionManager {
 
     private final Player player;

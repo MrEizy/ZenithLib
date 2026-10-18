@@ -10,6 +10,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.zic.zenithlib.ZenithLib;
 import net.zic.zenithlib.cooldown.EntityCooldownHandler;
 import net.zic.zenithlib.custom_attributes.ZenithAttributeHolder;
+import net.zic.zenithlib.input.action.ActionManager;
 import net.zic.zenithlib.input.action.PlayerActionManager;
 import net.zic.zenithlib.stats.EntityStatHolder;
 
@@ -18,9 +19,9 @@ import java.util.function.Supplier;
 public class ZenithAttachments {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, ZenithLib.MOD_ID);
 
-    public static final Supplier<AttachmentType<PlayerActionManager>> ACTION_MANAGER = ATTACHMENT_TYPES.register(
+    public static final Supplier<AttachmentType<ActionManager>> ACTION_MANAGER = ATTACHMENT_TYPES.register(
             "action_manager",()-> AttachmentType.builder(
-                    (holder)-> new PlayerActionManager((Player) holder)
+                    (holder)-> new ActionManager((LivingEntity) holder)
             ).build()
     );
     public static final Supplier<AttachmentType<ZenithAttributeHolder>> ATTRIBUTE_HOLDER = ATTACHMENT_TYPES.register(
