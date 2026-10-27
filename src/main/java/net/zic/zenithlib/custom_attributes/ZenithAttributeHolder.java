@@ -68,6 +68,10 @@ public class ZenithAttributeHolder extends Processable {
 
         zenithAttribute.setHolder(this);
 
+        if(attachedEntity != null && attachedEntity.hasData(ZenithAttachments.STAT_HOLDER)){
+            zenithAttribute.update(attachedEntity.getData(ZenithAttachments.STAT_HOLDER));
+        }
+
         startAndResolveProcess();
 
     }
