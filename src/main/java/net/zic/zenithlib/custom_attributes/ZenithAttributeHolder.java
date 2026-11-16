@@ -115,6 +115,10 @@ public class ZenithAttributeHolder extends Processable {
         ByteBufHelpers.encodeCollection(dirtyAttributes, buf, ZenithAttribute::encode);
         dirtyAttributes.clear();
     }
+    //full snapshot for initial syncs (login, dimension change, respawn, start tracking), leaves the dirty set alone
+    public void encodeAll(ByteBuf buf) {
+        ByteBufHelpers.encodeCollection(attributes.values(), buf, ZenithAttribute::encode);
+    }
     public void decode(ByteBuf buf) {
         ByteBufHelpers.decodeArray(buf, ZenithAttribute::decode).forEach(
                 container -> {
@@ -127,7 +131,8 @@ public class ZenithAttributeHolder extends Processable {
 
         @Override
         public void write(@NonNull RegistryFriendlyByteBuf buf, ZenithAttributeHolder attachment, boolean initialSync) {
-            attachment.encode(buf);
+            if (initialSync) attachment.encodeAll(buf);
+            else attachment.encode(buf);
         }
 
         @Override
