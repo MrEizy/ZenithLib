@@ -46,10 +46,6 @@ public final class ZenithVanillaTooltipConverter {
         List<ZenithTooltipPage> pages = new ArrayList<>();
         pages.add(buildOverviewPage(itemName, stack, lines));
 
-        if (!lines.enchantments().isEmpty()) {
-            pages.add(buildEnchantmentsPage(lines.enchantments()));
-        }
-
         return new ZenithTooltipDocument(ZenithTooltipTheme.defaultTheme(), pages);
     }
 
@@ -65,6 +61,10 @@ public final class ZenithVanillaTooltipConverter {
             String text = vanillaLine.getString();
 
             if (text.isBlank() || text.equals(itemName)) {
+                continue;
+            }
+
+            if (hasDirectEnchantments && enchantments.contains(text)) {
                 continue;
             }
 
@@ -88,20 +88,23 @@ public final class ZenithVanillaTooltipConverter {
     }
 
     private static List<String> extractEnchantments(ItemStack stack) {
-        ItemEnchantments enchantments = stack.get(DataComponents.ENCHANTMENTS);
-
-        if (enchantments == null || enchantments.isEmpty()) {
-            return List.of();
-        }
-
         List<String> lines = new ArrayList<>();
+
+        appendEnchantments(lines, stack.get(DataComponents.ENCHANTMENTS));
+        appendEnchantments(lines, stack.get(DataComponents.STORED_ENCHANTMENTS));
+
+        return lines;
+    }
+
+    private static void appendEnchantments(List<String> lines, ItemEnchantments enchantments) {
+        if (enchantments == null || enchantments.isEmpty()) {
+            return;
+        }
 
         for (Map.Entry<Holder<Enchantment>, Integer> entry : enchantments.entrySet()) {
             Component name = Enchantment.getFullname(entry.getKey(), entry.getValue());
-            lines.add(name.getString());
+            addUnique(lines, name.getString());
         }
-
-        return lines;
     }
 
     private static boolean hasDurability(ItemStack stack) {
@@ -161,31 +164,17 @@ public final class ZenithVanillaTooltipConverter {
     private static ZenithTooltipPage buildOverviewPage(String itemName, ItemStack stack, ClassifiedLines lines) {
         List<ZenithTooltipElement> elements = new ArrayList<>();
 
-        elements.add(new TitleIconElement(
-                ZenithTooltipText.literal(itemName),
-                ZenithTooltipText.translatable("tooltip.zenithlib.vanilla.converted")
-        ));
+        elements.add(new TitleIconElement(ZenithTooltipText.literal(itemName)));
 
         if (SpawnEggItem.getType(stack) != null) {
             elements.add(EntityPreviewElement.automaticSpawnEggPreview());
         }
+        appendTextSection(elements, lines.enchantments(), ENCHANT_COLOR, true, "tooltip.zenithlib.vanilla.enchantments");
         appendTextSection(elements, lines.overview(), ZenithTooltipColor.TEXT, false, "");
         appendStatsSection(elements, stack, lines.stats());
         appendTextSection(elements, lines.details(), DETAIL_COLOR, true, "tooltip.zenithlib.vanilla.details");
 
         return new ZenithTooltipPage(ZenithTooltipText.literal(itemName), elements);
-    }
-
-    private static ZenithTooltipPage buildEnchantmentsPage(List<String> enchantments) {
-        List<ZenithTooltipElement> elements = new ArrayList<>();
-
-        elements.add(new DividerElement());
-
-        for (String line : enchantments) {
-            elements.add(TextElement.literal(line, ENCHANT_COLOR));
-        }
-
-        return new ZenithTooltipPage(ZenithTooltipText.translatable("tooltip.zenithlib.vanilla.enchantments"), elements);
     }
 
     private static void appendStatsSection(

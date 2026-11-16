@@ -44,7 +44,6 @@ public class ZenithLanguageProvider extends LanguageProvider {
         add("creative_section.zenithlib.debug.stairs", "Stairs");
         add("creative_section.zenithlib.debug.fences", "Fences");
 
-        add("tooltip.zenithlib.vanilla.converted", "Converted Vanilla Tooltip");
         add("tooltip.zenithlib.vanilla.enchantments", "Enchantments");
         add("tooltip.zenithlib.vanilla.stats", "Stats");
         add("tooltip.zenithlib.vanilla.details", "Details");
